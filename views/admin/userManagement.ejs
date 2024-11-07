@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>
+        body {
+            display: flex;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            height: 100vh;
+        }
+        .sidebar h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 0;
+            font-size: 18px;
+        }
+        .sidebar a:hover {
+            background-color: #444;
+            padding-left: 10px;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .main-content h1 {
+            font-size: 24px;
+        }
+        .search-bar {
+            margin-bottom: 15px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .user-table th, .user-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .user-table th {
+            background-color: #333;
+            color: #fff;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .block-btn {
+            background-color: #e74c3c;
+            border-radius: 25px;
+            block-size: 30px;
+            color:#ffff;
+            border: none;
+        }
+        .unblock-btn {
+            background-color: #2ecc71;
+            border-radius: 25px;
+            block-size: 30px;
+            color:#ffff;
+            border: none;
+        }
+
+        /* Shake Animation */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        .shake {
+            animation: shake 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Dashboard</h2>
+        <a href="/admin/dashboard">Home</a>
+        <a href="/admin/userManagement">User Management</a>
+        <a href="/admin/productManagement">Product Management</a>
+        <a href="/admin/categoryManagement">Category </a>
+        <a href="#">Order Management</a>
+        <a href="#">Payments</a>
+        <a href="#">Sales Reports</a>
+        <a href="#">Profile</a>
+        <form action="/admin/logout" method="POST">
+            <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;">Logout</button>
+        </form>
+    </div>
+    <div class="main-content">
+        <h1>User Management</h1>
+        <p>Manage user statuses: block or unblock users</p>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search users..." onkeyup="searchUsers()">
+        </div>
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <% users.forEach(user => { %>
+                <tr id="user-<%= user._id %>">
+                    <td><%= user._id %></td>
+                    <td><%= user.name %></td>
+                    <td><%= user.email %></td>
+                    <td id="status-<%= user._id %>"><%= user.isblocked ? 'Blocked' : 'Active' %></td>
+                    <!-- Default to 'Active' if status is missing -->
+                    <td>
+                        <% if (user.isblocked) { %>
+                            <form action="userManagement/unblockUser/<%= user._id %>" method="POST">
+                                <button type="submit" class="unblock-btn">Unblock</button>
+                            </form>
+                        <% } else { %>
+                            <form action="userManagement/blockUser/<%= user._id %>" method="POST">
+                                <button type="submit" class="block-btn">Block</button>
+                            </form>
+                        <% } %>
+
+                        
+                        
+                        
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+            
+            
+        </table>
+    </div>
+
+    <script>
+
+        // Function to filter users based on search input
+        function searchUsers() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const rows = document.getElementById('userTableBody').getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+
+                // Check each cell in the row for a match
+                for (let j = 0; j < cells.length - 1; j++) { // Exclude the Action column
+                    if (cells[j] && cells[j].textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                // Show or hide the row based on whether there's a match
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>

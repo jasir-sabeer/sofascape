@@ -1,0 +1,158 @@
+<%-include("../../views/partials/user/header")%>
+
+<!-- <section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>SignUp</h2>
+                        <p>Home <span>-</span> Tracking Order</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> -->
+
+<section class="login_part padding_top">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 col-md-6">
+                <div class="login_part_text text-center">
+                    <div class="login_part_text_iner">
+                        <h2>You Already Our Member?</h2>
+                        <p>There are advances being made in science and technology everyday, and a good example of this is the</p>
+                        <a href="/userlogin" class="btn_3">Back To Login</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="login_part_form">
+                    <div class="login_part_form_iner">
+                        <h3>Welcome Sofascape!<br>Please Sign in now</h3>
+                        <form id="signform" class="row contact_form" action="/signup" method="post" novalidate="novalidate">
+                            <div class="col-md-12 form-group p_star">
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Username">
+                                <div id="error1" class="errormessage" aria-live="assertive"></div>
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="text" class="form-control" id="email" name="email" placeholder="Email">
+                                <div id="error2" class="errormessage" aria-live="assertive"></div>
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone Number">
+                                <div id="error3" class="errormessage" aria-live="assertive"></div>
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                                <div id="error4" class="errormessage" aria-live="assertive"></div>
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="password" class="form-control" id="confirmpassword" name="confirmpassword" placeholder="Confirm Password">
+                                <div id="error5" class="errormessage" aria-live="assertive"></div>
+                            </div>
+                            <% if(locals.message && message.length>0){%>
+                                <div class="alert alert-danger text-center" >
+                                 <%=message%>
+                                </div>
+                           <%}%>
+                            <div class="col-md-12 form-group">
+                                <button type="submit" value="submit" class="btn_3">SignUp</button>
+                            </div>
+                                <a class="lost_pass" href="#">Forget password?</a>
+                                <a  href="/auth/google"><i class="fa-brands fa-google" id="google"></i> Continue With Google</a>
+    
+                            </div>
+                        </form>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%-include("../../views/partials/user/footer")%>
+
+<script>
+    const signform = document.getElementById('signform');
+    const error1 = document.getElementById('error1');
+    const error2 = document.getElementById('error2');
+    const error3 = document.getElementById('error3');
+    const error4 = document.getElementById('error4');
+    const error5 = document.getElementById('error5');
+
+    signform.addEventListener("submit", (e) => {
+        nameValidateChecking();
+        emailValidateChecking();
+        phoneValidateChecking();
+        passwordValidateChecking();
+
+        if (
+            error1.classList.contains("show-error") || 
+            error2.classList.contains("show-error") || 
+            error3.classList.contains("show-error") || 
+            error4.classList.contains("show-error") || 
+            error5.classList.contains("show-error")
+        ) {
+            e.preventDefault();  // Prevent form submission if any errors are found
+        }
+    });
+
+    function nameValidateChecking() {
+        const nameInput = document.getElementById('name').value.trim();
+        if (nameInput === "") {
+            error1.textContent = "Username is required";
+            error1.classList.add("show-error");
+        } else {
+            error1.textContent = "";
+            error1.classList.remove("show-error");
+        }
+    }
+
+    function emailValidateChecking() {
+        const emailInput = document.getElementById('email').value.trim();
+        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+        if (!emailInput.match(emailPattern)) {
+            error2.textContent = "Please enter a valid email";
+            error2.classList.add("show-error");
+        } else {
+            error2.textContent = "";
+            error2.classList.remove("show-error");
+        }
+    }
+
+    function phoneValidateChecking() {
+        const phoneInput = document.getElementById('phone').value.trim();
+        const phonePattern = /^[0-9]{10}$/;
+        if (!phoneInput.match(phonePattern)) {
+            error3.textContent = "Phone number must be 10 digits";
+            error3.classList.add("show-error");
+        } else {
+            error3.textContent = "";
+            error3.classList.remove("show-error");
+        }
+    }
+
+    function passwordValidateChecking() {
+        const password = document.getElementById('password').value.trim();
+        const confirmpassword = document.getElementById('confirmpassword').value.trim();
+
+        if (password === "") {
+            error4.textContent = "Password is required";
+            error4.classList.add("show-error");
+        } else {
+            error4.textContent = "";
+            error4.classList.remove("show-error");
+        }
+
+        if (confirmpassword !== password) {
+            error5.textContent = "Passwords do not match";
+            error5.classList.add("show-error");
+        } else {
+            error5.textContent = "";
+            error5.classList.remove("show-error");
+        }
+    }
+</script>

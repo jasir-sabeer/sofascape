@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+  
+  body {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .dashboard {
+    display: flex;
+    width: 100%;
+  }
+  
+  .sidebar {
+    width: 250px;
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    
+  }
+  
+  .sidebar h2 {
+    margin-bottom: 20px;
+  }
+  
+  .sidebar nav ul {
+    list-style: none;
+    width: 100%;
+  }
+  
+  .sidebar nav ul li {
+    margin: 10px 0;
+  }
+  
+  .sidebar nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+  
+  .sidebar nav ul li a:hover {
+    background-color: #444;
+  }
+  
+  .content {
+    flex-grow: 1;
+    background-color: #f4f4f4;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  header h1 {
+    font-size: 24px;
+    color: #333;
+  }
+  
+  header p {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .overview-cards {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    text-align: center;
+    color: #333;
+    font-size: 18px;
+  }
+ 
+
+  </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+      <h2>Admin Dashboard</h2>
+      <nav>
+        <ul>
+          <li><a href="/admin/dashboard">Home</a></li>
+          <li><a href="/admin/userManagement">User Management</a></li>
+          <li><a href="/admin/productManagement">Product Management</a></li>
+          <li><a href="/admin/categoryManagement">Category </a></li>
+          <li><a href="#orders">Order Management</a></li>
+          <li><a href="#payments">Payments</a></li>
+          <li><a href="#reports">Sales Reports</a></li>
+          <li><a href="#profile">Profile</a></li>
+          <form action="/admin/logout" method="POST">
+            <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;width: 2cm;">Logout</button>
+        </form>
+        </ul>
+      </nav>
+    </aside>
+    <main class="content">
+      <header>
+        <h1>Welcome, Admin</h1>
+        <p>Overview of recent activities</p>
+      </header>
+      <section class="overview-cards">
+        <div class="card">Users: 200</div>
+        <div class="card">Products: 120</div>
+        <div class="card">Orders: 45</div>
+        <div class="card">Revenue: $2,500</div>
+      </section>
+    </main>
+  
+</body>
+</html>

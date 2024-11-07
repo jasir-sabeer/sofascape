@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    /* General Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      /* Light background color */
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #333;
+      /* Dark sidebar color */
+      color: #fff;
+      /* White text color */
+      height: 100vh;
+      /* Full height */
+      position: fixed;
+      /* Fixed sidebar */
+    }
+
+    .sidebar .logo {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .sidebar .menu {
+      margin-top: 20px;
+    }
+
+    .sidebar .menu ul {
+      list-style: none;
+      /* Remove bullet points */
+      padding: 0;
+    }
+
+    .sidebar .menu li {
+      margin: 15px 0;
+    }
+
+    .sidebar .menu a {
+      color: #fff;
+      /* White links */
+      text-decoration: none;
+      /* Remove underline */
+      padding: 10px 15px;
+      display: block;
+      /* Block display for easy clicking */
+      transition: background 0.3s;
+      /* Smooth background change */
+    }
+
+    .sidebar .menu a:hover {
+      background-color: #555;
+      /* Darker background on hover */
+    }
+
+    .main-content {
+      margin-left: 250px;
+      /* Space for the sidebar */
+      padding: 20px;
+    }
+
+    .dashboard-header {
+      display: flex;
+      /* Flexbox layout */
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .overview-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .recent-orders,
+    .user-table {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background-color: #333;
+      color: #ffffff;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #ccc;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f4f4f9;
+    }
+
+
+
+
+    .block-btn {
+      background-color: rgb(255, 0, 0);/
+    }
+
+    .unblock-btn {
+      background-color: rgb(0, 234, 62);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-profile img {
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+
+    table th,
+    table td {
+      padding: 10px;
+      text-align: left;
+    }
+
+
+    table th:last-child,
+    table td:last-child {
+      text-align: center;
+      width: 120px;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    table,
+    th,
+    td {
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+    }
+
+    .main-content {
+      margin-left: 250px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .modal {
+      display: none;
+      /* Hidden by default */
+      position: fixed;
+      /* Stay in place */
+      z-index: 1;
+      /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%;
+      /* Full width */
+      height: 100%;
+      /* Full height */
+      background-color: rgba(0, 0, 0, 0.5);
+      /* Black with opacity */
+      justify-content: center;
+      /* Center horizontally */
+      align-items: center;
+      /* Center vertically */
+      display: flex;
+      /* Flexbox for centering */
+    }
+
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      /* Adjust this value to control modal width */
+      max-width: 700px;
+      /* Set a maximum width */
+      height: auto;
+      /* Allow height to adjust based on content */
+      max-height: 80vh;
+      /* Set a maximum height to prevent overflow */
+      overflow-y: auto;
+      /* Enable vertical scrolling if content exceeds max height */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      bottom: 180px;
+    }
+
+    /* Modal Heading */
+    .modal-content h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: 'Arial', sans-serif;
+      font-weight: 600;
+      font-size: 22px;
+      /* Adjusted for better spacing */
+      color: #333;
+    }
+
+
+
+    .close:hover {
+      color: #000;
+    }
+
+    /* Form Styling */
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      /* Reduced for better spacing */
+      font-size: 14px;
+      width: 100%;
+    }
+
+    textarea {
+      height: 80px;
+      /* Reduced height for description */
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #66afe9;
+      box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+    }
+
+    /* Add Product Button */
+    .btn {
+      padding: 12px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      text-align: center;
+      gap: 600px;
+
+    }
+
+    .btn:hover {
+      background-color: #000000;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .modal-content {
+        width: 90%;
+        /* Full width on smaller screens */
+        padding: 15px;
+      }
+    }
+
+    /* Form Styling */
+    /* Form Styling */
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      /* Reduced for better spacing */
+      font-size: 14px;
+      width: calc(100% - 22px);
+      /* Adjust width for padding */
+      margin-left: 10px;
+      /* Add left margin */
+    }
+
+    textarea {
+      height: 80px;
+      /* Fixed height */
+      resize: none;
+      /* Disable resizing */
+      width: calc(100% - 22px);
+      /* Adjust width for padding */
+      margin-left: 10px;
+      /* Add left margin */
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #66afe9;
+      box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      /* 15% from the top and centered */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      /* Could be more or less, depending on screen size */
+      position: relative;
+      /* Allows absolute positioning of child elements */
+    }
+
+    .close {
+      position: absolute;
+      /* Position the close button absolutely */
+      top: 10px;
+      /* Adjust this value to position it at the top of the modal */
+      right: 20px;
+      /* Adjust this value for horizontal positioning */
+      font-size: 24px;
+      /* Adjust font size as needed */
+      color: #000;
+      /* Change color if desired */
+      cursor: pointer;
+      /* Change cursor to pointer */
+    }
+
+
+    .add-btn {
+      padding: 12px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      text-align: center;
+
+    }
+
+    /* Container for file input */
+    input[type="file"] {
+      display: none;
+      /* Hide the default file input */
+    }
+
+    /* Style for custom file upload button */
+    .file-upload-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 5px;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Style for hover effect on the upload button */
+    .file-upload-label:hover {
+      background-color: #45a049;
+    }
+
+    .navbar-brand {
+
+      padding-top: 20px;
+      padding-bottom: 20px;
+      font-size: xx-large;
+      font-weight: 600;
+
+    }
+
+    .modal #pagination {
+      display: none;
+    }
+
+
+    .sidebar {
+      width: 250px;
+      background-color: #333;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 20px;
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+      width: 100%;
+    }
+
+    .sidebar nav ul li {
+      margin: 10px 0;
+    }
+
+    .sidebar nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      padding: 10px;
+      display: block;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+
+    .sidebar nav ul li a:hover {
+      background-color: #444;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+</head>
+
+<body>
+
+  <aside class="sidebar">
+    <h2>Admin Dashboard</h2>
+    <nav>
+      <ul>
+        <li><a href="/admin/dashboard">Home</a></li>
+        <li><a href="/admin/userManagement">User Management</a></li>
+        <li><a href="/admin/productManagement">Product Management</a></li>
+        <li><a href="/admin/categoryManagement">Category </a></li>
+        <li><a href="#orders">Order Management</a></li>
+        <li><a href="#payments">Payments</a></li>
+        <li><a href="#reports">Sales Reports</a></li>
+        <li><a href="#profile">Profile</a></li>
+        <form action="/admin/logout" method="POST">
+          <button type="submit"
+            style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;width: 2cm;">Logout</button>
+        </form>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="dashboard-header">
+      <h1>Products Management</h1>
+      <div>
+        <form class="form-inline my-2 my-lg-0" action="/admin/productManagement/search" method="GET">
+          <input class="form-control mr-sm-2" type="search" name="search" placeholder="Search" aria-label="Search">
+        </form>
+      </div>
+
+
+
+    </header>
+    <button class="add-btn" onclick="openProductModal()">Add Product</button>
+
+    <section class="product-table">
+      <p>All Products</p>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Image</th>
+              <th>Price</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Edit</th>
+              <th>Toggle Status</th>
+            </tr>
+
+          </thead>
+          <tbody>
+            <% products.forEach(product=> { %>
+              <tr>
+                <td>
+                  <%= product.productname %>
+                </td>
+                <td>
+                  <% if (product.images && Array.isArray(product.images) && product.images.length> 0) { %>
+                    <img src="/uploads/<%= product.images[0] %>" alt="<%= product.productname %>"
+                      style="height: 50px; width: 50px;">
+                    <% } else { %>
+                      <span>No image available</span>
+                      <% } %>
+                </td>
+                <td>
+                  <%= product.regularprice %>
+                </td>
+                <td>
+                  <%= product.category ? product.category.name : 'No category' %>
+                </td>
+                <td>
+                  <%= product.description %>
+                </td>
+                <td>
+                  <%= product.stock %>
+                </td>
+                <td>
+                  <%= product.isListed ? 'Listed' : 'Unlisted' %>
+                </td>
+                <td>
+
+                  <button class="btn btn-primary action-btn"
+                    onclick="openEditProductModal('<%= product._id %>', '<%= product.productname %>', '<%= product.description %>', '<%= product.regularprice %>','<%= product.category._id %>', '<%= product.stock %>', '<%= JSON.stringify(product.images) %>')">Edit</button>
+
+                </td>
+                <td>
+
+                  <form action="/admin/productManagement/toggle-status/<%= product._id %>" method="POST">
+                    <button type="submit" class="btn <%= product.isListed ? 'btn-danger' : 'btn-warning' %>">
+                      <%= product.isListed ? 'Unlist' : 'List' %>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+
+
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- {{!-- aDD product modal --}} -->
+
+
+  <div class="modal" id="addProductModal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeProductModal()">&times;</span>
+      <h2>Add Product</h2>
+      <form id="addProductForm" action="/admin/productManagement/add" method="POST" enctype="multipart/form-data">
+
+        <label for="productName">Product Name:</label>
+        <input type="text" id="productName" name="productname" required />
+
+        <label for="productDescription">Description:</label>
+        <textarea id="productDescription" name="description" rows="4" required></textarea>
+
+        <label for="productPrice">Price:</label>
+        <input type="number" id="productPrice" name="regularprice" required />
+
+        <label for="productCategory">Category:</label>
+        <select id="productCategory" name="category" required>
+          <option value="">Select a category</option>
+          <% categories.forEach(category=> { %>
+            <option value="<%=category.name%>">
+              <%=category.name%>
+            </option>
+            <%})%>
+        </select>
+
+
+
+        <label for="productStock">Stock:</label>
+        <input type="number" id="productStock" name="stock" required />
+
+        <label for="productImage" class="file-upload-label">Choose Images:</label>
+        <input type="file" id="productImage" name="images" accept="image/*" multiple />
+        <div id="image-preview-container"></div>
+
+        <div class="modal" id="imageCropperModal" style="display:none;">
+          <div class="modal-content">
+            <span class="close" onclick="closeCropperModal()">&times;</span>
+            <img id="cropperImage" style="max-width:100%;" />
+            <button id="cropButton" type="button">Crop</button>
+          </div>
+        </div>
+
+        <input type="hidden" id="croppedImagesInput" name="croppedImages">
+        <button type="submit" class="btn">Add Product</button>
+      </form>
+    </div>
+  </div>
+
+  <!--!-- add prodcut modal ends --}}
+{{!-- Edit Modal --}} -->
+
+  <div class="modal" id="editProductModal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeEditProductModal()">&times;</span>
+      <h2>Edit Product</h2>
+      <form id="editProductForm" method="POST" enctype="multipart/form-data" onsubmit="submitEditProductForm(event)">
+        <label for="productName">Product Name:</label>
+        <input type="text" id="editProductName" name="productname" required />
+
+        <label for="productDescription">Description:</label>
+        <textarea id="editProductDescription" name="description" rows="4" required></textarea>
+
+        <label for="productPrice">Price:</label>
+        <input type="number" id="editProductPrice" name="regularprice" required />
+
+        <label for="productCategory">Category:</label>
+        <select id="editProductCategory" name="category" required>
+          <% categories.forEach(category=> { %>
+            <option value="<%=category._id%>">
+              <%=category.name%>
+            </option>
+            <%})%>
+        </select>
+
+        <label for="productStock">Stock:</label>
+        <input type="number" id="editProductStock" name="stock" required />
+        <input type="text" id="productId" hidden>
+        <label for="productImage" class="file-upload-label">Update Images:</label>
+        <input type="file" id="editProductImage" name="images" accept="image/*" multiple />
+
+        <div class="product-images"></div>
+        <div id="cropper-container" style="display: none;width: 250px;height: 250px;margin-top: 2cm;">
+  
+          <img id="imageToCrop" style="max-width: 100%; display: none;" />
+          <button id="cropImage" class="btn btn-success" style="margin-left: 300px;width: 2.5cm;height: 1cm;">Crop</button>
+        </div>
+        <button type="submit" class="btn" id="submit-btn">Update Product</button>
+      </form>
+    </div>
+  </div>
+  <!--  Edit Modal Ends  -->
+
+
+
+  <!-- {{!-- pagination --}} -->
+
+  <nav id="pagination" aria-label="Page navigation">
+    <ul class="pagination justify-content-center pages custom-pagination">
+      <% if (previousPage) { %>
+        <li class="page-item">
+          <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <% } %>
+
+          <% for (let i=1; i <=totalPages; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>">
+                <%= i %>
+              </a>
+            </li>
+            <% } %>
+
+              <% if (nextPage) { %>
+                <li class="page-item">
+                  <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+                <% } %>
+    </ul>
+  </nav>
+
+
+  <!-- {{!-- cropper js --}} -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+
+  <script>
+    function openProductModal() {
+      document.getElementById("addProductModal").style.display = "block";
+    }
+
+    function closeProductModal() {
+      document.getElementById("addProductModal").style.display = "none";
+    }
+
+    function closeCropperModal() {
+      document.getElementById('imageCropperModal').style.display = 'none';
+    }
+    let cropper;
+    let croppedImages = [];
+    let currentImageIndex = 0;
+    let currentImageElement = null; // Store reference to the clicked image
+
+    document.getElementById('productImage').addEventListener('change', function (event) {
+      const files = event.target.files;
+      const previewContainer = document.getElementById('image-preview-container');
+      previewContainer.innerHTML = ''; // Clear previous previews
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          // Create a container for the image and buttons
+          const imageContainer = document.createElement('div');
+          imageContainer.style.display = 'flex';
+          imageContainer.style.flexDirection = 'column'; // Stack vertically
+
+          const image = new Image();
+          image.src = e.target.result;
+          image.style.maxWidth = '200px';
+          image.style.margin = '10px';
+
+          // Create Change Image button
+          const changeImageBtn = document.createElement("button");
+          changeImageBtn.textContent = "Change Image";
+          changeImageBtn.classList.add("btn", "btn-warning", "w-50", "btn-sm", "m-2");
+          changeImageBtn.addEventListener("click", function () {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.click();
+
+            fileInput.onchange = function (e) {
+              const newFile = e.target.files[0];
+              if (newFile && newFile.type.startsWith('image/')) {
+                const newReader = new FileReader();
+                newReader.onload = function (event) {
+                  image.src = event.target.result; // Replace the image source
+                };
+                newReader.readAsDataURL(newFile);
+              } else {
+                alert("Invalid image file");
+              }
+            };
+          });
+
+          // Create Delete button
+          const deleteImageBtn = document.createElement("button");
+          deleteImageBtn.textContent = "Delete Image";
+          deleteImageBtn.classList.add("btn", "btn-danger", "w-50", "btn-sm", "m-2");
+          deleteImageBtn.addEventListener("click", function () {
+            previewContainer.removeChild(imageContainer); // Remove the image container
+          });
+
+          // Append image and buttons to the container
+          imageContainer.appendChild(image);
+          imageContainer.appendChild(changeImageBtn);
+          imageContainer.appendChild(deleteImageBtn);
+
+          // Append the container to the preview container
+          previewContainer.appendChild(imageContainer);
+
+          // Initialize cropping when the user clicks on the image
+          image.addEventListener('click', function () {
+            const cropperModal = document.getElementById('imageCropperModal');
+            const cropperImage = document.getElementById('cropperImage');
+            cropperImage.src = e.target.result;
+            cropperModal.style.display = 'block';
+            currentImageIndex = i;
+            currentImageElement = image; // Store reference to the clicked image
+
+            // Destroy any existing cropper instance before creating a new one
+            if (cropper) {
+              cropper.destroy();
+            }
+
+            cropper = new Cropper(cropperImage, {
+              aspectRatio: 1 / 1,  // Change aspect ratio as needed
+              viewMode: 1
+            });
+          });
+        };
+
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Add the cropButton listener outside the loop to prevent multiple listeners
+    document.getElementById('cropButton').addEventListener('click', function () {
+      if (cropper) {
+        const croppedCanvas = cropper.getCroppedCanvas();
+        if (croppedCanvas) {
+          const croppedImageURL = croppedCanvas.toDataURL('image/jpeg');
+
+          // Push the cropped image for uploading later
+          croppedImages[currentImageIndex] = croppedImageURL;
+
+          // Replace the original image in the preview with the cropped one
+          const croppedImage = new Image();
+          croppedImage.src = croppedImageURL;
+          croppedImage.style.maxWidth = '200px';
+          croppedImage.style.margin = '10px';
+
+          // Use the reference of the clicked image to replace it directly
+          if (currentImageElement) {
+            currentImageElement.src = croppedImageURL; // Update the image source
+          }
+
+          // Hide modal and destroy cropper
+          document.getElementById('imageCropperModal').style.display = 'none';
+          cropper.destroy();
+          cropper = null;
+        }
+      }
+    });
+
+    // Close the modal when user clicks on "Close" or elsewhere
+    document.getElementById('closeModalButton').addEventListener('click', function () {
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      document.getElementById('imageCropperModal').style.display = 'none';
+    });
+
+
+    // edit modal function  
+
+    function openEditProductModal(id, productname, description, regularprice, category, stock, imagesJson) {
+
+      console.log(imagesJson)
+      // Populate form fields with the provided product data
+      document.getElementById('editProductName').value = productname;
+      document.getElementById('editProductDescription').value = description;
+      document.getElementById('editProductPrice').value = regularprice;
+      document.getElementById('editProductStock').value = stock;
+      document.getElementById('editProductCategory').value = category;
+      document.getElementById("productId").value = id
+
+      const images = JSON.parse(imagesJson);
+      console.log(images);
+
+      const imagePreview = document.querySelector(".product-images");
+      imagePreview.innerHTML = "";  // Clear current images
+
+      images.forEach((image, index) => {
+        const imageContainer = document.createElement("div");
+        imageContainer.classList.add("image-wrapper", "m-2" ,"mb-3");
+
+        // Display the current image
+        const imgElement = document.createElement("img");
+        imgElement.src = `/uploads/${image}`;
+        imgElement.width = 150;
+        imgElement.height = 150;
+        imgElement.classList.add("preview-image");
+        imgElement.id = `preview-image-${index}`;
+        imageContainer.appendChild(imgElement);
+
+        // Add file input for replacing the image (hidden)
+        const replaceInput = document.createElement("input");
+        replaceInput.type = "file";
+        replaceInput.classList.add("replace-image-input", "d-none");
+        replaceInput.name = `images[${index}]`;
+
+        // Handle file input change event
+        replaceInput.addEventListener("change", (event) => {
+          openCropper(event.target, index);
+        });
+
+        imageContainer.appendChild(replaceInput);
+
+        // Add a "Change" button to trigger the file input
+        const changeButton = document.createElement("button");
+        changeButton.classList.add("btn", "btn-outline-primary");
+        changeButton.innerText = "Change Image";
+        changeButton.onclick = (event) => {
+          event.preventDefault();
+          replaceInput.click();
+        };
+
+        imageContainer.appendChild(changeButton);
+        imagePreview.appendChild(imageContainer);
+      });
+
+      // Function to open the cropper
+      function openCropper(input, index) {
+        const file = input.files[0];
+        currentReplaceInput = input;  // Track which input is being updated
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const imageToCrop = document.getElementById('imageToCrop');
+            imageToCrop.src = e.target.result;
+            imageToCrop.style.display = "block"; // Show the image
+
+            // Initialize or reinitialize the cropper
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(imageToCrop, {
+              aspectRatio: 1,
+              viewMode: 0,
+              autoCropArea: 1,
+              ready: () => {
+                document.getElementById('cropper-container').style.display = 'flex'; 
+              }
+            });
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      // Crop the image and update the preview
+      document.getElementById('cropImage').addEventListener('click', function (e) {
+        e.preventDefault()
+        if (cropper) {
+          const canvas = cropper.getCroppedCanvas({
+            width: 500,
+            height: 500,
+            fillColor: '#fff',
+          });
+
+          canvas.toBlob((blob) => {
+            const croppedFile = new File([blob], "croppedImage.png", { type: "image/png" });
+
+            // Use DataTransfer to simulate file input behavior
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+            currentReplaceInput.files = dataTransfer.files;
+
+            // Show the preview of the cropped image
+            const index = currentReplaceInput.name.match(/\d+/)[0];
+            const imgElement = document.getElementById(`preview-image-${index}`);
+            imgElement.src = URL.createObjectURL(croppedFile);
+
+            document.getElementById('cropper-container').style.display = 'none';
+          });
+        }
+      });
+      document.getElementById('editProductModal').style.display = 'block';
+    }
+
+
+
+    //closee modal function 
+
+    function closeEditProductModal() {
+      document.getElementById("editProductModal").style.display = "none"
+    }
+
+
+
+
+    document.getElementById('editProductForm').addEventListener('submit', submitEditProductForm);
+
+    async function submitEditProductForm(e) {
+      e.preventDefault(); // Prevent the default form submission
+
+      let productname = document.getElementById('editProductName').value;
+      let description = document.getElementById('editProductDescription').value;
+      let regularprice = document.getElementById('editProductPrice').value;
+      let stock = document.getElementById('editProductStock').value;
+      let category = document.getElementById('editProductCategory').value;
+      let id = document.getElementById("productId").value; // Get the product ID
+
+      const formData = { productname, description, regularprice, stock, category };
+
+      const response = await fetch(`/admin/productManagement/edit/${id}`, { // Include the ID in the URL
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        closeEditProductModal();
+        window.location.href = '/admin/productManagement';
+      } else {
+        console.error('Failed to update product');
+      }
+    }
+
+
+
+
+
+
+  </script>
