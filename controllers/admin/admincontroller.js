@@ -13,8 +13,10 @@ const pageerror = async (req, res) => {
 }
 
 const loadadminLogin = (req, res) => {
-    if (req.session.admin) {
-        return res.redirect('/dashboard');
+    console.log("wow",req.session)
+    console.log("admin check",req.session.adminlogin)
+    if (req.session.adminlogin) {
+        return res.redirect('/admin/dashboard');
     }
     res.render('adminLogin', { message: null });
 }
@@ -28,19 +30,20 @@ const login = async (req, res) => {
         const { email, password } = req.body;
         console.log(req.body);
 
-        const existAdmin = await Admin.findOne({ email: email }); // Find admin by email
+        const existAdmin = await Admin.findOne({ email: email }); 
 
         if (!existAdmin) {
             console.log("Admin not found");
             return res.redirect("/admin/adminLogin");
         }
 
-        console.log(password); // Entered password
-        console.log(existAdmin.password); // Stored hashed password in DB
+        console.log(password); 
+        console.log(existAdmin.password); 
  
 
 
         if(existAdmin.password===password){
+            req.session.adminlogin=true
             res.redirect("/admin/dashboard");
         }else{
             res.status(400).send("poyi oomb")
@@ -64,7 +67,7 @@ const loadDashboard = async (req, res) => {
         res.redirect('/pageerror');
     }
 }
-
+//user management
 const loaduserManagement = async (req, res) => {
 
     try {
@@ -103,6 +106,7 @@ const unblockUser = async (req, res) => {
     }
 }
 
+//category management
 const loadCategory = async (req, res) => {
 
     try {
@@ -168,88 +172,40 @@ const toggleCategoryStatus = async (req, res) => {
 };
 
 
+//product management
 
-
-
-
-const toggleProductStatus = async (req, res) => {
-    const productId = req.params.id;
-    try {
-        const product = await Product.findById(productId);
-        const newStatus = !product.isListed;
-        await Product.findByIdAndUpdate(productId, { isListed: newStatus });
-        res.redirect("/admin/productManagement");
-    } catch (error) {
-        console.error('Error toggling product status:', error);
-        res.status(500).send('Internal Server Error');
-    }
-};
 const loadProduct = async (req, res) => {
-
     try {
-
-        const totalCategories = await Category.countDocuments();
-        const categories = await Category.find({});
-
-        const page = parseInt(req.query.page, 4) || 1;
-        const limit = parseInt(req.query.limit, 4) || 6;
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 3; 
         const skip = (page - 1) * limit;
 
-        try {
-            const [totalProducts, products, categories] = await Promise.all([
-                Product.countDocuments(),
-                Product.find({}).populate('category').skip(skip).limit(limit),
-                Category.find()
-            ]);
+        const [totalProducts, products, categories] = await Promise.all([
+            Product.countDocuments(),
+            Product.find({}).populate('category').skip(skip).limit(limit),
+            Category.find({isListed:true})
+        ]);
 
-            const totalPages = Math.ceil(totalProducts / limit);
-            const previousPage = page > 1 ? page - 1 : null;
-            const nextPage = page < totalPages ? page + 1 : null;
-            const totalCategories = categories.length;
+        const totalPages = Math.ceil(totalProducts / limit);
+        const previousPage = page > 1 ? page - 1 : null;
+        const nextPage = page < totalPages ? page + 1 : null;
 
-            res.render("productManagement", {
-                categories,
-                products,
-                currentPage: page,
-                totalPages,
-                totalCategories,
-                previousPage,
-                nextPage,
-            });
-
-        } catch (error) {
-            console.error("Error fetching products or categories:", error);
-            res.status(500).send("An error occurred.");
-        }
-
+        res.render("productManagement", {
+            categories,
+            products,
+            currentPage: page,
+            totalPages,
+            previousPage,
+            nextPage,
+        });
 
     } catch (error) {
         console.error("Error in product management:", error.message);
         res.status(500).send("An error occurred while fetching products and categories.");
     }
-}
-
-const searchProduct = async (req, res) => {
-    const searchItem = req.query.search || "";
-    try {
-
-        const regex = new RegExp(searchItem, "i");
-
-        const query = {
-            $or: [
-                { name: { $regex: regex } },
-                { description: { $regex: regex } },
-                { material: { $regex: regex } }
-            ]
-        };
-
-        const products = await Product.find(query);
-        res.render("/admin/productManagement", { products, searchItem });
-    } catch (error) {
-        console.error("Error in search products:", error);
-        res.status(500).json({ message: "An error occurred while searching for products." });
-    }
 };
+
+
 
 
 
@@ -258,7 +214,7 @@ const addProduct = async (req, res) => {
         const { productname, description, regularprice, category, stock } = req.body;
         const images = req.files;
 
-        // Validate input
+        
         if (!productname || !regularprice || !category || !description || !stock) {
             console.error("Validation failed: Missing fields");
             return res.status(400).send({ message: 'Please fill all required fields' });
@@ -269,33 +225,33 @@ const addProduct = async (req, res) => {
             return res.status(400).send({ message: 'Invalid price or stock value' });
         }
 
-        // Ensure images are uploaded
+    
         if (!images || images.length < 1) {
             console.error("Validation failed: No images uploaded");
             return res.status(400).send({ message: 'Please upload at least one image' });
         }
 
-        // Fetch the ObjectId of the category
+        
         const categoryDoc = await Category.findOne({ name: category });
         if (!categoryDoc) {
             console.error("Category not found");
             return res.status(400).send({ message: 'Invalid category' });
         }
 
-        // Process image file names
+        
         const imagePaths = images.map(file => file.filename);
 
-        // Create new product
+        
         const newProduct = new Product({
             productname,
             description,
             regularprice,
-            category: categoryDoc._id,  // Use ObjectId from category document
+            category: categoryDoc._id,  
             stock,
             images: imagePaths
         });
 
-        // Save product to DB
+        
         await newProduct.save();
         res.redirect("/admin/productManagement");
     } catch (error) {
@@ -308,63 +264,68 @@ const addProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { productname, description, regularprice, category, stock } = req.body;
-        const images = req.files;
-     
-      
-
-
-        if (!productname || !description || !regularprice || !category || !stock) {
-            return res.status().send("All fields are required");
-        }
-
-        if (regularprice <= 0 || stock <= 0) {
-            return res.status(500).send({ message: 'Invalid price or stock value' });
-        }
-
-        const product = await Product.findById(id);
-
-        if (!product) {
-            return res.status(500).send("Product not found");
-        }
-
-        let updatedImages = product.images || [];
-        if (images && images.length > 0) {
-            const newImagePaths = images.map(file => file.path);
-            updatedImages = [...updatedImages, ...newImagePaths];
-        }
-        
-         
-          console.log("after updation",updatedImages)
-
-        await Product.findByIdAndUpdate(id, {
-            productname,
-            images: updatedImages,
-            regularprice,
-            description,
-            category,
-            stock,
-
-        });
-
+      const { id } = req.params;
+      const { productname, description, regularprice, category, stock } = req.body;
+      const images = req.files; 
+  
+      if (!productname || !description || !regularprice || !category || !stock) {
+        return res.status(400).send("All fields are required");
+      }
+  
+      if (regularprice <= 0 || stock <= 0) {
+        return res.status(400).send({ message: 'Invalid price or stock value' });
+      }
+  
+      const product = await Product.findById(id);
+      if (!product) {
+        return res.status(404).send("Product not found");
+      }
+  
+      let updatedImages = product.images || [];
+      if (images && images.length > 0) {
+        const newImagePaths = images.map(file => file.path);
+        updatedImages = [...updatedImages, ...newImagePaths];
+      }
+  
+      await Product.findByIdAndUpdate(id, {
+        productname,
+        images: updatedImages,
+        regularprice,
+        description,
+        category,
+        stock
+      });
+  
+      res.redirect("/admin/productManagement");
+    } catch (error) {
+      console.error("Error updating product: ", error.message);
+      res.status(500).send("Error updating product: " + error.message);
+    }
+  };
+  const toggleProductStatus = async (req, res) => {
+    const productId = req.params.id;
+    try {
+        const product = await Product.findById(productId);
+        const newStatus = !product.isListed;
+        await Product.findByIdAndUpdate(productId, { isListed: newStatus });
         res.redirect("/admin/productManagement");
     } catch (error) {
-        console.error("Error updating product: ", error.message);
-        res.status(500).send("Error updating product: " + error.message);
+        console.error('Error toggling product status:', error);
+        res.status(500).send('Internal Server Error');
     }
 };
+  
 
 
 const logout = async (req, res) => {
-    req.session.admin = false; // or delete req.session.admi
+    req.session.admin = false; 
 
-    // Optionally, destroy the session
+    
     req.session.destroy(err => {
         if (err) {
             return res.status(500).send('Could not log out.');
         }
-        res.redirect('/admin/adminLogin'); // Redirect to the login page after logout
+        res.redirect('/admin/adminLogin'); 
     })
 }
 
@@ -385,7 +346,6 @@ module.exports = {
     addProduct,
     editProduct,
     logout,
-    searchProduct,
     toggleProductStatus
 
 

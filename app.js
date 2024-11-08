@@ -6,13 +6,14 @@ const passport=require("./config/passport")
 require("dotenv").config();
 const db=require("./config/db");
 const userRouter=require('./routes/userRouter')
+const nocache = require("nocache");
 const adminRouter=require('./routes/adminRouter')
 db()
 
 
-
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+app.use(nocache())
 app.use(session({
     secret:process.env.SESSION_SECRET,
     resave:false,

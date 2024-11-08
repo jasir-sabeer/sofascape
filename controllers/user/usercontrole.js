@@ -19,10 +19,10 @@ const loadhomepage = async (req, res) => {
     try {
         const user = req.session.user;
         if (user) {
-            const userData = await User.findOne({ _id: user._id }); // Fixed: use User model to find user
-            res.render("home", { user: userData }); // Fixed: removed the leading slash in "home"
+            const userData = await User.findOne({ _id: user._id }); 
+            res.render("home", { user: userData }); 
         } else {
-            return res.render("home"); // Fixed: changed `rs` to `res` and removed leading slash
+            return res.render("home"); 
         }
     } catch (error) {
         console.log("Home page not found.", error); 
@@ -35,7 +35,7 @@ const loadhomepage = async (req, res) => {
 const loadproductpage = async (req, res) => {
     try {
         const products = await Product.find({ isListed: true });
-        res.render("shop", { products }); // Pass as 'products' to match EJS
+        res.render("shop", { products }); 
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');
@@ -43,7 +43,7 @@ const loadproductpage = async (req, res) => {
 };
 
 
-// Load login page
+
 const loadloginpage = async (req, res) => {
     try {
         console.log("Session User:", req.session.user); 
@@ -59,7 +59,7 @@ const loadloginpage = async (req, res) => {
 };
 
 
-// Load signup page
+
 const loadsignuppage = async (req, res) => {
     try {
         return res.render("signup");
@@ -69,7 +69,7 @@ const loadsignuppage = async (req, res) => {
     }
 };
 
-// Secure password hashing function
+
 const securePassword = async (password) => {
     try {
         return await bcrypt.hash(password, 10);
@@ -84,7 +84,7 @@ const loadotppage = async (req, res) => {
     try {
         const { otp } = req.body;
         if (otp === req.session.userOtp) {
-            // Save the user in the database upon OTP verification
+            
             const hashedPassword = await securePassword(req.session.userData.password);
             const newUser = new User({
                 name: req.session.userData.name,
@@ -110,7 +110,7 @@ function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Send verification email
+
 async function sendVerification(email, otp) {
     try {
         const transporter = nodemailer.createTransport({
@@ -228,14 +228,14 @@ const loadsingleproductpage = async (req, res) => {
     const productId=req.params.id
     try {
         const product=await Product.findById(productId).populate('category')
-        res.render("single-product",{product}) // Pass as 'products' to match EJS
+        res.render("single-product",{product})
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');
     }
 };
 const loadprofile = async (req,res) => {
-    // const user=req.session.userData
+   
     if (!req.session.user) {
         return res.render('login'); 
     }
@@ -247,14 +247,14 @@ const loadprofile = async (req,res) => {
     }
 }
 const userlogout = async (req, res) => {
-    req.session.user = false; // or delete req.session.admi
+    req.session.user = false; 
 
-    // Optionally, destroy the session
+
     req.session.destroy(err => {
         if (err) {
             return res.status(500).send('Could not log out.');
         }
-        res.render('login'); // Redirect to the login page after logout
+        res.render('login'); 
     })
 }
 

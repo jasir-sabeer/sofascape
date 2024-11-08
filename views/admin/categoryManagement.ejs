@@ -8,49 +8,48 @@
     <style>
         /* General styling */
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            display: flex;
-        }
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-        /* Sidebar styling */
-        .sidebar {
-            width: 200px;
-            background-color: #333;
-            color: white;
-            height: 100vh;
-            padding: 20px;
-            width: 250px;
-      
-        }
-
-        .sidebar h2 {
-            text-align: center;
-        }
-
-        .sidebar nav ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .sidebar nav ul li {
-            margin: 10px 0;
-        }
-
-        .sidebar nav ul li a {
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 5px;
-            display: block;
-        }
-
-        .sidebar nav ul li a:hover {
-            background-color: #444;
-        }
-
+         .sidebar {
+    width: 250px;
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    
+  }
+  
+  .sidebar h2 {
+    margin-bottom: 20px;
+  }
+  
+  .sidebar nav ul {
+    list-style: none;
+    width: 100%;
+  }
+  
+  .sidebar nav ul li {
+    margin: 10px 0;
+  }
+  
+  .sidebar nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+  
+  .sidebar nav ul li a:hover {
+    background-color: #444;
+  }
+  
         /* Main content styling */
         .container {
             flex: 1;
@@ -196,21 +195,21 @@
     <aside class="sidebar">
         <h2>Admin Dashboard</h2>
         <nav>
-            <ul>
-                <li><a href="/admin/dashboard">Home</a></li>
-                <li><a href="/admin/userManagement">User Management</a></li>
-                <li><a href="/admin/productManagement">Product Management</a></li>
-                <li><a href="/admin/categoryManagement">Category </a></li>
-                <li><a href="#orders">Order Management</a></li>
-                <li><a href="#payments">Payments</a></li>
-                <li><a href="#reports">Sales Reports</a></li>
-                <li><a href="#profile">Profile</a></li>
-                <form action="/admin/logout" method="POST">
-                    <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;">Logout</button>
-                </form>
-            </ul>
+          <ul>
+            <li><a href="/admin/dashboard">Home</a></li>
+            <li><a href="/admin/userManagement">User Management</a></li>
+            <li><a href="/admin/productManagement">Product Management</a></li>
+            <li><a href="/admin/categoryManagement">Category </a></li>
+            <li><a href="#orders">Order Management</a></li>
+            <li><a href="#payments">Payments</a></li>
+            <li><a href="#reports">Sales Reports</a></li>
+            <li><a href="#profile">Profile</a></li>
+            <form action="/admin/logout" method="POST">
+              <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;width: 2cm;">Logout</button>
+          </form>
+          </ul>
         </nav>
-    </aside>
+      </aside>
 
     <div class="container">
         <h1>Category Management</h1>
@@ -288,10 +287,12 @@
                     <label for="editCategoryVariant">Variant</label>
                     <input type="text" id="editCategoryVariant" name="variant" required>
                 </div>
-                <button type="submit">Save Changes</button>
+                <button type="submit" style="background-color: #000;margin-top: 10x;">Save Changes</button>
             </form>
         </div>
     </div>
+
+   
 
     <script>
         function openModal(modalId) {

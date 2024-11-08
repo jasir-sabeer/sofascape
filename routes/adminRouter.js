@@ -1,7 +1,7 @@
 const express=require('express')
 const router=express.Router();
 const admincontroller=require('../controllers/admin/admincontroller')
-const {userAuth,adminAuth}=require('../middlewares/auth');
+const adminAuth=require('../middlewares/adminAuth');
 const upload=require('../controllers/admin/imagecontroller')
 
 
@@ -9,9 +9,9 @@ const upload=require('../controllers/admin/imagecontroller')
 router.get('/pageerror',admincontroller.pageerror)
 router.get('/adminLogin',admincontroller.loadadminLogin)
 router.post('/adminLogin',admincontroller.login)
-router.get('/dashboard',admincontroller.loadDashboard)
-router.get('/userManagement',admincontroller.loaduserManagement)
-router.post('/userManagement/blockUser/:id', admincontroller.blockUser);
+router.get('/dashboard',adminAuth.adminlogin,admincontroller.loadDashboard)
+router.get('/userManagement',adminAuth.adminlogin,admincontroller.loaduserManagement)
+router.post('/userManagement/blockUser/:id',admincontroller.blockUser);
 router.post('/userManagement/unblockUser/:id', admincontroller.unblockUser);
 router.get('/categoryManagement',admincontroller.loadCategory)
 router.post("/categoryManagement/add",admincontroller.addCategory)

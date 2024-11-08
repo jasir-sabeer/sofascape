@@ -11,28 +11,42 @@
             margin: 0;
         }
         .sidebar {
-            width: 250px;
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            height: 100vh;
-        }
-        .sidebar h2 {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .sidebar a {
-            color: #fff;
-            text-decoration: none;
-            display: block;
-            padding: 10px 0;
-            font-size: 18px;
-        }
-        .sidebar a:hover {
-            background-color: #444;
-            padding-left: 10px;
-        }
-        .main-content {
+    width: 250px;
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    
+  }
+  
+  .sidebar h2 {
+    margin-bottom: 20px;
+  }
+  
+  .sidebar nav ul {
+    list-style: none;
+    width: 100%;
+  }
+  
+  .sidebar nav ul li {
+    margin: 10px 0;
+  }
+  
+  .sidebar nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+  
+  .sidebar nav ul li a:hover {
+    background-color: #444;
+  }
+       .main-content {
             flex-grow: 1;
             padding: 20px;
             background-color: #f4f4f4;
@@ -100,20 +114,24 @@
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <aside class="sidebar">
         <h2>Admin Dashboard</h2>
-        <a href="/admin/dashboard">Home</a>
-        <a href="/admin/userManagement">User Management</a>
-        <a href="/admin/productManagement">Product Management</a>
-        <a href="/admin/categoryManagement">Category </a>
-        <a href="#">Order Management</a>
-        <a href="#">Payments</a>
-        <a href="#">Sales Reports</a>
-        <a href="#">Profile</a>
-        <form action="/admin/logout" method="POST">
-            <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;">Logout</button>
-        </form>
-    </div>
+        <nav>
+          <ul>
+            <li><a href="/admin/dashboard">Home</a></li>
+            <li><a href="/admin/userManagement">User Management</a></li>
+            <li><a href="/admin/productManagement">Product Management</a></li>
+            <li><a href="/admin/categoryManagement">Category </a></li>
+            <li><a href="#orders">Order Management</a></li>
+            <li><a href="#payments">Payments</a></li>
+            <li><a href="#reports">Sales Reports</a></li>
+            <li><a href="#profile">Profile</a></li>
+            <form action="/admin/logout" method="POST">
+              <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;width: 2cm;">Logout</button>
+          </form>
+          </ul>
+        </nav>
+      </aside>
     <div class="main-content">
         <h1>User Management</h1>
         <p>Manage user statuses: block or unblock users</p>
