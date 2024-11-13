@@ -96,14 +96,19 @@
             error4.classList.contains("show-error") || 
             error5.classList.contains("show-error")
         ) {
-            e.preventDefault();  // Prevent form submission if any errors are found
+            e.preventDefault();  
         }
     });
 
     function nameValidateChecking() {
         const nameInput = document.getElementById('name').value.trim();
-        if (nameInput === "") {
-            error1.textContent = "Username is required";
+        const usernamePattern = /^[a-zA-Z\s]{3,}$/;
+        if(nameInput==="") {
+            error1.textContent = "user name is required";
+            error1.classList.add("show-error");
+           
+        }else if(!nameInput.match(usernamePattern)) {
+            error1.textContent = "plese enter a valid username";
             error1.classList.add("show-error");
         } else {
             error1.textContent = "";
@@ -114,7 +119,10 @@
     function emailValidateChecking() {
         const emailInput = document.getElementById('email').value.trim();
         const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
-        if (!emailInput.match(emailPattern)) {
+        if(emailInput===""){
+            error2.textContent = "email is required";
+            error2.classList.add("show-error");
+        }else if (!emailInput.match(emailPattern)) {
             error2.textContent = "Please enter a valid email";
             error2.classList.add("show-error");
         } else {
@@ -126,7 +134,11 @@
     function phoneValidateChecking() {
         const phoneInput = document.getElementById('phone').value.trim();
         const phonePattern = /^[0-9]{10}$/;
-        if (!phoneInput.match(phonePattern)) {
+        if(phoneInput===""){
+            error3.textContent = "Phone number is required";
+            error3.classList.add("show-error");
+
+        }else if (!phoneInput.match(phonePattern)) {
             error3.textContent = "Phone number must be 10 digits";
             error3.classList.add("show-error");
         } else {
@@ -137,16 +149,19 @@
 
     function passwordValidateChecking() {
         const password = document.getElementById('password').value.trim();
+        const passwordPattern = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
         const confirmpassword = document.getElementById('confirmpassword').value.trim();
-
         if (password === "") {
             error4.textContent = "Password is required";
             error4.classList.add("show-error");
-        } else {
+        }else if(!password.match(passwordPattern)){
+            error4.textContent = "please add a strong password";
+            error4.classList.add("show-error");
+        }else{
             error4.textContent = "";
             error4.classList.remove("show-error");
         }
-
+        
         if (confirmpassword !== password) {
             error5.textContent = "Passwords do not match";
             error5.classList.add("show-error");

@@ -46,12 +46,7 @@ const loadproductpage = async (req, res) => {
 
 const loadloginpage = async (req, res) => {
     try {
-        console.log("Session User:", req.session.user); 
-        if (!req.session.user) {
-            return res.render('login'); 
-        } else {
-            res.redirect('/'); 
-        }
+         res.render('login'); 
     } catch (error) {
         console.error("Error loading login page:", error);
         res.redirect("/pagenotfound");
@@ -92,8 +87,10 @@ const loadotppage = async (req, res) => {
                 email: req.session.userData.email,
                 password: hashedPassword,
             });
-
+       
             await newUser.save();
+
+            req.session.user=newUser._id
 
             res.json({ success: true, redirectUrl: "/homepage" });
         } else {
@@ -202,6 +199,7 @@ const login = async (req, res) => {
             return res.redirect('/userlogin');
         }
         const findUser = await User.findOne({ isadmin: 0, email: email });
+
         if (!findUser) {
             return res.render('login', { message: "User not found" });
         }
@@ -234,29 +232,6 @@ const loadsingleproductpage = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
-const loadprofile = async (req,res) => {
-   
-    if (!req.session.user) {
-        return res.render('login'); 
-    }
-    try {
-        return res.render("profile");
-    } catch (error) {
-        console.log("profile page not found.");
-        res.status(500).send('Server error');
-    }
-}
-const userlogout = async (req, res) => {
-    req.session.user = false; 
-
-
-    req.session.destroy(err => {
-        if (err) {
-            return res.status(500).send('Could not log out.');
-        }
-        res.render('login'); 
-    })
-}
 
 
 module.exports = {
@@ -270,6 +245,5 @@ module.exports = {
     resendOTP,
     login,
     loadsingleproductpage,
-    loadprofile,
-    userlogout
+   
 };

@@ -10,11 +10,11 @@
             <div id="vertical">
               <!-- Main image with zoom functionality -->
               <div data-thumb="/img/product/single-product/product_1.png" id="imageZoom" style="
-                  --url: url(/uploads/<%=product.images[0]%>);
+                  --url: url(/uploads/<%=product.images[1]%>);
                   --zoom-x: 0%;
                   --zoom-y: 0%;
                   --display: none;">
-                <img src="/uploads/<%=product.images[0]%>" id="main-image" />
+                <img src="/uploads/<%=product.images[1]%>" id="main-image" />
               </div>
             
               <br><br>
@@ -47,9 +47,10 @@
                 <a href="#"> <span>Stock</span> : <%=product.stock%></a>
               </li>
             </ul>
+        
             <p>
-              First replenish living. Creepeth image image. Creeping can't, won't called.
-              Two fruitful let days signs sea together all land fly subdue
+              <h5>Description</h5>
+              <%=product.description%>
             </p>
             <div class="card_area d-flex justify-content-between align-items-center">
               <div class="product_count">

@@ -13,11 +13,11 @@ router.get('/dashboard',adminAuth.adminlogin,admincontroller.loadDashboard)
 router.get('/userManagement',adminAuth.adminlogin,admincontroller.loaduserManagement)
 router.post('/userManagement/blockUser/:id',admincontroller.blockUser);
 router.post('/userManagement/unblockUser/:id', admincontroller.unblockUser);
-router.get('/categoryManagement',admincontroller.loadCategory)
+router.get('/categoryManagement',adminAuth.adminlogin,admincontroller.loadCategory)
 router.post("/categoryManagement/add",admincontroller.addCategory)
 router.post("/categoryManagement/edit",admincontroller.editCategory)
 router.post('/categoryManagement/toggle-status/:id',admincontroller.toggleCategoryStatus);
-router.get('/productManagement',admincontroller.loadProduct)
+router.get('/productManagement',adminAuth.adminlogin,admincontroller.loadProduct)
 router.post("/productManagement/add", upload.array('images', 3), admincontroller.addProduct);
 router.post("/productManagement/edit/:id", upload.array("images", 3), admincontroller.editProduct);
 router.post('/productManagement/toggle-status/:id',admincontroller.toggleProductStatus);

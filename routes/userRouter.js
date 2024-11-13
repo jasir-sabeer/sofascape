@@ -24,7 +24,6 @@ router.get('/auth/google/callback',
 
 router.post("/login",usercontroller.login)
 router.get("/productpage/:id",usercontroller.loadsingleproductpage)
-router.get('/profile',usercontroller.loadprofile)
-router.post('/userlogout',usercontroller.userlogout)
+
 
 module.exports = router;

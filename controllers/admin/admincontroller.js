@@ -13,7 +13,7 @@ const pageerror = async (req, res) => {
 }
 
 const loadadminLogin = (req, res) => {
-    console.log("wow",req.session)
+   
     console.log("admin check",req.session.adminlogin)
     if (req.session.adminlogin) {
         return res.redirect('/admin/dashboard');
@@ -34,7 +34,7 @@ const login = async (req, res) => {
 
         if (!existAdmin) {
             console.log("Admin not found");
-            return res.redirect("/admin/adminLogin");
+            return res.render("adminLogin", { message: "admin not found" });
         }
 
         console.log(password); 
@@ -46,8 +46,7 @@ const login = async (req, res) => {
             req.session.adminlogin=true
             res.redirect("/admin/dashboard");
         }else{
-            res.status(400).send("poyi oomb")
-
+            return res.render("adminLogin", { message: "Incorrect password" })
         }
     
 
@@ -67,18 +66,36 @@ const loadDashboard = async (req, res) => {
         res.redirect('/pageerror');
     }
 }
-//user management
+
 const loaduserManagement = async (req, res) => {
-
     try {
-        const users = await User.find({});
-        res.render("userManagement", { users });
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 4; 
+        const skip = (page - 1) * limit;
+
+        const [totalUsers,users] = await Promise.all([
+            User.countDocuments(),
+            User.find({}).skip(skip).limit(limit),
+           
+        ]);
+
+        const totalPages = Math.ceil(totalUsers / limit);
+        const previousPage = page > 1 ? page - 1 : null;
+        const nextPage = page < totalPages ? page + 1 : null;
+
+        res.render("userManagement", {
+            users,
+            currentPage: page,
+            totalPages,
+            previousPage,
+            nextPage,
+        });
+
     } catch (error) {
-        res.redirect('/pageerror');
+        console.error("Error in product management:", error.message);
+        res.status(500).send("An error occurred while fetching products and categories.");
     }
-
-
-}
+};
 
 const blockUser = async (req, res) => {
     const userId = req.params.id;
@@ -107,55 +124,83 @@ const unblockUser = async (req, res) => {
 }
 
 //category management
+
 const loadCategory = async (req, res) => {
-
     try {
-        const categories = await Category.find({});
-        console.log(categories);
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 3; 
+        const skip = (page - 1) * limit;
 
-        res.render('categoryManagement', { categories });
+        const [totalCategories, categories] = await Promise.all([
+            Category.countDocuments(),
+            Category.find({}).skip(skip).limit(limit),
+           
+        ]);
+
+        const totalPages = Math.ceil(totalCategories / limit);
+        const previousPage = page > 1 ? page - 1 : null;
+        const nextPage = page < totalPages ? page + 1 : null;
+
+        res.render("categoryManagement", {
+            categories,
+            currentPage: page,
+            totalPages,
+            previousPage,
+            nextPage,
+            err:req.flash('err')
+        });
+
     } catch (error) {
-        console.error("Error loading categories:", error);
-        res.status(500).send("An error occurred while loading categories.");
+        console.error("Error in product management:", error.message);
+        res.status(500).send("An error occurred while fetching products and categories.");
     }
-
 };
+
 const addCategory = async (req, res) => {
     try {
         const { name, variant } = req.body;
-
         const formattedName = name.trim().toLowerCase();
-
 
         const existingCategory = await Category.findOne({ name: { $regex: `^${formattedName}$`, $options: 'i' } });
         if (existingCategory) {
-
-            return res.status(400).send("Category with this name already exists.");
+            console.log('Category already exists');
+            return res.status(400).json({ error: 'This category name already exists' });
         }
-
 
         const newCategory = new Category({ name: formattedName, variant, isListed: true });
         await newCategory.save();
-
-
-        res.redirect('/admin/categoryManagement');
+        res.status(200).json({ message: 'Category added successfully' });
     } catch (error) {
-        console.error('Error adding category:', error);
-        res.status(500).send('Internal Server Error');
+        console.error('Error adding category:', error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 
 
 const editCategory = async (req, res) => {
     try {
         const { id, name, variant } = req.body;
+        const formattedName = name.trim().toLowerCase();
+
+        
+        const existingCategory = await Category.findOne({
+            name: { $regex: `^${formattedName}$`, $options: 'i' },
+            _id: { $ne: id } 
+        });
+
+        if (existingCategory) {
+            console.log('Category already exists');
+            return res.status(400).json({ error: 'This category name already exists' });
+        }
         await Category.findByIdAndUpdate(id, { name, variant });
-        res.redirect('/admin/categoryManagement');
+        return res.status(200).json({ message: 'Category updated successfully' });
     } catch (error) {
         console.error('Error editing category:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 
 
 const toggleCategoryStatus = async (req, res) => {
@@ -172,7 +217,6 @@ const toggleCategoryStatus = async (req, res) => {
 };
 
 
-//product management
 
 const loadProduct = async (req, res) => {
     try {
@@ -221,7 +265,7 @@ const addProduct = async (req, res) => {
         }
 
         if (regularprice <= 0 || stock <= 0) {
-            console.error("Validation failed: Invalid price or stock");
+        
             return res.status(400).send({ message: 'Invalid price or stock value' });
         }
 
@@ -267,6 +311,7 @@ const editProduct = async (req, res) => {
       const { id } = req.params;
       const { productname, description, regularprice, category, stock } = req.body;
       const images = req.files; 
+      console.log(images)
   
       if (!productname || !description || !regularprice || !category || !stock) {
         return res.status(400).send("All fields are required");

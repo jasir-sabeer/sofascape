@@ -117,7 +117,7 @@
 
 // Start Timer Function
 function startTimer() {
-    timer = 60; // Reset timer each time startTimer is called
+    timer = 60; 
     document.getElementById("countdown").textContent = `00:${timer < 10 ? '0' : ''}${timer}`;
     
     countdownInterval = setInterval(() => {

@@ -5,59 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
     <style>
-        body {
-            display: flex;
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-        .sidebar {
-    width: 250px;
+    body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    }
+    .sidebar {
+  width: 250px;
+  background-color: #333; /* Dark sidebar color */
+  color: #fff; /* White text color */
+  height: 100vh; /* Full height */
+  position: fixed; /* Fixed sidebar */
+}
+
+.sidebar li {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.sidebar ul{
+  list-style: none; /* Remove bullet points */
+  padding: 0;
+}
+
+.sidebar a {
+  color: #fff; 
+  text-decoration: none; 
+  padding: 10px 15px;
+  display: block; 
+  transition: background 0.3s; 
+}
+
+.sidebar  a:hover {
+  background-color: #555; /* Darker background on hover */
+}
+.logoutbtn{
     background-color: #333;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    block-size: 40px;
+    border: none;color: #fff;
+    width: 250px;
+}
+.logoutbtn:hover{
+    background-color: darkred;
+}  
+    .main-content {
+    margin-left: 250px;
     padding: 20px;
-    
-  }
-  
-  .sidebar h2 {
-    margin-bottom: 20px;
-  }
-  
-  .sidebar nav ul {
-    list-style: none;
-    width: 100%;
-  }
-  
-  .sidebar nav ul li {
-    margin: 10px 0;
-  }
-  
-  .sidebar nav ul li a {
-    color: #fff;
-    text-decoration: none;
-    padding: 10px;
-    display: block;
-    border-radius: 4px;
-    transition: background 0.3s ease;
-  }
-  
-  .sidebar nav ul li a:hover {
-    background-color: #444;
-  }
-       .main-content {
-            flex-grow: 1;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .main-content h1 {
-            font-size: 24px;
-        }
-        .search-bar {
-            margin-bottom: 15px;
-        }
-        .search-bar input {
+    background-color: #fff;
+    }
+    .main-content h1 {
+    font-size: 24px;
+    }
+    .search-bar {
+    margin-bottom: 15px;
+    }
+    .search-bar input {
             width: 100%;
             padding: 8px;
             font-size: 16px;
@@ -111,15 +112,38 @@
         .shake {
             animation: shake 0.5s ease;
         }
+        .special-color{
+            background-color:#555 ;
+        }
+         .page-item{
+        float: left;
+       }
+       .page-link{
+        text-decoration: none;
+        margin: 15px;
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 0 4px;
+       border: 1px solid #ddd;
+       border-radius: 4px;
+       text-decoration: none;
+       color: #333;
+       }
+       .paginationdiv{
+        margin-left: 8cm;
+       }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
 </head>
 <body>
     <aside class="sidebar">
-        <h2>Admin Dashboard</h2>
+        <h2 style="margin-left: .5cm;">Admin Dashboard</h2>
         <nav>
           <ul>
             <li><a href="/admin/dashboard">Home</a></li>
-            <li><a href="/admin/userManagement">User Management</a></li>
+            <li><a href="/admin/userManagement" class="special-color">User Management</a></li>
             <li><a href="/admin/productManagement">Product Management</a></li>
             <li><a href="/admin/categoryManagement">Category </a></li>
             <li><a href="#orders">Order Management</a></li>
@@ -127,11 +151,12 @@
             <li><a href="#reports">Sales Reports</a></li>
             <li><a href="#profile">Profile</a></li>
             <form action="/admin/logout" method="POST">
-              <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;width: 2cm;">Logout</button>
+              <button type="submit" class="logoutbtn">Logout</button>
           </form>
           </ul>
         </nav>
       </aside>
+      
     <div class="main-content">
         <h1>User Management</h1>
         <p>Manage user statuses: block or unblock users</p>
@@ -161,25 +186,41 @@
                     <!-- Default to 'Active' if status is missing -->
                     <td>
                         <% if (user.isblocked) { %>
-                            <form action="userManagement/unblockUser/<%= user._id %>" method="POST">
-                                <button type="submit" class="unblock-btn">Unblock</button>
-                            </form>
+                            <button type="button" class="unblock-btn" onclick="confirmAction('<%= user._id %>', 'unblock')">Unblock</button>
                         <% } else { %>
-                            <form action="userManagement/blockUser/<%= user._id %>" method="POST">
-                                <button type="submit" class="block-btn">Block</button>
-                            </form>
-                        <% } %>
-
-                        
-                        
-                        
-                    </td>
+                            <button type="button" class="block-btn" onclick="confirmAction('<%= user._id %>', 'block')">Block</button>
+                        <% } %>           
+                   </td>
                 </tr>
                 <% }) %>
             </tbody>
             
             
         </table>
+        <nav id="pagination" aria-label="Page navigation" class="paginationdiv">
+            <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
+              <% if (previousPage) { %>
+                <li class="page-item">
+                  <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous" style="text-decoration: none;"><</a>                   
+                </li>         
+                <% } %>
+        
+                  <% for (let i=1; i <=totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                       
+                      <a class="page-link" href="?page=<%= i %>">
+                        <%= i %>
+                      </a>
+                      </li>
+                    <% } %>
+        
+                      <% if (nextPage) { %>
+                        <li class="page-item">
+                          <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next" style="text-decoration: none;">></a>
+                        </li>
+                        <% } %>
+            </ul>
+          </nav>
     </div>
 
     <script>
@@ -206,6 +247,30 @@
                 rows[i].style.display = match ? '' : 'none';
             }
         }
+
+        
+    function confirmAction(userId, actionType) {
+        const actionText = actionType === 'block' ? 'Block' : 'Unblock';
+        
+        Swal.fire({
+            title: `Are you sure you want to ${actionText.toLowerCase()} this user?`,
+            showCancelButton: true,
+            confirmButtonColor: '#000',
+            cancelButtonColor: '#000',
+            confirmButtonText: ` ${actionText}`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Create a form to submit the request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/userManagement/${actionType}User/${userId}`;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+
+
     </script>
 </body>
 </html>

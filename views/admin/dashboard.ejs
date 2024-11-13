@@ -19,49 +19,47 @@
     overflow: hidden;
   }
   
-  .dashboard {
-    display: flex;
-    width: 100%;
-  }
-  
   .sidebar {
-    width: 250px;
+  width: 250px;
+  background-color: #333; /* Dark sidebar color */
+  color: #fff; /* White text color */
+  height: 100vh; /* Full height */
+  position: fixed; /* Fixed sidebar */
+}
+
+.sidebar li {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.sidebar ul{
+  list-style: none; /* Remove bullet points */
+  padding: 0;
+}
+
+.sidebar a {
+  color: #fff; 
+  text-decoration: none; 
+  padding: 10px 15px;
+  display: block; 
+  transition: background 0.3s; 
+}
+
+.sidebar  a:hover {
+  background-color: #555; /* Darker background on hover */
+}
+.logoutbtn{
     background-color: #333;
+    block-size: 40px;
+    border: none;
     color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    
-  }
-  
-  .sidebar h2 {
-    margin-bottom: 20px;
-  }
-  
-  .sidebar nav ul {
-    list-style: none;
-    width: 100%;
-  }
-  
-  .sidebar nav ul li {
-    margin: 10px 0;
-  }
-  
-  .sidebar nav ul li a {
-    color: #fff;
-    text-decoration: none;
-    padding: 10px;
-    display: block;
-    border-radius: 4px;
-    transition: background 0.3s ease;
-  }
-  
-  .sidebar nav ul li a:hover {
-    background-color: #444;
-  }
-  
+    width: 250px;
+}
+.logoutbtn:hover{
+    background-color: darkred;
+}
   .content {
+    margin-left: 250px;
     flex-grow: 1;
     background-color: #f4f4f4;
     padding: 20px;
@@ -94,30 +92,33 @@
     color: #333;
     font-size: 18px;
   }
- 
+  .special-color{
+            background-color:#555 ;
+        }
 
   </style>
 </head>
 <body>
 
-    <aside class="sidebar">
-      <h2>Admin Dashboard</h2>
-      <nav>
-        <ul>
-          <li><a href="/admin/dashboard">Home</a></li>
-          <li><a href="/admin/userManagement">User Management</a></li>
-          <li><a href="/admin/productManagement">Product Management</a></li>
-          <li><a href="/admin/categoryManagement">Category </a></li>
-          <li><a href="#orders">Order Management</a></li>
-          <li><a href="#payments">Payments</a></li>
-          <li><a href="#reports">Sales Reports</a></li>
-          <li><a href="#profile">Profile</a></li>
-          <form action="/admin/logout" method="POST">
-            <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;width: 2cm;">Logout</button>
-        </form>
-        </ul>
-      </nav>
-    </aside>
+  <aside class="sidebar">
+    <h2 style="margin-left: .5cm; margin-top: 19.920px;">Admin Dashboard</h2>
+    <nav>
+      <ul>
+        <li><a href="/admin/dashboard" style="margin-top:19px;" class="special-color">Home</a></li>
+        <li><a href="/admin/userManagement">User Management</a></li>
+        <li><a href="/admin/productManagement">Product Management</a></li>
+        <li><a href="/admin/categoryManagement">Category </a></li>
+        <li><a href="#orders">Order Management</a></li>
+        <li><a href="#payments">Payments</a></li>
+        <li><a href="#reports">Sales Reports</a></li>
+        <li><a href="#profile">Profile</a></li>
+        <form action="/admin/logout" method="POST">
+          <button type="submit" class="logoutbtn">Logout</button>
+      </form>
+      </ul>
+    </nav>
+  </aside>
+  
     <main class="content">
       <header>
         <h1>Welcome, Admin</h1>

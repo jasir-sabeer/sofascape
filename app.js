@@ -8,6 +8,8 @@ const db=require("./config/db");
 const userRouter=require('./routes/userRouter')
 const nocache = require("nocache");
 const adminRouter=require('./routes/adminRouter')
+const profileRouter=require('./routes/profileRouter')
+const fash=require('connect-flash')
 db()
 
 
@@ -27,6 +29,8 @@ cookie:{
 }))
 
 
+
+app.use(fash())
 app.use(passport.initialize())
 app.use(passport.session())
 app.use('/uploads', express.static('uploads'));
@@ -46,6 +50,7 @@ app.get('/home', loadHomepage);
 
 
 app.use('/',userRouter)
+app.use('/',profileRouter)
 app.use('/admin',adminRouter)
 
 

@@ -112,7 +112,9 @@ body {
 .login-button:hover {
     background-color: #001a33;
 }
-
+.alert{
+    color: rgb(253, 8, 8);
+}
     </style>
     
 </head>
@@ -123,6 +125,11 @@ body {
                 <h2>Admin Login</h2>
             </div>
             <form class="login-form"  action="/admin/adminLogin" method="post">
+                <% if(locals.message && message.length>0){%>
+                    <div class="alert" >
+                     <%=message%>
+                    </div>
+               <%}%>
                 <div class="input-group">
                     <span class="icon">👤</span>
                     <input type="email" placeholder="Email ID" name="email" required>

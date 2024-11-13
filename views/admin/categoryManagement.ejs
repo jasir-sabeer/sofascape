@@ -5,64 +5,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Category Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM97Dk4t3nA4q2Vo9mltpbBRj52R4mGowWbA2xB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <style>
         /* General styling */
-        body {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-  }
+       body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
 
-         .sidebar {
-    width: 250px;
+        .sidebar {
+  width: 250px;
+  background-color: #333; /* Dark sidebar color */
+  color: #fff; /* White text color */
+  height: 100vh; /* Full height */
+  position: fixed; /* Fixed sidebar */
+}
+
+.sidebar li {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.sidebar ul{
+  list-style: none; /* Remove bullet points */
+  padding: 0;
+}
+
+.sidebar a {
+  color: #fff; 
+  text-decoration: none; 
+  padding: 10px 15px;
+  display: block; 
+  transition: background 0.3s; 
+}
+
+.sidebar  a:hover {
+  background-color: #555; /* Darker background on hover */
+}
+.logoutbtn{
     background-color: #333;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    
-  }
-  
-  .sidebar h2 {
-    margin-bottom: 20px;
-  }
-  
-  .sidebar nav ul {
-    list-style: none;
-    width: 100%;
-  }
-  
-  .sidebar nav ul li {
-    margin: 10px 0;
-  }
-  
-  .sidebar nav ul li a {
-    color: #fff;
-    text-decoration: none;
-    padding: 10px;
-    display: block;
-    border-radius: 4px;
-    transition: background 0.3s ease;
-  }
-  
-  .sidebar nav ul li a:hover {
-    background-color: #444;
-  }
-  
+    block-size: 40px;
+    border: none;color: #fff;
+    width: 250px;
+}
+.logoutbtn:hover{
+    background-color: darkred;
+}
         /* Main content styling */
         .container {
             flex: 1;
             padding: 20px;
-            background: white;
-            margin-left: 20px;
+            margin-left: 250px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background: white;
         }
 
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 20px;
         }
 
         /* Add Category Button */
@@ -75,7 +82,8 @@
             cursor: pointer;
             font-size: 16px;
             text-decoration: none;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+            display: inline-block;
         }
 
         .add-category-button:hover {
@@ -115,30 +123,31 @@
             font-size: 16px;
             color: white;
             text-decoration: none;
+            display: inline-block;
         }
 
         .list-button {
-            background-color: #28a745;
+            background-color: #000;
         }
 
         .unlist-button {
-            background-color: #dc3545;
+            background-color: #000;
         }
 
         .edit-button {
-            background-color: #ffc107;
+            background-color: #000;
         }
 
         .list-button:hover {
-            background-color: #218838;
+            background-color: #000;
         }
 
         .unlist-button:hover {
-            background-color: #c82333;
+            background-color: #000;
         }
 
         .edit-button:hover {
-            background-color: #e0a800;
+            background-color: #000;
         }
 
         /* Modal styling */
@@ -150,13 +159,12 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(233, 227, 223, 0.922);
+            background-color: rgba(0, 0, 0, 0.5);
             padding-top: 100px;
         }
 
         .modal-content {
-            background-color:#ffffff;
+            background-color: #ffffff;
             margin: auto;
             padding: 20px;
             border: 1px solid #888;
@@ -171,13 +179,12 @@
             float: right;
             font-size: 28px;
             font-weight: bold;
+            cursor: pointer;
         }
 
         .close:hover,
         .close:focus {
             color: black;
-            text-decoration: none;
-            cursor: pointer;
         }
 
         /* Input styling */
@@ -188,33 +195,80 @@
             border-radius: 4px;
             border: 1px solid #ccc;
         }
+
+        /* Form button styling */
+        .form-button {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .search-bar {
+    margin-bottom: 15px;
+    }
+    .search-bar input {
+            width: 97%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .special-color{
+            background-color:#555 ;
+        }
+       
+       .page-item{
+        float: left;
+       }
+       .page-link{
+        text-decoration: none;
+        margin: 15px;
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 0 4px;
+       border: 1px solid #ddd;
+       border-radius: 4px;
+       text-decoration: none;
+       color: #333;
+       }
+       .paginationdiv{
+        margin-left: 8cm;
+       }
+       
     </style>
 </head>
 
 <body>
     <aside class="sidebar">
-        <h2>Admin Dashboard</h2>
+        <h2 style="margin-left: .5cm;">Admin Dashboard</h2>
         <nav>
           <ul>
             <li><a href="/admin/dashboard">Home</a></li>
             <li><a href="/admin/userManagement">User Management</a></li>
             <li><a href="/admin/productManagement">Product Management</a></li>
-            <li><a href="/admin/categoryManagement">Category </a></li>
+            <li ><a href="/admin/categoryManagement" class="special-color">Category </a></li>
             <li><a href="#orders">Order Management</a></li>
             <li><a href="#payments">Payments</a></li>
             <li><a href="#reports">Sales Reports</a></li>
             <li><a href="#profile">Profile</a></li>
             <form action="/admin/logout" method="POST">
-              <button type="submit" style="background-color: #dc3545;block-size: 40px;border: none;color: #fff;border-radius: 25px;width: 2cm;">Logout</button>
+              <button type="submit" class="logoutbtn" style="font-size: 13.3px;">Logout</button>
           </form>
           </ul>
         </nav>
       </aside>
+      
 
     <div class="container">
         <h1>Category Management</h1>
         <button type="button" class="add-category-button" onclick="openModal('addCategoryModal')">Add Category</button>
-
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search category..." onkeyup="searchCategories()">
+        </div>
         <!-- Category Table -->
         <table>
             <thead>
@@ -226,74 +280,101 @@
                     <th>List/Unlist</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="categoryTableBody">
                 <% categories.forEach(category => { %>
-                <tr>
-                    <td><%= category.name %></td>
-                    <td><%= category.variant %></td>
-                    <td><%= category.isListed ? 'Listed' : 'Unlisted' %></td>
-                    <td>
-                        <button class="edit-button" onclick="openEditModal('<%= category._id %>', '<%= category.name %>', '<%= category.variant %>')">Edit</button>
-                    </td>
-                    <td>
-                        <form action="/admin/categoryManagement/toggle-status/<%= category._id %>" method="POST">
-                            <% if (category.isListed) { %>
-                                <button type="submit" class="unlist-button">Unlist</button>
-                            <% } else { %>
-                                <button type="submit" class="list-button">List</button>
-                            <% } %>
-                        </form>
-                    </td>
-                    
-                </tr>
+                    <tr>
+                        <td><%= category.name %></td>
+                        <td><%= category.variant %></td>
+                        <td><%= category.isListed ? 'Listed' : 'Unlisted' %></td>
+                        <td><button class="edit-button" onclick="openEditModal('<%= category._id %>', '<%= category.name %>', '<%= category.variant %>')">Edit</button></td>
+                        <td>
+                            <form action="/admin/categoryManagement/toggle-status/<%= category._id %>" method="POST">
+                                <% if (category.isListed) { %>
+                                    <button type="submit" class="unlist-button">Unlist</button>
+                                <% } else { %>
+                                    <button type="submit" class="list-button">List</button>
+                                <% } %>
+                            </form>
+                        </td>
+                    </tr>
                 <% }) %>
             </tbody>
-            
         </table>
+        
+            <nav id="pagination" aria-label="Page navigation" class="paginationdiv">
+                <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
+                  <% if (previousPage) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous" style="text-decoration: none;"><</a>                   
+                    </li>         
+                    <% } %>
+            
+                      <% for (let i=1; i <=totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                           
+                          <a class="page-link" href="?page=<%= i %>">
+                            <%= i %>
+                          </a>
+                          </li>
+                        <% } %>
+            
+                          <% if (nextPage) { %>
+                            <li class="page-item">
+                              <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next" style="text-decoration: none;">></a>
+                            </li>
+                            <% } %>
+                </ul>
+              </nav>
     </div>
 
     <!-- Add Category Modal -->
     <div id="addCategoryModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('addCategoryModal')">&times;</span>
-            <h5 style="color: #000;font-weight: 800;font-size: 20px;margin-left: 5cm;">Add Category</h5>
-            <form action="/admin/categoryManagement/add" method="POST">
+            <h5>Add Category</h5>
+            <form id="addCategoryForm">
                 <div>
                     <label for="categoryName">Category Name</label>
                     <input type="text" id="categoryName" name="name" required>
+                    
+                    <div id="error-message" class="alert alert-danger text-center" style="display: none; color: red;"></div>
                 </div>
                 <div>
                     <label for="categoryVariant">Variant</label>
                     <input type="text" id="categoryVariant" name="variant" required>
                 </div>
-                <button type="submit" style="background-color: black;margin-top: .5cm;">Add Category</button>
-                <button  style="background-color: black;margin-top: .5cm;" onclick="closeModal('addCategoryModal')">Cancel</button>
+                <button type="button" class="form-button" onclick="submitCategoryForm()">Add Category</button>
+                <button type="button" class="form-button" onclick="closeModal('addCategoryModal')">Cancel</button>
             </form>
         </div>
     </div>
 
     <!-- Edit Category Modal -->
-    <div id="editCategoryModal" class="modal">
+    <div id="editCategoryModal" class="modal" style="float: left;">
         <div class="modal-content">
             <span class="close" onclick="closeModal('editCategoryModal')">&times;</span>
             <h5>Edit Category</h5>
-            <form action="/admin/categoryManagement/edit" method="POST" id="editCategoryForm">
+            <form id="editCategoryForm">
                 <input type="hidden" name="id" id="editCategoryId">
                 <div>
                     <label for="editCategoryName">Category Name</label>
                     <input type="text" id="editCategoryName" name="name" required>
+                    <!-- Error message container -->
+                    <div id="error-message1" class="alert alert-danger text-center" style="display: none; color: red;"></div>
                 </div>
                 <div>
                     <label for="editCategoryVariant">Variant</label>
                     <input type="text" id="editCategoryVariant" name="variant" required>
                 </div>
-                <button type="submit" style="background-color: #000;margin-top: 10x;">Save Changes</button>
+                <!-- Set button type to "button" to prevent form from submitting traditionally -->
+                <button type="button" class="form-button" onclick="submitEditCategoryForm(event)">Save Changes</button>
             </form>
         </div>
     </div>
-
-   
-
+    
+    
+    
+  
     <script>
         function openModal(modalId) {
             document.getElementById(modalId).style.display = "block";
@@ -318,8 +399,116 @@
                 }
             });
         }
-    </script>
+
+        function searchCategories() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const rows = document.getElementById('categoryTableBody').getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+
+                
+                for (let j = 0; j < cells.length - 1; j++) { 
+                    if (cells[j] && cells[j].textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+  
+    async function submitCategoryForm() {
+    const form = document.getElementById('addCategoryForm');
+    const formData = new FormData(form);
+    const errorMessageElement = document.getElementById('error-message');
+
     
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    try {
+        const response = await fetch('/admin/categoryManagement/add', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            errorMessageElement.innerHTML = result.error || 'An error occurred';
+            errorMessageElement.style.display = 'block';
+        } else {
+            form.reset();
+            closeModal('addCategoryModal');
+            location.reload(); 
+        }
+    } catch (error) {
+        console.error('Error adding category:', error);
+        errorMessageElement.innerHTML = 'An internal error occurred';
+        errorMessageElement.style.display = 'block';
+    }
+}
+
+
+async function submitEditCategoryForm(event) {
+    event.preventDefault(); 
+
+    const form = document.getElementById('editCategoryForm');
+    const formData = new FormData(form);
+    const errorMessageElement = document.getElementById('error-message1');
+
+    
+    errorMessageElement.style.display = 'none';
+    errorMessageElement.textContent = '';
+
+    
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    try {
+        const response = await fetch('/admin/categoryManagement/edit', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            
+            errorMessageElement.textContent = result.error || 'An error occurred';
+            errorMessageElement.style.display = 'block';
+        } else {
+           
+            form.reset();
+            errorMessageElement.style.display = 'none'; 
+            closeModal('editCategoryModal');
+            location.reload(); 
+        }
+    } catch (error) {
+        console.error('Error editing category:', error);
+        errorMessageElement.textContent = 'An internal error occurred';
+        errorMessageElement.style.display = 'block';
+    }
+}
+
+    </script>
 </body>
 
 </html>
