@@ -1,20 +1,21 @@
 const { name } = require("ejs");
+const mongoose = require("mongoose");
 const User = require("../../models/userschema");
 const Address=require('../../models/addressschema')
 
 
-const loadprofile = async (req,res) => {
+const loadprofile = async (req, res) => {
+    const id=req.session.user
     try {
-        const userAddressData = await Address.findOne({ user: user._id });
-
-        // If no addresses are found, initialize as an empty array
-        const addresses = userAddressData ? userAddressData.address : [];
-        return res.render("profile",{addresses});
+        const users = await User.findOne({ _id:id });
+        const addresses=await Address.find({ user: id })
+        res.render("profile",{users,addresses})
     } catch (error) {
-        console.log("profile page not found.");
-        res.status(500).send('Server error');
-    }
-}
+        res.send(error)
+    }
+
+};
+
 const userlogout = async (req, res) => {
     req.session.user = false; 
 

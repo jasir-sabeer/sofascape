@@ -29,7 +29,7 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Create the upload middleware
+
 const upload = multer({
     storage: storage,
     limits: {

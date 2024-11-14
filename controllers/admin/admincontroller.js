@@ -311,7 +311,7 @@ const editProduct = async (req, res) => {
       const { id } = req.params;
       const { productname, description, regularprice, category, stock } = req.body;
       const images = req.files; 
-      console.log(images)
+      console.log('images ',images)
   
       if (!productname || !description || !regularprice || !category || !stock) {
         return res.status(400).send("All fields are required");

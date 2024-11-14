@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const addressSchema = new Schema({
     userid: {
-        type: Schema.Types.ObjectId, 
+        type:mongoose.Schema.Types.ObjectId, 
         ref: "user",
         required: true
     },
@@ -20,7 +20,7 @@ const addressSchema = new Schema({
             type: String,
             required: true
         },
-        landmark: {
+        street: {
             type: String,
             required: true
         },
@@ -33,10 +33,6 @@ const addressSchema = new Schema({
             required: true
         },
         phone: {
-            type: String,
-            required: true
-        },
-        altphone: {
             type: String,
             required: true
         }
