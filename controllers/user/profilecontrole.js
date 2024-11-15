@@ -7,7 +7,12 @@ const Address=require('../../models/addressschema')
 const loadprofile = async (req, res) => {
     const id=req.session.user
     try {
-        const users = await User.findOne({ _id:id });
+        const users = await User.findOne({ _id:id, isblocked:false });
+        console.log(users)
+
+        if(!users){
+         res.status(404).render('login')
+        }
         const addresses=await Address.find({ user: id })
         res.render("profile",{users,addresses})
     } catch (error) {

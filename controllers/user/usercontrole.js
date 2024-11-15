@@ -17,13 +17,8 @@ const pagenotfound = async (req, res) => {
 // Load home page
 const loadhomepage = async (req, res) => {
     try {
-        const user = req.session.user;
-        if (user) {
-            const userData = await User.findOne({ _id: user._id }); 
-            res.render("home", { user: userData }); 
-        } else {
-            return res.render("home"); 
-        }
+      
+     return res.render("home");
     } catch (error) {
         console.log("Home page not found.", error); 
         res.status(500).send('Server error');
@@ -196,7 +191,7 @@ const login = async (req, res) => {
 
         if (!email || !password) {
             req.session.message = "Email and password are required";
-            return res.redirect('/userlogin');
+            return res.render('login', { message: "Email and password are required" });
         }
         const findUser = await User.findOne({ isadmin: 0, email: email });
 
@@ -226,7 +221,10 @@ const loadsingleproductpage = async (req, res) => {
     const productId=req.params.id
     try {
         const product=await Product.findById(productId).populate('category')
-        res.render("single-product",{product})
+        const productCategory= product.category
+        const relatedProducts= await Product.find({category:productCategory})
+        console.log(relatedProducts)
+        res.render("single-product",{product,relatedProducts})
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');

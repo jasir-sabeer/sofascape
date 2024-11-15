@@ -25,7 +25,7 @@ const productSchema = new Schema({
         required: true,
     },
     images: [{
-        type: String, // Paths to uploaded images
+        type: String, 
         required: true
     }],
     isListed: {

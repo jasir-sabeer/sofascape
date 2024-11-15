@@ -22,6 +22,11 @@
                             <h3>Welcome Back ! <br>
                                 Please Sign in now</h3>
                             <form class="row contact_form" action="/login" method="post" novalidate="novalidate">
+                                <% if(locals.message && message.length>0){%>
+                                    <div style="color: red;margin-left: 3cm;" >
+                                     <%=message%>
+                                    </div>
+                               <%}%>
                                 <div class="col-md-12 form-group p_star">
                                     <input type="text" class="form-control" id="email" name="email" value=""
                                         placeholder="Email">
@@ -32,11 +37,6 @@
                                         placeholder="Password">
                                         <div id="error7" class="errormessage"></div>
                                 </div>
-                               <% if(locals.message && message.length>0){%>
-                                    <div class="alert alert-danger text-center" >
-                                     <%=message%>
-                                    </div>
-                               <%}%>
                                 <div class="col-md-12 form-group">
                                     <div class="creat_account d-flex align-items-center">
                                         <input type="checkbox" id="f-option" name="selector">

@@ -1,7 +1,7 @@
 
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/userschema'); // Renamed to 'User'
+const User = require('../models/userschema'); 
 require("dotenv").config();
 
 passport.use(

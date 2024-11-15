@@ -111,11 +111,9 @@
     </div>
 
     <script>
-        // Countdown Script
         let timer = 60;
         let countdownInterval;
 
-// Start Timer Function
 function startTimer() {
     timer = 60; 
     document.getElementById("countdown").textContent = `00:${timer < 10 ? '0' : ''}${timer}`;
@@ -179,7 +177,7 @@ function resendOTP() {
 
 
 
-        // OTP Validation Function
+        // OTP Validation
         function validationOtpForm() {
     const otpInput = document.getElementById("otp").value;
 
@@ -188,7 +186,7 @@ function resendOTP() {
         url: "otppage",
         data: { otp: otpInput },
         success: function(response) {
-            if (response.success) { // Check response.success instead of otpInput.success
+            if (response.success) {
                 Swal.fire({
                     title: "OTP verified successfully!",
                     text: "You have successfully verified your OTP.",
@@ -197,7 +195,7 @@ function resendOTP() {
                     if (response.redirectUrl) {
                         window.location.href = response.redirectUrl;
                     } else {
-                        // If no redirectUrl, go to a default page
+                    
                         window.location.href = "/home";
                     }
                 });
@@ -217,7 +215,7 @@ function resendOTP() {
             });
         }
     });
-    return false; // Prevent default form submission
+    return false; 
 }
 
 

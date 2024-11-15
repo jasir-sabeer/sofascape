@@ -160,14 +160,15 @@ const addCategory = async (req, res) => {
     try {
         const { name, variant } = req.body;
         const formattedName = name.trim().toLowerCase();
+        const formattedVariant=variant.trim().toLowerCase();
 
-        const existingCategory = await Category.findOne({ name: { $regex: `^${formattedName}$`, $options: 'i' } });
+        const existingCategory = await Category.findOne({ name: { $regex: `^${formattedName}$`, $options: 'i'},variant:{$regex:`^${formattedVariant}$`,$options:'i'}});
         if (existingCategory) {
             console.log('Category already exists');
             return res.status(400).json({ error: 'This category name already exists' });
         }
 
-        const newCategory = new Category({ name: formattedName, variant, isListed: true });
+        const newCategory = new Category({ name: formattedName, variant:formattedVariant, isListed: true });
         await newCategory.save();
         res.status(200).json({ message: 'Category added successfully' });
     } catch (error) {

@@ -41,7 +41,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 const loadHomepage = (req, res) => {
-    const user = req.session.passport ? req.session.passport.user : null; // Get user data from session
+    const user = req.session.passport ? req.session.passport.user : null;
     res.render('home', { user }); 
 };
 

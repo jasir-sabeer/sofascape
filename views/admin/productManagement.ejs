@@ -764,7 +764,7 @@ input[type="file"] {
           }
         });
     
-        // Add the cropButton listener outside the loop to prevent multiple listeners
+        
         document.getElementById('cropButton').addEventListener('click', function () {
           if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas();
@@ -808,7 +808,7 @@ input[type="file"] {
         function openEditProductModal(id, productname, description, regularprice, category, stock, imagesJson) {
     
           console.log(imagesJson)
-          // Populate form fields with the provided product data
+          
           document.getElementById('editProductName').value = productname;
           document.getElementById('editProductDescription').value = description;
           document.getElementById('editProductPrice').value = regularprice;
@@ -820,7 +820,7 @@ input[type="file"] {
           console.log(images);
     
           const imagePreview = document.querySelector(".product-images");
-          imagePreview.innerHTML = "";  // Clear current images
+          imagePreview.innerHTML = "";  
     
           images.forEach((image, index) => {
             const imageContainer = document.createElement("div");
@@ -939,11 +939,11 @@ input[type="file"] {
           let regularprice = document.getElementById('editProductPrice').value;
           let stock = document.getElementById('editProductStock').value;
           let category = document.getElementById('editProductCategory').value;
-          let id = document.getElementById("productId").value; // Get the product ID
+          let id = document.getElementById("productId").value; 
     
           const formData = { productname, description, regularprice, stock, category };
     
-          const response = await fetch(`/admin/productManagement/edit/${id}`, { // Include the ID in the URL
+          const response = await fetch(`/admin/productManagement/edit/${id}`, { 
             method: "POST",
             headers: {
               "Content-Type": "application/json"
