@@ -1,7 +1,7 @@
 
 const express = require('express');
 const router = express.Router();
-const usercontroller = require('../controllers/user/usercontrole');
+const usercontroller = require('../../controllers/user/usercontrole');
 const passport = require('passport');
 
 router.get('/pagenotfound', usercontroller.pagenotfound);

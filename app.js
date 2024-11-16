@@ -5,10 +5,10 @@ const session =require('express-session')
 const passport=require("./config/passport")
 require("dotenv").config();
 const db=require("./config/db");
-const userRouter=require('./routes/userRouter')
+const userRouter=require('./routes/user/userRouter')
 const nocache = require("nocache");
-const adminRouter=require('./routes/adminRouter')
-const profileRouter=require('./routes/profileRouter')
+const adminRouter=require('./routes/admin/adminRouter')
+const profileRouter=require('./routes/user/profileRouter')
 const fash=require('connect-flash')
 db()
 
@@ -52,8 +52,6 @@ app.get('/home', loadHomepage);
 app.use('/',userRouter)
 app.use('/',profileRouter)
 app.use('/admin',adminRouter)
-
-
 
 
 

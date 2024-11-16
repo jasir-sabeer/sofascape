@@ -1,8 +1,8 @@
 const express=require('express')
 const router=express.Router();
-const admincontroller=require('../controllers/admin/admincontroller')
-const adminAuth=require('../middlewares/adminAuth');
-const upload=require('../controllers/admin/imagecontroller')
+const admincontroller=require('../../controllers/admin/admincontroller')
+const adminAuth=require('../../middlewares/adminAuth');
+const upload=require('../../controllers/admin/imagecontroller')
 
 
 
