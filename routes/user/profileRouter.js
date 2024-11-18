@@ -5,6 +5,7 @@ const userAuth=require('../../middlewares/userAuth')
 
 router.get('/profile',userAuth.userLogin,profilecontroller.loadprofile)
 router.post('/userlogout',profilecontroller.userlogout)
+router.post('/change-password',profilecontroller.changepassword)
 
 
 

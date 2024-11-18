@@ -149,7 +149,7 @@
 
     function passwordValidateChecking() {
         const password = document.getElementById('password').value.trim();
-        const passwordPattern = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
         const confirmpassword = document.getElementById('confirmpassword').value.trim();
         if (password === "") {
             error4.textContent = "Password is required";
