@@ -183,11 +183,13 @@ const editCategory = async (req, res) => {
     try {
         const { id, name, variant } = req.body;
         const formattedName = name.trim().toLowerCase();
+        const formattedVariant=variant.trim().toLowerCase();
 
         
         const existingCategory = await Category.findOne({
             name: { $regex: `^${formattedName}$`, $options: 'i' },
-            _id: { $ne: id } 
+            _id: { $ne: id },
+            variant:{$regex:`^${formattedVariant}$`,$options:'i'}
         });
 
         if (existingCategory) {

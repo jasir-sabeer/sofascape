@@ -169,35 +169,13 @@
             <p><strong>Email:</strong> <%= users.email %></p>
             <p><strong>Phone:</strong> <%= users.phone %></p>
             <!-- Change Password Button -->
-            <button class="change-password-button" onclick="openChangePasswordModal()">Change Password</button>
+             <a href="/changePassword">
+            <button class="change-password-button">Change Password</button>
+            </a>
         </div>
     </div>
 </section>
 
-<!-- Change Password Modal -->
-<div id="changePasswordModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Change Password</h2>
-            <button class="close-button" onclick="closeChangePasswordModal()">X</button>
-        </div>
-        <form action="/change-password" method="post">
-            <label for="currentPassword">Current Password</label>
-            <input type="password" name="currentPassword" id="currentPassword" required>
-
-            <label for="newPassword">New Password</label>
-            <input type="password" name="newPassword" id="newPassword" required>
-
-            <label for="confirmPassword">Confirm New Password</label>
-            <input type="password" name="confirmPassword" id="confirmPassword" required>
-
-            <div class="modal-footer">
-                <button type="button" class="cancel-button" onclick="closeChangePasswordModal()">Cancel</button>
-                <button type="submit" class="save-button">Save</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <section class="address-section">
     <div class="container">
@@ -227,16 +205,7 @@
 <%- include("../../views/partials/user/footer") %>
 
 <script>
-    // Function to open the Change Password modal
-    function openChangePasswordModal() {
-        document.getElementById("changePasswordModal").style.display = "flex";
-    }
-
-    // Function to close the Change Password modal
-    function closeChangePasswordModal() {
-        document.getElementById("changePasswordModal").style.display = "none";
-    }
-
+    
     // Other existing functions for add/edit/delete address
     function addNewAddress() {
         window.location.href = "/add-address";

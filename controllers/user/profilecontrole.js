@@ -33,6 +33,14 @@ const userlogout = async (req, res) => {
         res.render('login'); 
     })
 }
+const loadChangePasswordPage= async (req,res)=>{
+    try {
+        res.render('changepassword')
+    } catch (error) {
+
+        res.redirect('/page-404')
+    }
+}
 
 
 const changepassword= async (req,res)=>{
@@ -44,23 +52,23 @@ const changepassword= async (req,res)=>{
      const user=await User.findById(userId);
 
      if (!user) {
-        return res.status(404).json({message: 'User not found.' });
+        return res.render('changepassword',{message: 'User not found.' });
     }
 
     const isMatch=await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-        return res.status(404).json({message: 'current password is  incorrect' });
+        return res.render('changepassword',{message: 'current password is  incorrect' });
     }
    
     if(newPassword!==confirmPassword){
-        return res.status(404).json({message: 'passwords do not match' });
+        return res.render('changepassword',{message2: 'passwords do not match' });
     }
 
     const passwordPattern=/^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
     
 
     if(!newPassword.match(passwordPattern)){
-        return res.status(404).json({message: 'set a 8 character strong password' });
+        return res.render('changepassword',{message1: 'set a 8 character strong password' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -68,7 +76,8 @@ const changepassword= async (req,res)=>{
         await user.save();
 
 
-        res.status(200).json({ message: 'Password changed successfully.' });
+        res.redirect('/profile?success=Password changed successfully.');
+
   } catch (error) {
     console.error('Error changing password:', error);
     res.status(500).json({ error: 'Server error, please try again later.' });
@@ -79,5 +88,6 @@ const changepassword= async (req,res)=>{
 module.exports={
     loadprofile,
     userlogout,
-    changepassword
+    changepassword,
+    loadChangePasswordPage
 }
