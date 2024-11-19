@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const usercontroller = require('../../controllers/user/usercontrole');
 const passport = require('passport');
+const userAuth=require('../../middlewares/userAuth')
+
 
 router.get('/pagenotfound', usercontroller.pagenotfound);
 router.get('/homepage', usercontroller.loadhomepage);
@@ -24,6 +26,7 @@ router.get('/auth/google/callback',
 
 router.post("/login",usercontroller.login)
 router.get("/productpage/:id",usercontroller.loadsingleproductpage)
+router.post('/review/:id',userAuth.userLogin,usercontroller.productReview)
 
 
 module.exports = router;

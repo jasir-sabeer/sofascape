@@ -4,6 +4,7 @@ const  Product=require('../../models/prductschema')
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
+const Review= require('../../models/reviewSchema');
 
 // Page not found handler
 const pagenotfound = async (req, res) => {
@@ -223,14 +224,55 @@ const loadsingleproductpage = async (req, res) => {
         const product=await Product.findById(productId).populate('category')
         const productCategory= product.category
         const relatedProducts= await Product.find({category:productCategory})
-        console.log(relatedProducts)
-        res.render("single-product",{product,relatedProducts})
+        const productReviews=await Review.find({productId}).populate('productId')
+        console.log(productReview)
+        res.render("single-product",{product,relatedProducts,productReviews})
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');
     }
 };
 
+const productReview = async (req, res) => {
+    const { name, email, number, comment ,rating} = req.body;
+    console.log(req.body);
+    const userId = req.session.user;
+  
+   
+    if (!name || !comment) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+  
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (!phoneRegex.test(number)) {
+      return res.status(400).json({ message: 'Invalid phone number' });
+    }
+  
+    try {
+       const product = await Product.findById(req.params.id);
+      if (!product) return res.status(404).json({ message: 'Product not found' });
+  
+      const newReview = new Review({
+        userId:userId,
+        name:name,
+        email:email,
+        number:number,
+        comment:comment,
+        rating:rating,
+        productId:product._id
+      });
+
+    
+      await newReview.save();
+  
+      res.status(201).json(product);
+    } catch (error) {
+        console.log(error);
+        
+      res.status(500).json({ message: 'Error adding review', error });
+    }
+  };
+  
 
 module.exports = {
     loadhomepage,
@@ -243,5 +285,6 @@ module.exports = {
     resendOTP,
     login,
     loadsingleproductpage,
+    productReview
    
 };

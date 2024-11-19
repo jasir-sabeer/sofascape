@@ -47,9 +47,16 @@
                 <a class="active" href="#">
                   <span>Meterial</span><%=product.category.variant%></a>
               </li>
-              <li>
-                <a href="#"> <span>Stock</span> : <%=product.stock%></a>
-              </li>
+              <% if (product.stock<=0) { %>
+                <li>
+                  <a href="#"> <span>Stock</span>Out of stock</a>
+                </li>
+              <% } else { %>
+                <li>
+                  <a href="#"> <span>Stock</span> : <%=product.stock%></a>
+                </li>
+              <% } %>
+             
             </ul>
         
             <p>
@@ -57,13 +64,18 @@
               <%=product.description%>
             </p>
             <div class="card_area d-flex justify-content-between align-items-center">
-              <div class="product_count">
-                <span class="inumber-decrement"> <i class="ti-minus"></i></span>
-                <input class="input-number" type="text" value="1" min="0" max="10">
-                <span class="number-increment"> <i class="ti-plus"></i></span>
-              </div>
-              <a href="#" class="btn_3">add to cart</a>
-              <a href="#" class="like_us"> <i class="ti-heart"></i> </a>
+              <% if (product.stock<=0) { %>
+                 <p style="font-size: 20px;margin-left: 2cm;color: brown;">Out of Stock</p>
+                <% } else { %>
+                  <div class="product_count">
+                    <span class="inumber-decrement"> <i class="ti-minus"></i></span>
+                    <input class="input-number" type="text" value="1" min="0" max="10">
+                    <span class="number-increment"> <i class="ti-plus"></i></span>
+                  </div>
+                  <a href="#" class="btn_3">add to cart</a>
+    
+                  <% } %>
+                   <a href="#" class="like_us"> <i class="ti-heart"></i> </a>
             </div>
           </div>
         </div>
@@ -353,69 +365,42 @@
                 </div>
               </div>
               <div class="review_list">
-                <div class="review_item">
-                  <div class="media">
-                    <div class="d-flex">
-                      <img src="img/product/single-product/review-1.png" alt="" />
-                    </div>
-                    <div class="media-body">
-                      <h4>Blake Ruiz</h4>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                    </div>
-                  </div>
-                  <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                    sed do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                    ullamco laboris nisi ut aliquip ex ea commodo
-                  </p>
-                </div>
-                <div class="review_item">
-                  <div class="media">
-                    <div class="d-flex">
-                      <img src="img/product/single-product/review-2.png" alt="" />
-                    </div>
-                    <div class="media-body">
-                      <h4>Blake Ruiz</h4>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                    </div>
-                  </div>
-                  <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                    sed do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                    ullamco laboris nisi ut aliquip ex ea commodo
-                  </p>
-                </div>
+                <% productReviews.forEach(productReview => { %>
                 <div class="review_item">
                   <div class="media">
                     <div class="d-flex">
                       <img src="img/product/single-product/review-3.png" alt="" />
                     </div>
                     <div class="media-body">
-                      <h4>Blake Ruiz</h4>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
+                      <h4><%= productReview.name %></h4>
+                      <% if (productReview.rating===1) { %>
+                        <i class="fa fa-star"></i>
+                       <% } else if(productReview.rating===2){ %>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <% } else if(productReview.rating===3){ %>
+                          <i class="fa fa-star"></i>
+                          <i class="fa fa-star"></i>
+                          <i class="fa fa-star"></i>
+                          <% } else if(productReview.rating===4){ %>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <% } else{ %>
+                              <i class="fa fa-star"></i>
+                              <i class="fa fa-star"></i>
+                              <i class="fa fa-star"></i>
+                              <i class="fa fa-star"></i>
+                              <i class="fa fa-star"></i>
+                         <% } %>
                     </div>
                   </div>
                   <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                    sed do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                    ullamco laboris nisi ut aliquip ex ea commodo
+                    <%= productReview.comment %>
                   </p>
                 </div>
+                <%})%>
               </div>
             </div>
             <div class="col-lg-6">
@@ -450,7 +435,9 @@
                   </li>
                 </ul>
                 <p>Outstanding</p>
-                <form class="row contact_form" action="contact_process.php" method="post" novalidate="novalidate">
+                
+                <form class="row contact_form" id="reviewForm" action="/review/<%= product._id %>" method="post" novalidate="novalidate">
+                  <input type="hidden" id="productId" value="<%= product._id %>" />
                   <div class="col-md-12">
                     <div class="form-group">
                       <input type="text" class="form-control" name="name" placeholder="Your Full name" />
@@ -468,7 +455,29 @@
                   </div>
                   <div class="col-md-12">
                     <div class="form-group">
-                      <textarea class="form-control" name="message" rows="1" placeholder="Review"></textarea>
+                      <textarea class="form-control" name="comment" rows="1" placeholder="Review"></textarea>
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="form-group" style="float: left;">
+                      <label >1<i class="fa fa-star" style="color: rgb(239, 219, 4);"></i></label>
+                     <input type="radio" name="rating" value="1">
+                    </div>
+                    <div class="form-group" style="float: left;margin-left: 1cm;">
+                      <label >2<i class="fa fa-star" style="color: rgb(239, 219, 4);"></i></label>
+                     <input type="radio" name="rating" value="2">
+                    </div>
+                    <div class="form-group" style="float: left;margin-left: 1cm;">
+                      <label >3<i class="fa fa-star"  style="color: rgb(239, 219, 4);"></i></label>
+                     <input type="radio" name="rating" value="3">
+                    </div>
+                    <div class="form-group" style="float: left;margin-left: 1cm;">
+                      <label >4<i class="fa fa-star" style="color: rgb(239, 219, 4);"></i></label>
+                     <input type="radio" name="rating" value="4">
+                    </div>
+                    <div class="form-group" style="float: left;margin-left: 1cm;">
+                      <label >5<i class="fa fa-star" style="color: rgb(239, 219, 4);"></i></label>
+                     <input type="radio" name="rating" value="5">
                     </div>
                   </div>
                   <div class="col-md-12 text-right">
@@ -524,7 +533,7 @@
     let imageZoom = document.getElementById("imageZoom");
 
     imageZoom.addEventListener("mousemove", (event) => {
-        console.log("Mouse moved"); // Check if event fires
+        console.log("Mouse moved"); 
         imageZoom.style.setProperty("--display", "block");
         let pointer = {
             x: (event.offsetX * 100) / imageZoom.offsetWidth,
@@ -535,16 +544,16 @@
     });
 
     imageZoom.addEventListener("mouseout", () => {
-        console.log("Mouse out"); // Check if event fires
+        console.log("Mouse out"); 
         imageZoom.style.setProperty("--display", "none");
     });
 });
 document.querySelectorAll('.thumbnail').forEach(function(thumbnail) {
     thumbnail.addEventListener('click', function() {
-      // Get the source of the clicked thumbnail
+   
       var src = thumbnail.getAttribute('data-src');
       
-      // Update the main image and zoom background
+     
       var mainImage = document.getElementById('main-image');
       var imageZoom = document.getElementById('imageZoom');
 
@@ -552,4 +561,32 @@ document.querySelectorAll('.thumbnail').forEach(function(thumbnail) {
       imageZoom.style.setProperty('--url', `url(${src})`);
     });
   });
+
+
+  document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const productId= document.getElementById('productId').value;
+  const formData = new FormData(e.target);
+  const reviewData = Object.fromEntries(formData);
+
+
+  try {
+    const response = await fetch(`/review/${productId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reviewData),
+    });
+
+    if (response.ok) {
+      location.reload();
+      alert('Review submitted successfully!');
+    } else {
+      const error = await response.json();
+      alert('Error: ' + (error.message || 'Something went wrong'));
+    }
+  } catch (error) {
+    alert('Failed to submit review');
+  }
+});
+
   </script>

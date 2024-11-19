@@ -1,7 +1,8 @@
 const User = require('../../models/userschema');
 const Admin = require('../../models/adminschema')
 const Category = require('../../models/categoryschema');
-const Product = require('../../models/prductschema')
+const Product = require('../../models/prductschema');
+
 const fs = require('fs')
 const path = require('path')
 const sharp = require('sharp')
@@ -267,9 +268,9 @@ const addProduct = async (req, res) => {
             return res.status(400).send({ message: 'Please fill all required fields' });
         }
 
-        if (regularprice <= 0 || stock <= 0) {
+        if (regularprice <= 0 ) {
         
-            return res.status(400).send({ message: 'Invalid price or stock value' });
+            return res.status(400).send({ message: 'Invalid price value' });
         }
 
     
@@ -320,8 +321,8 @@ const editProduct = async (req, res) => {
         return res.status(400).send("All fields are required");
       }
   
-      if (regularprice <= 0 || stock <= 0) {
-        return res.status(400).send({ message: 'Invalid price or stock value' });
+      if (regularprice <= 0) {
+        return res.status(400).send({ message: 'Invalid price  value' });
       }
   
       const product = await Product.findById(id);
@@ -362,7 +363,9 @@ const editProduct = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
-  
+
+
+
 
 
 const logout = async (req, res) => {
