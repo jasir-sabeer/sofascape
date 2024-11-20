@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Address</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .cancel-button {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .cancel-button:hover {
+            background-color: #e55a5a;
+        }
+
+        .save-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .save-button:hover {
+            background-color: #45a049;
+        }
+        .errormessage{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Add New Address</h1>
+    <form id="addAddressForm" action="/add_address" method="post">
+        <div id="error1" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="firstName" name="firstName" placeholder="First Name" >
+        <div id="error2" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="lastName" name="lastName" placeholder="Last Name" >
+        <div id="error3" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="email" name="email" placeholder="Email">
+        <div id="error4" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" >
+        <div id="error5" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="address" name="address" placeholder="Address" >
+        <div id="error6" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="street" name="street" placeholder="Street" >
+        <div id="error7" class="errormessage" aria-live="assertive"></div> 
+        <input type="text" id="city" name="city" placeholder="City" >
+        <div id="error8" class="errormessage" aria-live="assertive"></div> 
+        <input type="text" id="state" name="state" placeholder="State" >
+        <div id="error9" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="pincode" name="pincode" placeholder="Pincode" >
+        
+        
+        <div class="form-actions">
+            <button type="button" class="cancel-button" onclick="cancelAddAddress()">Cancel</button>
+            <button type="submit" value="submit" class="save-button">Save</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    
+    function cancelAddAddress() {
+        window.location.href = '/profile'; 
+    }
+    const addAddressForm= document.getElementById('addAddressForm');
+    const error1 = document.getElementById('error1');
+    const error2 = document.getElementById('error2');
+    const error3 = document.getElementById('error3');
+    const error4 = document.getElementById('error4');
+    const error5 = document.getElementById('error5');
+    const error6 = document.getElementById('error6');
+    const error7 = document.getElementById('error7');
+    const error8 = document.getElementById('error8');
+    const error9 = document.getElementById('error9');
+
+    addAddressForm.addEventListener("submit", (e) => {
+        firstNameValidateChecking();
+        lastNameValidateChecking();
+        emailValidateChecking();
+        phoneNumberValidateChecking();
+        addressValidateChecking();
+        streetValidateChecking();
+        cityValidateChecking();
+        stateValidateChecking();
+        pincodeValidateChecking();
+
+        if (
+            error1.classList.contains("show-error") || 
+            error2.classList.contains("show-error") || 
+            error3.classList.contains("show-error") || 
+            error4.classList.contains("show-error") || 
+            error5.classList.contains("show-error") ||
+            error6.classList.contains("show-error") || 
+            error7.classList.contains("show-error") ||
+            error8.classList.contains("show-error") || 
+            error9.classList.contains("show-error")
+        ) {
+            e.preventDefault();  
+        }
+    });
+    
+    function firstNameValidateChecking() {
+        const nameInput = document.getElementById('firstName').value.trim();
+        const usernamePattern = /^[a-zA-Z\s]{3,}$/;
+        if(nameInput==="") {
+            error1.textContent = "first is required";
+            error1.classList.add("show-error");
+           
+        }else if(!nameInput.match(usernamePattern)) {
+            error1.textContent = "plese enter a valid name";
+            error1.classList.add("show-error");
+        } else {
+            error1.textContent = "";
+            error1.classList.remove("show-error");
+        }
+    }
+    function lastNameValidateChecking() {
+        const nameInput = document.getElementById('lastName').value.trim();
+        const usernamePattern = /^[a-zA-Z\s]{3,}$/;
+        if(nameInput==="") {
+            error2.textContent = "last name is required";
+            error2.classList.add("show-error");
+           
+        }else if(!nameInput.match(usernamePattern)) {
+            error2.textContent = "plese enter a valid name";
+            error2.classList.add("show-error");
+        } else {
+            error2.textContent = "";
+            error2.classList.remove("show-error");
+        }
+    }
+
+
+    function emailValidateChecking() {
+        const emailInput = document.getElementById('email').value.trim();
+        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+        if(emailInput===""){
+            error3.textContent = "email is required";
+            error3.classList.add("show-error");
+        }else if (!emailInput.match(emailPattern)) {
+            error3.textContent = "Please enter a valid email";
+            error3.classList.add("show-error");
+        } else {
+            error3.textContent = "";
+            error3.classList.remove("show-error");
+        }
+    }
+
+
+    function phoneNumberValidateChecking() {
+        const phoneInput = document.getElementById('phoneNumber').value.trim();
+        const phonePattern = /^[0-9]{10}$/;
+        if(phoneInput===""){
+            error4.textContent = "Phone number is required";
+            error4.classList.add("show-error");
+
+        }else if (!phoneInput.match(phonePattern)) {
+            error4.textContent = "Phone number must be 10 digits";
+            error4.classList.add("show-error");
+        } else {
+            error4.textContent = "";
+            error4.classList.remove("show-error");
+        }
+    }
+
+    function addressValidateChecking() {
+        const nameInput = document.getElementById('address').value.trim();
+        if(nameInput==="") {
+            error5.textContent = "Address is required";
+            error5.classList.add("show-error");
+        } else {
+            error5.textContent = "";
+            error5.classList.remove("show-error");
+        }
+    }
+    function streetValidateChecking() {
+        const nameInput = document.getElementById('street').value.trim();
+        if(nameInput==="") {
+            error6.textContent = "street  is required";
+            error6.classList.add("show-error");
+        } else {
+            error6.textContent = "";
+            error6.classList.remove("show-error");
+        }
+    }
+    function cityValidateChecking() {
+        const cityInput = document.getElementById('city').value.trim();
+        if(cityInput==="") {
+            error7.textContent = "city is required";
+            error7.classList.add("show-error");
+        } else {
+            error7.textContent = "";
+            error7.classList.remove("show-error");
+        }
+    }
+
+    function stateValidateChecking() {
+        const stateInput = document.getElementById('state').value.trim();
+        const statePattern = /^[a-zA-Z\s]{3,}$/;
+        if(stateInput==="") {
+            error8.textContent = "state is required";
+            error8.classList.add("show-error");
+           
+        }else if(!stateInput.match(statePattern)) {
+            error8.textContent = "plese enter your currect state";
+            error8.classList.add("show-error");
+        } else {
+            error8.textContent = "";
+            error8.classList.remove("show-error");
+        }
+    }
+    
+    function pincodeValidateChecking() {
+        const pincodeInput = document.getElementById('pincode').value.trim();
+        const pincodePattern = /^[0-9]{6}$/;
+        if(pincodeInput===""){
+            error9.textContent = "Pincode is required";
+            error9.classList.add("show-error");
+
+        }else if (!pincodeInput.match(pincodePattern)) {
+            error9.textContent = "Pincode must be 6 digits";
+            error9.classList.add("show-error");
+        } else {
+            error9.textContent = "";
+            error9.classList.remove("show-error");
+        }
+    }
+
+
+</script>
+
+</body>
+</html>

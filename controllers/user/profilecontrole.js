@@ -85,9 +85,48 @@ const changepassword= async (req,res)=>{
 
 }
 
+const loadAddressPage=async (req,res)=>{
+   try {
+       res.render('add_address')
+   } catch (error) {
+    res.redirect('/page-404')
+   }
+}
+const addAddress=async(req,res)=>{
+ 
+const {firstName,lastName,email,phoneNumber,address,street,city,state,pincode}=req.body;
+console.log(req.body)
+const userId=req.session.user;
+try {
+    const addresses=new Address({
+        user:userId,
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        address,
+        street,
+        city,
+        state,
+        pincode
+    })
+    await addresses.save()
+    res.redirect('/profile?success=address added successfully.');
+
+
+} catch (error) {
+    console.log(error);
+        
+      res.status(500).json({ message: 'Error adding adress', error }); 
+}
+}
+
+
 module.exports={
     loadprofile,
     userlogout,
     changepassword,
-    loadChangePasswordPage
+    loadChangePasswordPage,
+    loadAddressPage,
+    addAddress
 }
