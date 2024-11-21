@@ -225,7 +225,7 @@
 
     <script>
 
-        // Function to filter users based on search input
+        
         function searchUsers() {
             const input = document.getElementById('searchInput');
             const filter = input.value.toLowerCase();
@@ -235,15 +235,15 @@
                 const cells = rows[i].getElementsByTagName('td');
                 let match = false;
 
-                // Check each cell in the row for a match
-                for (let j = 0; j < cells.length - 1; j++) { // Exclude the Action column
+                
+                for (let j = 0; j < cells.length - 1; j++) { 
                     if (cells[j] && cells[j].textContent.toLowerCase().includes(filter)) {
                         match = true;
                         break;
                     }
                 }
 
-                // Show or hide the row based on whether there's a match
+            
                 rows[i].style.display = match ? '' : 'none';
             }
         }
@@ -260,7 +260,6 @@
             confirmButtonText: ` ${actionText}`
         }).then((result) => {
             if (result.isConfirmed) {
-                // Create a form to submit the request
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `/admin/userManagement/${actionType}User/${userId}`;

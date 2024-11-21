@@ -9,6 +9,7 @@ const userRouter=require('./routes/user/userRouter')
 const nocache = require("nocache");
 const adminRouter=require('./routes/admin/adminRouter')
 const profileRouter=require('./routes/user/profileRouter')
+const cartRouter=require('./routes/user/cartRouter')
 const fash=require('connect-flash')
 db()
 
@@ -45,10 +46,9 @@ const loadHomepage = (req, res) => {
     res.render('home', { user }); 
 };
 
-// Define the routes
+
 app.get('/home', loadHomepage);
-
-
+app.use('/',cartRouter)
 app.use('/',userRouter)
 app.use('/',profileRouter)
 app.use('/admin',adminRouter)

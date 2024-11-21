@@ -156,7 +156,7 @@
                                 <div class="single_product_text">
                                     <h4><%= product.productname %></h4>
                                     <h3>₹<%= product.regularprice %></h3>
-                                    <a href="#" class="add_cart">+ add to cart<i class="ti-heart"></i></a>
+                                    <a  onclick=" addToCart('<%= product._id %>')" class="add_cart">+ add to cart<i class="ti-heart"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -373,6 +373,27 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     <script src="js/price_rangs.js"></script>
     <!-- custom js -->
     <script src="js/custom.js"></script>
+    <script>
+        
+        async function addToCart(productId) {
+  try {
+    const response = await fetch(`/cart/add/${productId}`, {
+      method: "POST",
+    });
+
+    if (response.ok) {
+      alert("Product added to cart!");
+      window.location.reload();
+    } else {
+      const errorMessage = await response.text();
+      alert(`Error: ${errorMessage}`);
+    }
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+  }
+}
+
+    </script>
 </body>
 
 </html>

@@ -1,5 +1,46 @@
 
+<style>
+  .input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.input-number {
+  width: 50px;
+  text-align: center;
+  border: 1px solid #ccc;
+  height: 30px;
+}
+
+.btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #fff;
+}
+
+.btn:active {
+  background-color: #fff;
+}
+
+.btn-decrement {
+  border-right: none;
+}
+
+.btn-increment {
+  border-left: none;
+}
+
+</style>
 <%-include("../partials/user/header")%>
   <!--================Home Banner Area =================-->
   <!-- breadcrumb start-->
@@ -29,99 +70,51 @@
               <tr>
                 <th scope="col">Product</th>
                 <th scope="col">Price</th>
-                <th scope="col">Quantity</th>
+                <th scope="col">Quantity of Product</th>
                 <th scope="col">Total</th>
+                <th scope="col">Remove product</th>
+
               </tr>
             </thead>
             <tbody>
+              
+              <% cartProducts.forEach(product => { %>
               <tr>
                 <td>
                   <div class="media">
                     <div class="d-flex">
-                      <img src="img/product/single-product/cart-1.jpg" alt="" />
+                      <img style="width: 2cm;height: 2cm;" src="/uploads/<%= product.productId.images[0] %>" alt="<%= product.productId.productname %>" />
                     </div>
                     <div class="media-body">
-                      <p>Minimalistic shop for multipurpose use</p>
+                      <p><%= product.productId.productname %></p>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <h5>$360.00</h5>
+                  <h5><%= product.productId.regularprice %></h5>
                 </td>
                 <td>
                   <div class="product_count">
-                    <span class="input-number-decrement"> <i class="ti-angle-down"></i></span>
-                    <input class="input-number" type="text" value="1" min="0" max="10">
-                    <span class="input-number-increment"> <i class="ti-angle-up"></i></span>
+                      <div class="input-group">
+                          <button class="btn btn-decrement" onclick="updateQuantity('<%= product.productId %>', -1)">-</button>
+                          <input class="input-number"  type="number" value="<%= product.quantity %>"   min="1" max="10" readonly data-product-id="<%= product.productId %>">
+                          <button class="btn btn-increment" onclick="updateQuantity('<%= product.productId %>', 1)">+</button>
+                      </div>
                   </div>
+              </td>
+                 <td>
+                  <h5>$<%= product.productId.regularprice * product.quantity %></h5>
                 </td>
                 <td>
-                  <h5>$720.00</h5>
+                  <a href="#" class="genric-btn danger">Remove</a>
                 </td>
               </tr>
-              <tr>
-                <td>
-                  <div class="media">
-                    <div class="d-flex">
-                      <img src="img/product/single-product/cart-1.jpg" alt="" />
-                    </div>
-                    <div class="media-body">
-                      <p>Minimalistic shop for multipurpose use</p>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <h5>$360.00</h5>
-                </td>
-                <td>
-                  <div class="product_count">
-                    <!-- <input type="text" value="1" min="0" max="10" title="Quantity:"
-                      class="input-text qty input-number" />
-                    <button
-                      class="increase input-number-increment items-count" type="button">
-                      <i class="ti-angle-up"></i>
-                    </button>
-                    <button
-                      class="reduced input-number-decrement items-count" type="button">
-                      <i class="ti-angle-down"></i>
-                    </button> -->
-                    <span class="input-number-decrement"> <i class="ti-angle-down"></i></span>
-                    <input class="input-number" type="text" value="1" min="0" max="10">
-                    <span class="input-number-increment"> <i class="ti-angle-up"></i></span>
-                  </div>
-                </td>
-                <td>
-                  <h5>$720.00</h5>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="media">
-                    <div class="d-flex">
-                      <img src="img/product/single-product/cart-1.jpg" alt="" />
-                    </div>
-                    <div class="media-body">
-                      <p>Minimalistic shop for multipurpose use</p>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <h5>$360.00</h5>
-                </td>
-                <td>
-                  <div class="product_count">
-                    <span class="input-number-decrement"> <i class="ti-angle-down"></i></span>
-                    <input class="input-number" type="text" value="1" min="0" max="10">
-                    <span class="input-number-increment"> <i class="ti-angle-up"></i></span>
-                  </div>
-                </td>
-                <td>
-                  <h5>$720.00</h5>
-                </td>
-              </tr>
+              <%})%>
+              
+              
               <tr class="bottom_button">
                 <td>
-                  <a class="btn_1" href="#">Update Cart</a>
+                  <a class="btn_1" href="/products">Update Cart</a>
                 </td>
                 <td></td>
                 <td></td>
@@ -138,7 +131,7 @@
                   <h5>Subtotal</h5>
                 </td>
                 <td>
-                  <h5>$2160.00</h5>
+                  <h5>$<%= subtotal %></h5>
                 </td>
               </tr>
               <tr class="shipping_area">
@@ -194,3 +187,34 @@
   <!--================End Cart Area =================-->
 
   <%-include("../partials/user/header")%>
+  <script>
+  function updateQuantity(productId, change) {
+    const inputField = document.querySelector(`.input-number[data-product-id="${productId}"]`);
+    const currentValue = parseInt(inputField.value);
+    const newValue = currentValue + change;
+
+    if (newValue >= parseInt(inputField.min) && newValue <= parseInt(inputField.max)) {
+        inputField.value = newValue;
+
+        // Update server with new quantity
+        fetch('/cart/update-quantity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId, quantity: newValue }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Quantity updated successfully!');
+                } else {
+                    alert('Failed to update quantity: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error updating quantity:', error));
+    } else {
+        alert('Invalid quantity. Please ensure it is between 1 and 10.');
+    }
+}
+</script>

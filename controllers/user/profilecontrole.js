@@ -1,7 +1,7 @@
 const { name } = require("ejs");
 const mongoose = require("mongoose");
-const User = require("../../models/userschema");
-const Address=require('../../models/addressschema')
+const User = require("../../models/admin/userschema");
+const Address=require('../../models/user/addressschema')
 const bcrypt = require('bcrypt');
 
 
