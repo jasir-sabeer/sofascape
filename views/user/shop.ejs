@@ -382,11 +382,11 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     });
 
     if (response.ok) {
-      alert("Product added to cart!");
+      
       window.location.reload();
     } else {
       const errorMessage = await response.text();
-      alert(`Error: ${errorMessage}`);
+
     }
   } catch (error) {
     console.error("Error adding to cart:", error);

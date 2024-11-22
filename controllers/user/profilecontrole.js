@@ -61,14 +61,14 @@ const changepassword= async (req,res)=>{
     }
    
     if(newPassword!==confirmPassword){
-        return res.render('changepassword',{message2: 'passwords do not match' });
+        return res.render('changepassword',{message: 'passwords do not match' });
     }
 
     const passwordPattern=/^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
     
 
     if(!newPassword.match(passwordPattern)){
-        return res.render('changepassword',{message1: 'set a 8 character strong password' });
+        return res.render('changepassword',{message: 'set a 8 character strong password' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -92,6 +92,7 @@ const loadAddressPage=async (req,res)=>{
     res.redirect('/page-404')
    }
 }
+
 const addAddress=async(req,res)=>{
  
 const {firstName,lastName,email,phoneNumber,address,street,city,state,pincode}=req.body;
@@ -122,11 +123,53 @@ try {
 }
 
 
+const loadEditAddressPage=async(req,res)=>{
+    const userId=req.session.user
+    try {
+        const address=await Address.findOne({user:userId})
+        res.render('edit_address',{address})
+    } catch (error) {
+        console.log(error)
+        res.redirect('/page-404')
+    }
+}
+const editAddress=async(req,res)=>{
+    const addressId = req.params.id;
+    const updatedData = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        phoneNumber: req.body.phoneNumber,
+        address: req.body.address,
+        street: req.body.street,
+        city: req.body.city,
+        state: req.body.state,
+        pincode: req.body.pincode,
+    };
+
+    try {
+        const address = await Address.findByIdAndUpdate(addressId, updatedData, { new: true }); // Update address in database
+        if (!address) {
+            return res.status(404).send('Address not found');
+        }
+
+        // Redirect or respond with success
+        res.redirect('/profile'); // Adjust the route as per your application
+    } catch (error) {
+        console.error('Error updating address:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
 module.exports={
     loadprofile,
     userlogout,
     changepassword,
     loadChangePasswordPage,
     loadAddressPage,
-    addAddress
+    addAddress,
+    loadEditAddressPage,
+    editAddress
 }

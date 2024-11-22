@@ -66,6 +66,7 @@
       <div class="cart_inner">
         <div class="table-responsive">
           <table class="table">
+            <% if ( cartProducts.length > 0) { %>
             <thead>
               <tr>
                 <th scope="col">Product</th>
@@ -91,19 +92,29 @@
                   </div>
                 </td>
                 <td>
-                  <h5><%= product.productId.regularprice %></h5>
+                  <h5>₹<%= product.productId.regularprice %></h5>
                 </td>
                 <td>
                   <div class="product_count">
                       <div class="input-group">
-                          <button class="btn btn-decrement" onclick="updateQuantity('<%= product.productId %>', -1)">-</button>
-                          <input class="input-number"  type="number" value="<%= product.quantity %>"   min="1" max="10" readonly data-product-id="<%= product.productId %>">
-                          <button class="btn btn-increment" onclick="updateQuantity('<%= product.productId %>', 1)">+</button>
+                          
+                          <button class="btn btn-decrement" onclick="updateQuantity('<%= product.productId._id %>', 'decrease')">-</button>
+                          
+                          <input 
+                              class="input-number" 
+                              type="number" 
+                              value="<%= product.quantity %>" 
+                              min="1" 
+                              max="10" 
+                              readonly 
+                              data-product-id="<%= product.productId._id %>" />
+                          
+                          <button class="btn btn-increment" onclick="updateQuantity('<%= product.productId._id %>', 'increase')">+</button>
                       </div>
                   </div>
               </td>
                  <td>
-                  <h5>$<%= product.productId.regularprice * product.quantity %></h5>
+                  <h5>₹<%= product.productId.regularprice * product.quantity %></h5>
                 </td>
                 <td>
                   <a href="#" class="genric-btn danger">Remove</a>
@@ -120,7 +131,7 @@
                 <td></td>
                 <td>
                   <div class="cupon_text float-right">
-                    <a class="btn_1" href="#">Close Coupon</a>
+                    <a class="btn_1"  href="#">Close Coupon</a>
                   </div>
                 </td>
               </tr>
@@ -131,90 +142,68 @@
                   <h5>Subtotal</h5>
                 </td>
                 <td>
-                  <h5>$<%= subtotal %></h5>
+                  <h5>₹<%=subtotal%></h5>
                 </td>
               </tr>
-              <tr class="shipping_area">
-                <td></td>
-                <td></td>
-                <td>
-                  <h5>Shipping</h5>
-                </td>
-                <td>
-                  <div class="shipping_box">
-                    <ul class="list">
-                      <li>
-                        <a href="#">Flat Rate: $5.00</a>
-                      </li>
-                      <li>
-                        <a href="#">Free Shipping</a>
-                      </li>
-                      <li>
-                        <a href="#">Flat Rate: $10.00</a>
-                      </li>
-                      <li class="active">
-                        <a href="#">Local Delivery: $2.00</a>
-                      </li>
-                    </ul>
-                    <h6>
-                      Calculate Shipping
-                      <i class="fa fa-caret-down" aria-hidden="true"></i>
-                    </h6>
-                    <select class="shipping_select">
-                      <option value="1">Bangladesh</option>
-                      <option value="2">India</option>
-                      <option value="4">Pakistan</option>
-                    </select>
-                    <select class="shipping_select section_bg">
-                      <option value="1">Select a State</option>
-                      <option value="2">Select a State</option>
-                      <option value="4">Select a State</option>
-                    </select>
-                    <input type="text" placeholder="Postcode/Zipcode" />
-                    <a class="btn_1" href="#">Update Details</a>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+        
+            <% } else { %>
+              <tr>
+                <td colspan="4">Your cart is empty....! Please add products </td>
+            </tr>
+          </tbody>
+            <% } %>
+     
           </table>
           <div class="checkout_btn_inner float-right">
-            <a class="btn_1" href="#">Continue Shopping</a>
+            <a class="btn_1" href="/products">Continue Shopping</a>
+            <% if ( cartProducts.length > 0) { %>
             <a class="btn_1 checkout_btn_1" href="#">Proceed to checkout</a>
+            <% } else { %>
+              <a class="btn_1 checkout_btn_1" href="#">Back to home</a>
+              <% } %>
           </div>
         </div>
       </div>
   </section>
   <!--================End Cart Area =================-->
 
-  <%-include("../partials/user/header")%>
+  <%-include("../partials/user/footer")%>
   <script>
-  function updateQuantity(productId, change) {
+  function updateQuantity(productId, action) {
+    // Select the quantity input field
     const inputField = document.querySelector(`.input-number[data-product-id="${productId}"]`);
     const currentValue = parseInt(inputField.value);
-    const newValue = currentValue + change;
+    const minValue = parseInt(inputField.min);
+    const maxValue = parseInt(inputField.max);
+    let newValue = currentValue;
 
-    if (newValue >= parseInt(inputField.min) && newValue <= parseInt(inputField.max)) {
-        inputField.value = newValue;
-
-        // Update server with new quantity
-        fetch('/cart/update-quantity', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productId, quantity: newValue }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Quantity updated successfully!');
-                } else {
-                    alert('Failed to update quantity: ' + data.message);
-                }
-            })
-            .catch(error => console.error('Error updating quantity:', error));
-    } else {
-        alert('Invalid quantity. Please ensure it is between 1 and 10.');
+    // Update quantity based on action
+    if (action === 'increase') {
+        newValue = Math.min(currentValue + 1, maxValue);
+    } else if (action === 'decrease') {
+        newValue = Math.max(currentValue - 1, minValue);
     }
+
+    // Update the UI
+    inputField.value = newValue;
+
+    // Update the backend
+    fetch('/cart/update-quantity', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity: newValue }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log("Quantity updated successfully:", data.products);
+        } else {
+          console.logT
+        }
+    })
+    .catch(error => console.error("Error:", error));
 }
+
 </script>

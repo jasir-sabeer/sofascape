@@ -9,6 +9,10 @@ router.get('/changePassword',userAuth.userLogin,profilecontroller.loadChangePass
 router.post('/change-password',profilecontroller.changepassword)
 router.get('/addAddressPage',userAuth.userLogin,profilecontroller.loadAddressPage)
 router.post('/add_address',profilecontroller.addAddress)
+router.get('/editAddressPage',userAuth.userLogin,profilecontroller.loadEditAddressPage)
+router.post('/edit_address/:id',profilecontroller.editAddress)
+
+
 
 
 module.exports = router;
