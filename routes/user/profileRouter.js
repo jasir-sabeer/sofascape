@@ -11,6 +11,9 @@ router.get('/addAddressPage',userAuth.userLogin,profilecontroller.loadAddressPag
 router.post('/add_address',profilecontroller.addAddress)
 router.get('/editAddressPage',userAuth.userLogin,profilecontroller.loadEditAddressPage)
 router.post('/edit_address/:id',profilecontroller.editAddress)
+router.post('/delete-address/:id', userAuth.userLogin, profilecontroller.deleteAddress);
+
+
 
 
 
