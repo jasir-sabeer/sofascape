@@ -1,8 +1,8 @@
 const { name } = require("ejs");
 const mongoose = require("mongoose");
-const Cart = require('../../models/user/cartSchema')
-const User = require('../../models/admin/userschema')
-const Product = require('../../models/admin/prductschema')
+const Cart = require('../../models/cartSchema')
+const User = require('../../models/userschema')
+const Product = require('../../models/prductschema')
 
 
 const loadCartPage = async (req, res) => {

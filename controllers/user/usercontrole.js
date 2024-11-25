@@ -1,10 +1,10 @@
 const { name } = require("ejs");
-const User = require("../../models/admin/userschema");
-const  Product=require('../../models/admin/prductschema')
+const User = require("../../models/userschema");
+const  Product=require('../../models/prductschema')
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
-const Review= require('../../models/user/reviewSchema');
+const Review= require('../../models/reviewSchema');
 
 // Page not found handler
 const pagenotfound = async (req, res) => {

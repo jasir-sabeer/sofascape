@@ -1,7 +1,7 @@
-const User = require('../../models/admin/userschema');
-const Admin = require('../../models/admin/adminschema')
-const Category = require('../../models/admin/categoryschema');
-const Product = require('../../models/admin/prductschema');
+const User = require('../../models/userschema');
+const Admin = require('../../models/adminschema')
+const Category = require('../../models/categoryschema');
+const Product = require('../../models/prductschema');
 
 const fs = require('fs')
 const path = require('path')
