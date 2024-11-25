@@ -840,7 +840,7 @@ input[type="file"] {
             replaceInput.type = "file";
             replaceInput.classList.add("replace-image-input", "d-none");
             replaceInput.name = `images[${index}]`;
-    
+            replaceInput.accept = "image/png, image/jpeg, image/jpg,";
             
             replaceInput.addEventListener("change", (event) => {
               openCropper(event.target, index);
@@ -932,7 +932,7 @@ input[type="file"] {
         document.getElementById('editProductForm').addEventListener('submit', submitEditProductForm);
     
         async function submitEditProductForm(e) {
-          e.preventDefault(); // Prevent the default form submission
+          e.preventDefault(); 
     
           let productname = document.getElementById('editProductName').value;
           let description = document.getElementById('editProductDescription').value;

@@ -76,7 +76,7 @@ const loaduserManagement = async (req, res) => {
 
         const [totalUsers,users] = await Promise.all([
             User.countDocuments(),
-            User.find({}).skip(skip).limit(limit),
+            User.find({}).skip(skip).sort({_id:-1}).limit(limit),
            
         ]);
 
@@ -134,7 +134,7 @@ const loadCategory = async (req, res) => {
 
         const [totalCategories, categories] = await Promise.all([
             Category.countDocuments(),
-            Category.find({}).skip(skip).limit(limit),
+            Category.find({}).skip(skip).sort({_id:-1}).limit(limit),
            
         ]);
 
@@ -230,7 +230,7 @@ const loadProduct = async (req, res) => {
 
         const [totalProducts, products, categories] = await Promise.all([
             Product.countDocuments(),
-            Product.find({}).populate('category').skip(skip).limit(limit),
+            Product.find({}).populate('category').sort({ _id: -1  }).skip(skip).limit(limit),
             Category.find({isListed:true})
         ]);
 

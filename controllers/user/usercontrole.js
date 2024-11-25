@@ -17,6 +17,11 @@ const pagenotfound = async (req, res) => {
 
 // Load home page
 const loadhomepage = async (req, res) => {
+    console.log(req.session)
+    console.log(req.session.passport.user)
+    if(req.session.passport.user){
+        req.session.user=req.session.passport.user
+    }
     try {
       
      return res.render("home");
@@ -30,7 +35,7 @@ const loadhomepage = async (req, res) => {
 // Load product page
 const loadproductpage = async (req, res) => {
     try {
-        const products = await Product.find({ isListed: true });
+        const products = await Product.find({ isListed: true }).sort({_id:-1});
         res.render("shop", { products }); 
     } catch (error) {
         console.error("Product page load error:", error);
