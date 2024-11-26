@@ -56,6 +56,10 @@
                   <a href="#"> <span>Stock</span> : <%=product.stock%></a>
                 </li>
               <% } %>
+              <li>
+                <a class="active" href="#">
+                  <span>Rating</span><%=avg%></a>
+              </li>
              
             </ul>
         
@@ -278,8 +282,8 @@
                 <div class="col-6">
                   <div class="box_total">
                     <h5>Overall</h5>
-                    <h4>4.0</h4>
-                    <h6>(03 Reviews)</h6>
+                    <h4><%= avg %></h4>
+                    <h6>(<%= totalReviews %> Reviews)</h6>
                   </div>
                 </div>
                 <div class="col-6">
@@ -545,7 +549,6 @@ document.querySelectorAll('.thumbnail').forEach(function(thumbnail) {
 
     if (response.ok) {
       location.reload();
-      alert('Review submitted successfully!');
     } else {
       const error = await response.json();
       alert('Error: ' + (error.message || 'Something went wrong'));

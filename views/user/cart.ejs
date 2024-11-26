@@ -51,7 +51,11 @@
           <div class="breadcrumb_iner">
             <div class="breadcrumb_iner_item">
               <h2>Cart Products</h2>
-              <p>Home <span>-</span>Cart Products</p>
+                
+                  <li style="float: left;" class="breadcrumb-item"><a href="/homepage">Home</a></li>
+                  <li  style="float: left;" class="breadcrumb-item active" aria-current="page">Cart</li>
+              
+        
             </div>
           </div>
         </div>
@@ -66,7 +70,7 @@
       <div class="cart_inner">
         <div class="table-responsive">
           <table class="table">
-            <% if ( cartProducts.length > 0) { %>
+            <%if(cartProducts.length>0){ %>
             <thead>
               <tr>
                 <th scope="col">Product</th>
@@ -170,7 +174,7 @@
   <%-include("../partials/user/footer")%>
   <script>
   function updateQuantity(productId, action) {
-    // Select the quantity input field
+    
     const inputField = document.querySelector(`.input-number[data-product-id="${productId}"]`);
     const currentValue = parseInt(inputField.value);
     const minValue = parseInt(inputField.min);
@@ -187,7 +191,7 @@
     // Update the UI
     inputField.value = newValue;
 
-    // Update the backend
+    
     fetch('/cart/update-quantity', {
         method: 'POST',
         headers: {

@@ -6,8 +6,17 @@ const Product = require('../../models/prductschema')
 
 
 const loadCartPage = async (req, res) => {
-
+  const id = req.session.user;
     try {
+        
+         const users = await User.findOne({ _id: id, isblocked: false });
+        
+ 
+         if (!users) {
+             res.status(404).render('login')
+         }
+
+
          const userId=req.session.user;
          const cart=await Cart.findOne({userId}).populate('products.productId').exec()
          if (!cart) {
@@ -78,7 +87,7 @@ const addCart = async (req, res) => {
       }
   
       await cart.save();
-      res.redirect("/cart");
+      res.redirect("/cartPage");
     } catch (error) {
       console.error("Error adding product to cart:", error);
       res.status(500).send("Internal server error");

@@ -17,14 +17,16 @@ const pagenotfound = async (req, res) => {
 
 // Load home page
 const loadhomepage = async (req, res) => {
-    console.log(req.session)
-    console.log(req.session.passport.user)
-    if(req.session.passport.user){
-        req.session.user=req.session.passport.user
-    }
+
     try {
-      
-     return res.render("home");
+        
+        if (req.session.passport && req.session.passport.user) {
+            req.session.user = req.session.passport.user; 
+        } 
+        
+        return res.render("home", {
+            user: req.session.user, 
+        });
     } catch (error) {
         console.log("Home page not found.", error); 
         res.status(500).send('Server error');
@@ -166,7 +168,7 @@ const signup = async (req, res) => {
     }
 };
 
-// Resend OTP handler
+// Resend OTP 
 const resendOTP = async (req, res) => {
     try {
         const { email } = req.session.userData;
@@ -225,13 +227,32 @@ const login = async (req, res) => {
 
 const loadsingleproductpage = async (req, res) => {
     const productId=req.params.id
+    const id = req.session.user
     try {
         const product=await Product.findById(productId).populate('category')
         const productCategory= product.category
+        const users = await User.findOne({ _id: id, isblocked: false });
         const relatedProducts= await Product.find({category:productCategory})
         const productReviews=await Review.find({productId}).populate('productId')
-        console.log(productReview)
-        res.render("single-product",{product,relatedProducts,productReviews})
+        const totalReviews= await Review.countDocuments({productId})
+        const Ratings = await Review.aggregate([
+            { $match: { productId: product._id } }, 
+            {
+                $group: {
+                    _id: "$productId",
+                    averageRating: { $avg: "$rating" }
+                }
+            }
+        ]);
+        console.log(Ratings);
+         let avg=0
+        if(Ratings.length>0){
+               avg=Ratings[0].averageRating.toFixed(2)
+        }
+      
+        
+        
+        res.render("single-product",{product,relatedProducts,productReviews,users,avg,totalReviews})
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');
@@ -247,6 +268,7 @@ const productReview = async (req, res) => {
     if (!name || !comment) {
       return res.status(400).json({ message: 'All fields are required' });
     }
+
   
     const phoneRegex = /^[0-9]{10,15}$/;
     if (!phoneRegex.test(number)) {
@@ -254,6 +276,7 @@ const productReview = async (req, res) => {
     }
   
     try {
+         
        const product = await Product.findById(req.params.id);
       if (!product) return res.status(404).json({ message: 'Product not found' });
   

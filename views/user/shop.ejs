@@ -149,14 +149,17 @@
                         <% products.forEach(product => { %>
                         <div class="col-lg-4 col-sm-6">
                             <div class="single_product_item">
-                                <!-- Wrap only the img or the text inside the anchor -->
                                 <a href="/productpage/<%= product._id %>">
                                     <img src="/uploads/<%= product.images[1] %>" alt="">
                                 </a>
                                 <div class="single_product_text">
                                     <h4><%= product.productname %></h4>
                                     <h3>₹<%= product.regularprice %></h3>
-                                    <a  onclick=" addToCart('<%= product._id %>')" class="add_cart">+ add to cart<i class="ti-heart"></i></a>
+                                    <%if(product.stock<=0){%>
+                                        <a  class="add_cart">Out of Stock<i class="ti-heart"></i></a>
+                                    <% } else {%>
+                                    <a style="cursor: pointer;" onclick=" addToCart('<%= product._id %>')" class="add_cart">+ add to cart<i class="ti-heart"></i></a>
+                                    <%}%>
                                 </div>
                             </div>
                         </div>
@@ -382,14 +385,16 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     });
 
     if (response.ok) {
-      
-      window.location.reload();
+      toastr.success("Product added to cart!", "Success");
     } else {
       const errorMessage = await response.text();
-
+      
+      toastr.error(`Failed to add to cart: ${errorMessage}`, "Error");
     }
   } catch (error) {
     console.error("Error adding to cart:", error);
+    
+    toastr.error("An unexpected error occurred.", "Error");
   }
 }
 
