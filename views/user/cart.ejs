@@ -121,7 +121,9 @@
                   <h5>₹<%= product.productId.regularprice * product.quantity %></h5>
                 </td>
                 <td>
-                  <a href="#" class="genric-btn danger">Remove</a>
+                  <form action="/cart/deleteCartItem/<%= product._id %>" method="POST">
+                    <button type="submit" class="genric-btn danger" >Remove</button>
+                  </form>
                 </td>
               </tr>
               <%})%>

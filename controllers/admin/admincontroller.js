@@ -253,6 +253,16 @@ const loadProduct = async (req, res) => {
     }
 };
 
+const loadAddProduct=async(req,res)=>{
+
+try {
+    const categories=await Category.find({isListed:true})
+    res.render('addProduct',{categories})
+} catch (error) {
+    console.error("Error in product management:", error.message);
+    res.status(500).send("An error occurred while fetching products .");
+}
+}
 
 
 
@@ -265,25 +275,22 @@ const addProduct = async (req, res) => {
         
         if (!productname || !regularprice || !category || !description || !stock) {
             console.error("Validation failed: Missing fields");
-            return res.status(400).send({ message: 'Please fill all required fields' });
+            
+            return 
         }
 
-        if (regularprice <= 0 ) {
-        
-            return res.status(400).send({ message: 'Invalid price value' });
-        }
-
+       
     
         if (!images || images.length < 1) {
             console.error("Validation failed: No images uploaded");
-            return res.status(400).send({ message: 'Please upload at least one image' });
+            return
         }
 
         
         const categoryDoc = await Category.findOne({ name: category });
         if (!categoryDoc) {
             console.error("Category not found");
-            return res.status(400).send({ message: 'Invalid category' });
+            return
         }
 
         
@@ -394,6 +401,7 @@ module.exports = {
     editCategory,
     toggleCategoryStatus,
     loadProduct,
+    loadAddProduct,
     addProduct,
     editProduct,
     logout,

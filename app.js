@@ -47,7 +47,7 @@ const loadHomepage = (req, res) => {
 };
 
 
-app.get('/home', loadHomepage);
+app.get('/', loadHomepage);
 app.use('/',cartRouter)
 app.use('/',userRouter)
 app.use('/',profileRouter)

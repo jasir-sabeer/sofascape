@@ -89,6 +89,9 @@
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -147,26 +150,15 @@ function resendOTP() {
         url: "resendOTP",
         success: function(response) {
             if (response.success) {
-                Swal.fire({
-                    icon: "success",
-                    title: "OTP Resent",
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+              
+                toastr.info("OTP Resended Please check!", "Info");
             } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "An error occurred while resending OTP. Please try again"
-                });
+            
+                toastr.error("Failed to resend otp", "Error");
             }
         },
         error: function() {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "Failed to resend OTP"
-            });
+            toastr.error(`Failed to resend otp: ${errorMessage}`, "Error");
         }
     });
     return false;

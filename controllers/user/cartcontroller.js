@@ -131,8 +131,10 @@ const addCart = async (req, res) => {
   
 
 
+
 module.exports = {
     loadCartPage,
     addCart,
-    updateCartQuantity 
+    updateCartQuantity ,
+    
 }

@@ -18,7 +18,8 @@ router.post("/categoryManagement/add",admincontroller.addCategory)
 router.post("/categoryManagement/edit",admincontroller.editCategory)
 router.post('/categoryManagement/toggle-status/:id',admincontroller.toggleCategoryStatus);
 router.get('/productManagement',adminAuth.adminlogin,admincontroller.loadProduct)
-router.post("/productManagement/add", upload.array('images', 3), admincontroller.addProduct);
+router.get('/addProduct',adminAuth.adminlogin,admincontroller.loadAddProduct)
+router.post("/addProduct/add", upload.array('images', 3), admincontroller.addProduct);
 router.post("/productManagement/edit/:id", upload.array("images", 3), admincontroller.editProduct);
 router.post('/productManagement/toggle-status/:id',admincontroller.toggleProductStatus);
 router.post('/logout',admincontroller.logout)

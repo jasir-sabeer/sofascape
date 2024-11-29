@@ -450,8 +450,9 @@ input[type="file"] {
     
     
         </header>
-        <button class="add-btn" onclick="openProductModal()">Add Product</button>
-    
+         <a href="/admin/addProduct">
+        <button class="add-btn" >Add Product</button>
+      </a>
         <section class="product-table">
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Search product..." onkeyup="searchProducts()">
@@ -502,7 +503,18 @@ input[type="file"] {
                     <td>
     
                       <button class="btn btn-primary action-btn"
-                        onclick="openEditProductModal('<%= product._id %>', '<%= product.productname %>', '<%= product.description %>', '<%= product.regularprice %>','<%= product.category._id %>', '<%= product.stock %>', '<%= JSON.stringify(product.images) %>')">Edit</button>
+                      onclick="openEditProductModal(
+                        '<%= product._id %>', 
+                        '<%= product.productname %>', 
+                        '<%= product.description %>', 
+                        '<%= product.regularprice %>', 
+                        '<%= product.category ? product.category._id :null %>', 
+                        '<%= product.stock %>', 
+                        '<%= JSON.stringify(product.images) %>'
+                      )">
+                      Edit
+                    </button>
+                    
     
                     </td>
                     <td>
