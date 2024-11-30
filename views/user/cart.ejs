@@ -24,21 +24,62 @@
   cursor: pointer;
 }
 
-.btn:hover {
-  background-color: #fff;
+.product_count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px; /* Small gap between elements */
 }
 
-.btn:active {
-  background-color: #fff;
+.product_count .btn-decrease, 
+.product_count .btn-increase {
+  background-color: #fff; /* Blue color */
+  color: #000; /* White text */
+  border: none; /* No border */
+  padding: 8px 12px; /* Add padding for better visibility */
+  font-size: 18px; /* Larger font size for buttons */
+  font-weight: bold;
+  border-radius: 5px; /* Slightly rounded corners */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.btn-decrement {
-  border-right: none;
+.product_count .btn-decrease:hover, 
+.product_count .btn-increase:hover {
+  background-color: #fff; /* Darker blue on hover */
+  transform: scale(1.1); /* Slight zoom effect */
 }
 
-.btn-increment {
-  border-left: none;
+.product_count .input-text {
+  width: 60px; /* Compact width */
+  height: 40px; /* Uniform height */
+  text-align: center; /* Center-align the text */
+  font-size: 16px; /* Adjusted font size */
+  border: 1px solid #ccc; /* Light border */
+  border-radius: 5px; /* Rounded corners */
+  outline: none; /* No outline on focus */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+.product_count .input-text:focus {
+  border-color: #fff; /* Blue border on focus */
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); /* Blue shadow on focus */
+}
+
+@media (max-width: 768px) {
+  .product_count {
+    flex-direction: column; /* Stack buttons and input vertically */
+    gap: 10px; /* Increase spacing for smaller screens */
+  }
+
+  .product_count .btn-decrease, 
+  .product_count .btn-increase, 
+  .product_count .input-text {
+    width: 100%; /* Full width for smaller screens */
+  }
+}
+
 
 </style>
 <%-include("../partials/user/header")%>
@@ -100,31 +141,26 @@
                 </td>
                 <td>
                   <div class="product_count">
-                      <div class="input-group">
-                          
-                          <button class="btn btn-decrement" onclick="updateQuantity('<%= product.productId._id %>', 'decrease')">-</button>
-                          
-                          <input 
-                              class="input-number" 
-                              type="number" 
-                              value="<%= product.quantity %>" 
-                              min="1" 
-                              max="10" 
-                              readonly 
-                              data-product-id="<%= product.productId._id %>" />
-                          
-                          <button class="btn btn-increment" onclick="updateQuantity('<%= product.productId._id %>', 'increase')">+</button>
-                      </div>
+                    <button onclick="updateQuantity('decrease', '<%= product.productId._id %>')" 
+                            class="btn-decrease" type="button">-</button>
+                    <input type="text" name="qty" id="sst" maxlength="12" m value="<%= product.quantity %>" 
+                           title="Quantity:" class="input-text qty" 
+                           data-product-id="<%= product.productId._id %>">
+                    <button onclick="updateQuantity('increase', '<%= product.productId._id %>')" 
+                            class="btn-increase" type="button">+</button>
                   </div>
-              </td>
+                </td>
+                
+              
                  <td>
                   <h5>₹<%= product.productId.regularprice * product.quantity %></h5>
                 </td>
                 <td>
-                  <form action="/cart/deleteCartItem/<%= product._id %>" method="POST">
-                    <button type="submit" class="genric-btn danger" >Remove</button>
+                  <form action="/cart/cancel/<%= product.productId._id %>?_method=DELETE" method="POST"
+                      onsubmit="event.preventDefault(); cancelProduct('<%= product.productId._id %>')">
+                      <button class="genric-btn danger-border radius">Cancel</button>
                   </form>
-                </td>
+              </td>
               </tr>
               <%})%>
               
@@ -174,42 +210,99 @@
   <!--================End Cart Area =================-->
 
   <%-include("../partials/user/footer")%>
-  <script>
-  function updateQuantity(productId, action) {
+ <!---update Quantity---->
+ <script>
+  function updateQuantity(action, productId) {
     
-    const inputField = document.querySelector(`.input-number[data-product-id="${productId}"]`);
-    const currentValue = parseInt(inputField.value);
-    const minValue = parseInt(inputField.min);
-    const maxValue = parseInt(inputField.max);
-    let newValue = currentValue;
+    const input = document.querySelector(`input[data-product-id="${productId}"]`); 
+    const priceElement = document.querySelector(`#price-${productId}`); 
+    let currentQty = parseInt(input.value);
 
-    // Update quantity based on action
-    if (action === 'increase') {
-        newValue = Math.min(currentValue + 1, maxValue);
-    } else if (action === 'decrease') {
-        newValue = Math.max(currentValue - 1, minValue);
+    if (isNaN(currentQty)) {
+        currentQty = 1; 
     }
 
-    // Update the UI
-    inputField.value = newValue;
+    
+    if (action === 'increase' && currentQty<10) {
+        currentQty++;
+    } else if (action === 'decrease' && currentQty > 1) {
+        currentQty--;
+    }
+
+    input.value = currentQty;
 
     
-    fetch('/cart/update-quantity', {
+    const data = {
+        productId: productId,
+        quantity: currentQty
+    };
+
+    
+    fetch('/updateCart', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ productId, quantity: newValue }),
+        body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            console.log("Quantity updated successfully:", data.products);
+            
+            priceElement.textContent = `₹${data.newPrice}`;
         } else {
-          console.logT
+            
+            Swal.fire({
+                title: "Error!",
+                text: data.message,
+                icon: "error",
+                confirmButtonText: "Okay",
+            });
         }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+        // Handle fetch errors
+        Swal.fire({
+            title: "Server Error!",
+            text: "Something went wrong while updating the cart. Please try again later.",
+            icon: "error",
+            confirmButtonText: "Okay",
+        });
+    });
 }
+
+
+function cancelProduct(productId) {
+    fetch(`/cart/cancel/${productId}`, { 
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+           
+        }else{
+          toastr.error("Cart Item Removed ", "Error");
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const productRow = document.querySelector(`#product-${productId}`);
+            window.location.reload()
+            if (productRow) {
+                productRow.remove();
+            }
+        } else {
+            console.error('Error:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error canceling product:', error);
+    });
+}
+
 
 </script>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Product</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+  <style>
+    /* Add padding and margins to improve alignment */
+    .edit-product-page {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 30px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #cropper-container {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #imageToCrop {
+      max-width: 100%;
+      max-height: 400px; /* Control the size of the image */
+      border-radius: 8px;
+    }
+
+    /* Adjust image previews and buttons */
+    .image-wrapper {
+      display: inline-block;
+      margin: 10px;
+      text-align: center;
+    }
+
+    .image-wrapper img {
+      max-width: 150px;
+      margin-bottom: 10px;
+    }
+
+    .close-cropper {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #888;
+    }
+
+    .close-cropper:hover {
+      color: #f44336;
+    }
+
+    /* Modal style */
+    .modal-content {
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Styling crop button */
+    #cropImage {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    #cropImage:hover {
+      background-color: #218838;
+    }
+
+    .file-upload-label {
+      display: block;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="edit-product-page">
+    <h2>Edit Product</h2>
+    <form id="editProductForm" method="POST" action="/admin/productManagement/edit/<%= product._id %>" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="productName" class="form-label">Product Name:</label>
+        <input type="text" id="editProductName" name="productname" class="form-control" value="<%= product.productname %>" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="productDescription" class="form-label">Description:</label>
+        <textarea id="editProductDescription" name="description" class="form-control" rows="4" required><%= product.description %></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="productPrice" class="form-label">Price:</label>
+        <input type="number" id="editProductPrice" name="regularprice" class="form-control" value="<%= product.regularprice %>" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="productCategory" class="form-label">Category:</label>
+        <select id="editProductCategory" name="category" class="form-select" required>
+          <% categories.forEach(category => { %>
+            <option value="<%= category._id %>" <%= product.category.toString() === category._id.toString() ? 'selected' : '' %> >
+              <%= category.name %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="productStock" class="form-label">Stock:</label>
+        <input type="number" id="editProductStock" name="stock" class="form-control" value="<%= product.stock %>" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="productImage" class="file-upload-label">Update Images:</label>
+        <input type="file" id="editProductImage" name="images" class="form-control" accept="image/*" multiple />
+      </div>
+
+      <div class="product-images">
+        <% product.images.forEach((image, index) => { %>
+          <div class="image-wrapper">
+            <img src="/uploads/<%= image %>" alt="Product Image" id="preview-image-<%= index %>" />
+            <input type="file" name="images[<%= index %>]" class="replace-image-input" accept="image/*" onchange="openCropper(this,' <%= index %>')" />
+            <button type="button" class="btn btn-warning mt-2" onclick="removeImage('<%= index %>')">Remove</button>
+          </div>
+        <% }) %>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-3">Update Product</button>
+    </form>
+  </div>
+
+  <!-- Cropper Modal -->
+  <div id="cropper-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-cropper" onclick="closeCropper()">&times;</span>
+      <h3>Crop Your Image</h3>
+      <img id="imageToCropModal" src="" alt="Image to crop" />
+      <button id="cropImageModal" onclick="cropImage()">Crop</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+  <script>
+    let cropper;
+    let currentReplaceInput;
+
+    // Handle file selection for cropping
+    document.getElementById('editProductImage').addEventListener('change', function(e) {
+      const fileInput = e.target;
+      const files = fileInput.files;
+      const previewContainer = document.querySelector('.product-images');
+      previewContainer.innerHTML = ''; // Clear previous previews
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewDiv = document.createElement('div');
+          previewDiv.classList.add('image-preview');
+          
+          const image = document.createElement('img');
+          image.src = e.target.result;
+          previewDiv.appendChild(image);
+
+          const inputFile = document.createElement('input');
+          inputFile.type = 'file';
+          inputFile.accept = 'image/*';
+          inputFile.addEventListener('change', (event) => openCropper(event.target));
+
+          previewDiv.appendChild(inputFile);
+          previewContainer.appendChild(previewDiv);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Open the cropper modal
+    function openCropper(input, index) {
+      const file = input.files[0];
+      currentReplaceInput = input;
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imageToCropModal = document.getElementById('imageToCropModal');
+          imageToCropModal.src = e.target.result;
+
+          // Display the cropper modal
+          document.getElementById('cropper-modal').style.display = 'block';
+
+          // Initialize the cropper
+          if (cropper) cropper.destroy();
+          cropper = new Cropper(imageToCropModal, {
+            aspectRatio: 1,  // Optional: Aspect ratio for square cropping
+            viewMode: 1,  // Limits the crop area to the image dimensions
+            autoCropArea: 0.8,  // Auto-crop area
+            responsive: true,  // Make the cropper responsive
+            minContainerWidth: 400, // Set the container width
+            minContainerHeight: 400 // Set the container height
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Crop the image and update the preview
+    function cropImage() {
+      if (cropper) {
+        cropper.getCroppedCanvas().toBlob(function(blob) {
+          const croppedFile = new File([blob], 'croppedImage.png', { type: 'image/png' });
+
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(croppedFile);
+          currentReplaceInput.files = dataTransfer.files;
+
+          const previewImg = currentReplaceInput.previousElementSibling;
+          previewImg.src = URL.createObjectURL(croppedFile);
+
+          document.getElementById('cropper-modal').style.display = 'none';
+          cropper.destroy();
+        });
+      }
+    }
+
+    // Close the cropper modal
+    function closeCropper() {
+      document.getElementById('cropper-modal').style.display = 'none';
+      if (cropper) {
+        cropper.destroy();
+      }
+    }
+
+    // Function to remove image preview
+    function removeImage(index) {
+      const imageWrapper = document.querySelector(`#preview-image-${index}`).parentElement;
+      imageWrapper.remove();
+    }
+  </script>
+</body>
+</html>

@@ -6,7 +6,8 @@ const userAuth=require('../../middlewares/userAuth')
 
 router.get('/cartPage',userAuth.userLogin,cartController.loadCartPage)
 router.post('/cart/add/:id',cartController.addCart)
-router.post('/cart/update-quantity', cartController.updateCartQuantity);
+router.post('/updateCart', cartController.updateCartQuantity);
+router.delete('/cart/cancel/:productId', cartController.cancelProduct);
 
 
 

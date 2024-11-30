@@ -33,6 +33,11 @@ const loadhomepage = async (req, res) => {
     }
 };
 
+const loadHomepage = (req, res) => {
+    const user = req.session.passport ? req.session.passport.user : null;
+    res.render('home', { user }); 
+};
+
 
 // Load product page
 const loadproductpage = async (req, res) => {
@@ -192,7 +197,7 @@ const resendOTP = async (req, res) => {
     }
 };
 
-// Login handler
+// Login 
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -313,6 +318,7 @@ module.exports = {
     resendOTP,
     login,
     loadsingleproductpage,
-    productReview
+    productReview,
+    loadHomepage
    
 };

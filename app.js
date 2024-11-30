@@ -10,7 +10,9 @@ const nocache = require("nocache");
 const adminRouter=require('./routes/admin/adminRouter')
 const profileRouter=require('./routes/user/profileRouter')
 const cartRouter=require('./routes/user/cartRouter')
+const salesRouter=require('./routes/user/salesRouter')
 const fash=require('connect-flash')
+const methodOverride = require('method-override');
 db()
 
 
@@ -41,17 +43,16 @@ app.set("views",[path.join(__dirname,'views/user'),path.join(__dirname,'views/ad
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-const loadHomepage = (req, res) => {
-    const user = req.session.passport ? req.session.passport.user : null;
-    res.render('home', { user }); 
-};
 
 
-app.get('/', loadHomepage);
+app.use('/',salesRouter)
 app.use('/',cartRouter)
 app.use('/',userRouter)
 app.use('/',profileRouter)
 app.use('/admin',adminRouter)
+
+
+app.use(methodOverride('_method'));
 
 
 

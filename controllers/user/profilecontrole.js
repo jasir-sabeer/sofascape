@@ -24,8 +24,6 @@ const loadprofile = async (req, res) => {
 
 const userlogout = async (req, res) => {
     req.session.user = false;
-
-
     req.session.destroy(err => {
         if (err) {
             return res.status(500).send('Could not log out.');
@@ -33,6 +31,7 @@ const userlogout = async (req, res) => {
         res.render('login');
     })
 }
+
 const loadChangePasswordPage = async (req, res) => {
     try {
         res.render('changepassword')

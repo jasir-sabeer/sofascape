@@ -6,6 +6,7 @@ const passport = require('passport');
 const userAuth=require('../../middlewares/userAuth')
 
 
+router.get('/', usercontroller. loadHomepage);
 router.get('/pagenotfound', usercontroller.pagenotfound);
 router.get('/homepage', usercontroller.loadhomepage);
 router.get('/products', usercontroller.loadproductpage);
