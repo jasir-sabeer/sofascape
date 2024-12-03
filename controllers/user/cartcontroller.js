@@ -96,36 +96,62 @@ const addCart = async (req, res) => {
   };
 
 
-  const updateCartQuantity = async (req, res) => {
+ const updateCartQuantity = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
-        
         const userId = req.session.user;
 
+        // Validate inputs
         if (!productId || quantity == null) {
-            return res.status(400).json({ success: false, message: 'Product ID and quantity are required.' });
+            return res.status(400).json({
+                success: false,
+                message: 'Product ID and quantity are required.',
+            });
         }
 
         if (quantity < 1) {
-            return res.status(400).json({ success: false, message: 'Quantity must be at least 1.' });
+            return res.status(400).json({
+                success: false,
+                message: 'Quantity must be at least 1.',
+            });
         }
 
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User is not logged in.',
+            });
+        }
+
+        // Fetch the cart and populate products
         const cart = await Cart.findOne({ userId }).populate('products.productId');
 
         if (!cart) {
-            return res.status(404).json({ success: false, message: 'Cart not found.' });
+            return res.status(404).json({
+                success: false,
+                message: 'Cart not found.',
+            });
         }
 
-        const productIndex = cart.products.findIndex(item => item.productId._id.toString() === productId);
+        // Find the product in the cart
+        const productIndex = cart.products.findIndex(
+            item => item.productId._id.toString() === productId.toString()
+        );
 
         if (productIndex === -1) {
-            return res.status(404).json({ success: false, message: 'Product not found in cart.' });
+            return res.status(404).json({
+                success: false,
+                message: 'Product not found in cart.',
+            });
         }
 
         const product = cart.products[productIndex].productId;
 
         if (!product) {
-            return res.status(404).json({ success: false, message: 'Product data unavailable.' });
+            return res.status(404).json({
+                success: false,
+                message: 'Product data unavailable.',
+            });
         }
 
         const availableStock = product.stock;
@@ -135,28 +161,47 @@ const addCart = async (req, res) => {
         if (quantity > availableStock + currentQuantity) {
             return res.status(400).json({
                 success: false,
-                message: `Only ${availableStock + currentQuantity} units available for this product.`
+                message: `Only ${availableStock + currentQuantity} units available for this product.`,
+            });
+        }
+
+        // Update the cart quantity
+        cart.products[productIndex].quantity = quantity;
+
+        // Update the product stock
+        const newStock = availableStock - quantityDifference;
+        const stockUpdateResult = await Product.findByIdAndUpdate(
+            productId,
+            { stock: newStock },
+            { new: true } // Return the updated product
+        );
+
+        if (!stockUpdateResult) {
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to update product stock.',
             });
         }
 
         
-        cart.products[productIndex].quantity = quantity;
-
-        
-        const newStock = availableStock - quantityDifference;
-        await Product.findByIdAndUpdate(productId, { stock: newStock });
-
-      
         await cart.save();
 
         const updatedPrice = product.price * quantity;
 
-        res.json({ success: true, newPrice: updatedPrice });
+        res.json({
+            success: true,
+            message: 'Cart quantity updated successfully.',
+            newPrice: updatedPrice,
+        });
     } catch (error) {
         console.error('Error updating cart quantity:', error);
-        res.status(500).json({ success: false, message: 'Server error occurred while updating cart quantity.' });
+        res.status(500).json({
+            success: false,
+            message: 'Server error occurred while updating cart quantity.',
+        });
     }
 };
+
 
 
 const cancelProduct = async (req, res) => {

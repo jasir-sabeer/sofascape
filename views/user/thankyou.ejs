@@ -1,0 +1,138 @@
+
+<%-include("../../views/partials/user/header")%>
+  <!--================Home Banner Area =================-->
+  <!-- breadcrumb start-->
+  <section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="breadcrumb_iner">
+            <div class="breadcrumb_iner_item">
+              <h2>Thankyou For Purchsing</h2>
+              <p>Home <span>-</span> Order Confirmation</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- breadcrumb start-->
+
+  <!--================ confirmation part start =================-->
+  <section class="confirmation_part padding_top">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="confirmation_tittle">
+            <span>Thank you.More about your order.</span>
+          </div>
+        </div>
+        <div class="col-lg-6 col-lx-4">
+          <div class="single_confirmation_details">
+            <h4>order info</h4>
+            <ul>
+              <li>
+                <p>order number</p><span>:<%= orders._id %></span>
+              </li>
+              <li>
+                <p>date</p><span>:<%= new Date(orders.createdAt).toLocaleDateString() %></span>
+              </li>
+              <li>
+                <p>total</p><span>:<%= orders.total %> </span>
+              </li>
+              <li>
+                <% if(orders.paymentMethod=='COD'){%>
+                <p>mayment methord</p><span>:Cash on Delivery</span>
+                <%}else{%>
+                <p>mayment methord</p><span>:<%=orders.paymentMethod%></span>
+                <%}%>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-6 col-lx-4">
+          <div class="single_confirmation_details">
+            <h4>Billing Address</h4>
+            <ul>
+              <li>
+                <p>Street</p><span>: Kaakkancheri</span>
+              </li>
+              <li>
+                <p>city</p><span>: Ramanattukkara</span>
+              </li>
+              <li>
+                <p>country</p><span>:India</span>
+              </li>
+              <li>
+                <p>postcode</p><span>: 369520</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-6 col-lx-4">
+          <div class="single_confirmation_details">
+            <h4>shipping Address</h4>
+            <ul>
+              <li>
+                <p>Street</p><span>:<%= orders.address.street%></span>
+              </li>
+              <li>
+                <p>city</p><span>:<%= orders.address.city%></span>
+              </li>
+              <li>
+                <p>State</p><span>: <%= orders.address.state%></span>
+              </li>
+              <li>
+                <p>pincode</p><span>: <%= orders.address.pincode%></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="order_details_iner">
+            <h3>Order Details</h3>
+            <table class="table table-borderless">
+              <thead>
+                <tr>
+                  <th scope="col" colspan="2">Product</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Amount</th>
+                </tr>
+              </thead>
+             
+              <tbody>
+                <% orders.products.forEach(product => { %>
+                <tr>
+                  <th colspan="2"><span><%= product.name %></span></th>
+                  <th>x<%= product.quantity %></th>
+                  <th> <span>₹<%= product.price * product.quantity %></span></th>
+                </tr>
+                <%})%>
+                <tr>
+                  <th colspan="3">Subtotal</th>
+                  <th> <span></span>₹<%= orders.subtotal%></th>
+                </tr>
+                <tr>
+                  <th colspan="3">shipping</th>
+                  <th><span><%= orders.shippingCost%></span></th>
+                </tr>
+              </tbody>
+              
+              <tfoot>
+                <tr>
+                  <th scope="00col" colspan="3">Total</th>
+                  <th scope="col"><%= orders.total%></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--================ confirmation part end =================-->
+  <%-include("../../views/partials/user/footer")%>
+
+  

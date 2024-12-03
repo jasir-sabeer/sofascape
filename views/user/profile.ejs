@@ -258,7 +258,7 @@
                     <p><strong>Pin Code:</strong> <%= address.pincode %></p>
 
                     <div class="address-actions">
-                        <a href='/editAddressPage?id=<%= address._id %>'><button class="edit-button" onclick="editAddress('<%= address.id %>')">Edit</button></a>
+                        <a href='/editAddressPage?id=<%= address._id %>'><button class="edit-button" >Edit</button></a>
                         <form action="/delete-address/<%= address._id %>" method="POST" style="display: inline;">
                             <button type="submit" class="delete-button">Delete</button>
                         </form>

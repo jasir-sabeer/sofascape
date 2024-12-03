@@ -275,7 +275,7 @@ const addProduct = async (req, res) => {
         
         if (!productname || !regularprice || !category || !description || !stock) {
             console.error("Validation failed: Missing fields");
-            // return res.status(400).json({ message: 'Please fill all required fields' });
+            // return res.status(400).json({ message: 'Please fill all required fields' })
             return 
         }
 
@@ -286,17 +286,14 @@ const addProduct = async (req, res) => {
             return
         }
 
-        
         const categoryDoc = await Category.findOne({ name: category });
         if (!categoryDoc) {
             console.error("Category not found");
             return
         }
 
-        
         const imagePaths = images.map(file => file.filename);
 
-        
         const newProduct = new Product({
             productname,
             description,
@@ -314,8 +311,6 @@ const addProduct = async (req, res) => {
         res.status(500).send({ message: "Internal Server Error" });
     }
 };
-
-
 
 const editProduct = async (req, res) => {
     try {
@@ -372,9 +367,6 @@ const editProduct = async (req, res) => {
 };
 
 
-
-
-
 const logout = async (req, res) => {
     req.session.admin = false; 
 
@@ -386,7 +378,6 @@ const logout = async (req, res) => {
         res.redirect('/admin/adminLogin'); 
     })
 }
-
 
 module.exports = {
     loadadminLogin,

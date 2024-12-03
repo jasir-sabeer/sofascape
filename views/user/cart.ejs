@@ -199,7 +199,7 @@
           <div class="checkout_btn_inner float-right">
             <a class="btn_1" href="/products">Continue Shopping</a>
             <% if ( cartProducts.length > 0) { %>
-            <a class="btn_1 checkout_btn_1" href="#">Proceed to checkout</a>
+            <a class="btn_1 checkout_btn_1" href="/checkout">Proceed to checkout</a>
             <% } else { %>
               <a class="btn_1 checkout_btn_1" href="#">Back to home</a>
               <% } %>
@@ -261,7 +261,7 @@
         }
     })
     .catch(error => {
-        // Handle fetch errors
+        
         Swal.fire({
             title: "Server Error!",
             text: "Something went wrong while updating the cart. Please try again later.",
