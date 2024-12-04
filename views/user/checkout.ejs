@@ -444,6 +444,7 @@ if(!selectedAddressElement){
             quantity: '<%= product.quantity %>',
             price:Number('<%=product.productId.regularprice %>'),
             name: "<%= product.productId.productname %>",
+            image:'<%= product.productId.images[0]%>',
             status: "Pending",
         });
        ' <% }); %>'

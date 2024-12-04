@@ -153,7 +153,7 @@
                 
               
                  <td>
-                  <h5>₹<%= product.productId.regularprice * product.quantity %></h5>
+                  <h5 id="price-<%= product.productId._id %>">₹<%= product.productId.regularprice * product.quantity %></h5>
                 </td>
                 <td>
                   <form action="/cart/cancel/<%= product.productId._id %>?_method=DELETE" method="POST"
@@ -248,7 +248,7 @@
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            
+            console.log(data.newPrice);
             priceElement.textContent = `₹${data.newPrice}`;
         } else {
             
@@ -261,7 +261,7 @@
         }
     })
     .catch(error => {
-        
+        console.log(error)
         Swal.fire({
             title: "Server Error!",
             text: "Something went wrong while updating the cart. Please try again later.",

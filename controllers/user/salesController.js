@@ -99,6 +99,7 @@ const saveOrder=async(req,res)=>{
                 quantity: item.quantity,
                 name: item.name,
                 price: item.price,
+                image:item.image,
                 status: item.status
             };
         });
@@ -115,8 +116,19 @@ const saveOrder=async(req,res)=>{
 
     })
     await oders.save()
-   
-    
+    const cartClearResult = await Cart.findOneAndUpdate(
+        { userId },
+        { products: [] }, 
+        { new: true }
+    );
+    if (!cartClearResult) {
+        return res.status(404).json({
+            success: false,
+            message: "Cart not found or already empty.",
+        });
+    }
+
+
     res.json({ success: true, orderId:oders._id});
     
     
@@ -131,10 +143,6 @@ const saveOrder=async(req,res)=>{
 const loadThankyou = async (req, res) => {
     const { orderId } = req.query;
     const user = req.session.user;
-    console.log(orderId);
-    console.log('User ID:', user);
-
-    
 
     try {
         const orders= await Order.findOne({ _id: orderId, userId: user }).populate('address');
@@ -146,17 +154,74 @@ const loadThankyou = async (req, res) => {
     }
 };
 
+const loadOrderTable=async (req,res)=>{
+    const userId=req.session.user;
+    try {
+        const orders = await Order.find({ userId })
+        .populate('products.productId')    
+        .populate('address')
+
+        
+        
+        res.render('orderTable',{orders})
+    } catch (error) {
+        console.error('Error loading thank you page:', error);
+        res.status(500).json({ message: 'Error adding order', error });
+    }
+}
+
+const loadOrderDetails=async(req,res)=>{
+    const { orderId } = req.params;
+    const user = req.session.user;
+    console.log('ithann order id',orderId);
+    
+    try {
+        const orders = await Order.findOne({ _id: orderId, userId: user}).populate('address');
+        console.log(orders);
+        
+        if (!orders) {
+            return res.status(404).json( { message: 'Order not found' });
+        }
+        res.render('orderDetails', { orders })
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding order', error });
+    }
+
+}
 
 
+const cancelProduct = async (req, res) => {
+    const { orderId, productId } = req.params;
+    const user = req.session.user;
 
+    try {
 
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: orderId, userId: user._id, 'products.productId': productId },
+            { 'products.$.status': 'Cancelled' }, 
+            { new: true } 
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ message: 'Product not found in the order or not authorized to cancel' });
+        }
+
+        res.json({ message: 'Product cancelled successfully', order: updatedOrder });
+    } catch (error) {
+        console.error('Error cancelling product:', error);
+        res.status(500).json({ message: 'Error cancelling product', error });
+    }
+};
 
 module.exports = {
 loadCheckout,
 addAddressCheckout,
 editAddressCheckout,
 saveOrder,
-loadThankyou
+loadThankyou,
+loadOrderTable,
+loadOrderDetails,
+cancelProduct
 }
 
 

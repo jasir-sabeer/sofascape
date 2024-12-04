@@ -1,0 +1,90 @@
+<style>
+    .section-top-border{
+        margin: 2cm;
+    }
+    .last{
+        margin-left:15cm;
+        margin-top: 2cm;
+    }
+    .lastdate{
+        margin-left:15cm;
+    
+    }
+    #viwemore{
+        margin-left: 25cm;
+    }
+    #btn{
+    margin-left: 27cm;
+   
+  }
+   
+</style>
+<%-include("../../views/partials/user/header")%>
+
+<div class="section-top-border">
+    <h2 class="mb-30">Your Orders</h2>
+    <% orders.forEach(order => { %>
+    <h5 class="country">OrderId :<%= order._id%></h5>
+    <div class="progress-table-wrap " id="table">
+        <div class="progress-table">
+            <div class="table-head">
+                <div class="serial">#</div>
+                <div class="percentage">Products</div>
+                <div class="percentage">quantity</div>
+                <div class="country">Price</div>
+                <div class="country">Status</div>
+                <div class="country">Cancel</div>
+
+
+            </div>
+            <% order.products.forEach(product => { %>
+            <div class="table-row">
+                <div class="serial">01</div>
+                <div class="percentage"> <img src="/uploads/<%= product.image %>" alt="flag" style="width: 1.5cm;"><%= product.name %></div>
+                <div class="percentage"><%= product.quantity%></div>
+                <div class="country"><%= product.price %></div>
+                <div class="country"><%= product.status %></div>
+                <div class="country"><a  onclick="cancelProduct('<%= order._id %>', '<%= product.productId %>')" class="genric-btn danger-border circle">Cancel</a></div>
+
+
+            </div>
+            <% }); %>
+            <p class="last">Total Amount:<%= order.total %></p>
+            <% if(order.paymentMethod=='COD'){%>
+            <p class="lastdate">payment Method:Cash on Delivery</p>
+            <%}else{%>
+            <p class="lastdate">payment Method:<%=order.paymentMethod%></p>
+            <%}%>
+
+            <div id="viwemore" class="country"><a href="/orderDetails/<%= order._id %>" class="genric-btn success-border circle">View More</a></div>
+           
+        </div>
+    </div>
+    <% }); %>
+   
+</div>
+<a href="/homepage" id="btn" class="genric-btn default circle">Back To Home</a>
+
+
+
+
+
+
+
+<%-include("../../views/partials/user/footer")%>
+<script>
+    function cancelProduct(orderId, productId) {
+    if (confirm('Are you sure you want to cancel this product?')) {
+        fetch(`/cancelOrder/${orderId}/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            alert(data.message);
+            window.location.reload();
+        })
+        .catch((error) => console.error('Error cancelling product:', error));
+    }
+}
+</script>

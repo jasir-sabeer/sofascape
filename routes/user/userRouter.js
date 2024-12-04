@@ -11,7 +11,7 @@ router.get('/pagenotfound', usercontroller.pagenotfound);
 router.get('/homepage', usercontroller.loadhomepage);
 router.get('/products', usercontroller.loadproductpage);
 router.get('/userlogin',userAuth.userLogin, usercontroller.loadloginpage);
-router.get('/signup',userAuth.userLogin ,usercontroller.loadsignuppage);
+router.get('/signup',usercontroller.loadsignuppage);
 router.post('/signup', usercontroller.signup);
 router.post('/otppage', usercontroller.loadotppage);
 router.post('/resendOTP', usercontroller.resendOTP);

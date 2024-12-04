@@ -101,7 +101,7 @@ const addCart = async (req, res) => {
         const { productId, quantity } = req.body;
         const userId = req.session.user;
 
-        // Validate inputs
+      
         if (!productId || quantity == null) {
             return res.status(400).json({
                 success: false,
@@ -123,7 +123,7 @@ const addCart = async (req, res) => {
             });
         }
 
-        // Fetch the cart and populate products
+      
         const cart = await Cart.findOne({ userId }).populate('products.productId');
 
         if (!cart) {
@@ -133,7 +133,7 @@ const addCart = async (req, res) => {
             });
         }
 
-        // Find the product in the cart
+        
         const productIndex = cart.products.findIndex(
             item => item.productId._id.toString() === productId.toString()
         );
@@ -165,15 +165,15 @@ const addCart = async (req, res) => {
             });
         }
 
-        // Update the cart quantity
+        
         cart.products[productIndex].quantity = quantity;
 
-        // Update the product stock
+        
         const newStock = availableStock - quantityDifference;
         const stockUpdateResult = await Product.findByIdAndUpdate(
             productId,
             { stock: newStock },
-            { new: true } // Return the updated product
+            { new: true }
         );
 
         if (!stockUpdateResult) {
@@ -186,8 +186,8 @@ const addCart = async (req, res) => {
         
         await cart.save();
 
-        const updatedPrice = product.price * quantity;
-
+        const updatedPrice = product.regularprice * quantity;
+    
         res.json({
             success: true,
             message: 'Cart quantity updated successfully.',
