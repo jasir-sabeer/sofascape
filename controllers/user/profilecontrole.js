@@ -2,6 +2,7 @@ const { name } = require("ejs");
 const mongoose = require("mongoose");
 const User = require("../../models/userschema");
 const Address = require('../../models/addressschema')
+const Order=require('../../models/orderSchema')
 const bcrypt = require('bcrypt');
 
 
@@ -15,7 +16,18 @@ const loadprofile = async (req, res) => {
             res.status(404).render('login')
         }
         const addresses = await Address.find({ user: id })
-        res.render("profile", { users, addresses })
+        
+        const orders=await Order.find().populate("userId").populate("products.productId")
+
+        const productCounts = orders.map(order => {
+            const totalProducts = order.products.reduce((count, product) => {
+                return count + product.quantity; // Sum up the quantities of products in the order
+            }, 0);
+            return { orderId: order._id, totalProducts };
+        });        
+
+
+        res.render("profile", { users, addresses,orders,productCounts })
     } catch (error) {
         res.send(error)
     }
@@ -50,6 +62,12 @@ const changepassword = async (req, res) => {
 
         const user = await User.findById(userId);
 
+      
+        if (!currentPassword||! newPassword||! confirmPassword) {
+            return res.render('changepassword', { message: 'all fields are require' });
+        }
+
+           
         if (!user) {
             return res.render('changepassword', { message: 'User not found.' });
         }
@@ -61,6 +79,10 @@ const changepassword = async (req, res) => {
 
         if (newPassword !== confirmPassword) {
             return res.render('changepassword', { message: 'passwords do not match' });
+        }
+
+        if ( currentPassword === confirmPassword) {
+            return res.render('changepassword', { message: 'choose an other password' });
         }
 
         const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
@@ -148,7 +170,7 @@ const editAddress = async (req, res) => {
     };
 
     try {
-        const address = await Address.findByIdAndUpdate(addressId, updatedData, { new: true }); // Update address in database
+        const address = await Address.findByIdAndUpdate(addressId, updatedData, { new: true }); 
         if (!address) {
             return res.status(404).send('Address not found');
         }
@@ -179,6 +201,50 @@ const deleteAddress = async (req, res) => {
 };
 
 
+const loadEditProfilePage=async(req,res)=>{
+   const id=  req.session.user
+    try {
+        const user = await User.findOne({ _id: id, isblocked: false });
+        console.log(user)
+
+        if (!user) {
+            res.status(404).render('login')
+        }
+
+        res.render('editProfile',{user})
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
+
+const editProfile=async(req,res)=>{
+    const userId = req.params.id;
+    const updatedData = {
+        name: req.body.userName,
+        email: req.body.email,
+        phone: req.body.phoneNumber,
+       
+    };
+
+    console.log(updatedData);
+    
+
+    try {
+        const user = await User.findByIdAndUpdate(userId, updatedData, { new: true }); 
+        if (!user) {
+            return res.status(404).send('Address not found');
+        }
+
+
+        res.redirect('/profile');
+        
+    } catch (error) {
+        console.error('Error updating address:', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
 
 
 
@@ -192,5 +258,7 @@ module.exports = {
     addAddress,
     loadEditAddressPage,
     editAddress,
-    deleteAddress
+    deleteAddress,
+    loadEditProfilePage,
+    editProfile
 }

@@ -42,7 +42,7 @@ const addCart = async (req, res) => {
     console.log(req.body.qty)
   
     if (!userId) {
-      return res.status(401).send("User not authenticated");
+      return res.status(401).send("Please login ");
     }
   
     try {

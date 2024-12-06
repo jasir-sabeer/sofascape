@@ -248,11 +248,11 @@
         <nav>
           <ul>
             <li><a href="/admin/dashboard">Home</a></li>
-            <li><a href="/admin/userManagement">User Management</a></li>
-            <li><a href="/admin/productManagement">Product Management</a></li>
+            <li><a href="/admin/userManagement">Users</a></li>
+            <li><a href="/admin/productManagement">Products</a></li>
             <li ><a href="/admin/categoryManagement" class="special-color">Category </a></li>
-            <li><a href="#orders">Order Management</a></li>
-            <li><a href="#payments">Payments</a></li>
+            <li><a href="/admin/orderManagement">Orders</a></li>
+            <li><a href="/admin/inventoryManagement">inventory</a></li>
             <li><a href="#reports">Sales Reports</a></li>
             <li><a href="#profile">Profile</a></li>
             <form action="/admin/logout" method="POST">
@@ -372,9 +372,7 @@
         </div>
     </div>
     
-    
-    
-  
+ 
     <script>
         function openModal(modalId) {
             document.getElementById(modalId).style.display = "block";
@@ -421,6 +419,8 @@
                 rows[i].style.display = match ? '' : 'none';
             }
         }
+
+
   
     async function submitCategoryForm() {
     const form = document.getElementById('addCategoryForm');
@@ -495,7 +495,6 @@ async function submitEditCategoryForm(event) {
             errorMessageElement.textContent = result.error || 'An error occurred';
             errorMessageElement.style.display = 'block';
         } else {
-           
             form.reset();
             errorMessageElement.style.display = 'none'; 
             closeModal('editCategoryModal');

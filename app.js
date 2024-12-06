@@ -8,6 +8,8 @@ const db=require("./config/db");
 const userRouter=require('./routes/user/userRouter')
 const nocache = require("nocache");
 const adminRouter=require('./routes/admin/adminRouter')
+const orderRouter=require('./routes/admin/orderRouter')
+const stockRouter=require('./routes/admin/stockRouter')
 const profileRouter=require('./routes/user/profileRouter')
 const cartRouter=require('./routes/user/cartRouter')
 const salesRouter=require('./routes/user/salesRouter')
@@ -50,6 +52,8 @@ app.use('/',cartRouter)
 app.use('/',userRouter)
 app.use('/',profileRouter)
 app.use('/admin',adminRouter)
+app.use('/admin',orderRouter)
+app.use('/admin',stockRouter)
 
 
 app.use(methodOverride('_method'));

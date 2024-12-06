@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM97Dk4t3nA4q2Vo9mltpbBRj52R4mGowWbA2xB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        /* General styling */
+       body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .sidebar {
+  width: 250px;
+  background-color: #333; /* Dark sidebar color */
+  color: #fff; /* White text color */
+  height: 100vh; /* Full height */
+  position: fixed; /* Fixed sidebar */
+}
+
+.sidebar li {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.sidebar ul{
+  list-style: none; 
+  padding: 0;
+}
+
+.sidebar a {
+  color: #fff; 
+  text-decoration: none; 
+  padding: 10px 15px;
+  display: block; 
+  transition: background 0.3s; 
+}
+
+.sidebar  a:hover {
+  background-color: #555; /* Darker background on hover */
+}
+.logoutbtn{
+    background-color: #333;
+    block-size: 40px;
+    border: none;color: #fff;
+    width: 250px;
+}
+.logoutbtn:hover{
+    background-color: darkred;
+}
+        /* Main content styling */
+        .container {
+            flex: 1;
+            padding: 20px;
+            margin-left: 250px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Add Category Button */
+        .add-category-button {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .add-category-button:hover {
+            background-color: #444;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Button styling */
+        button,
+        .button-link {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .list-button {
+            background-color: #000;
+        }
+
+        .unlist-button {
+            background-color: #000;
+        }
+
+        .edit-button {
+            background-color: #000;
+        }
+
+        .list-button:hover {
+            background-color: #000;
+        }
+
+        .unlist-button:hover {
+            background-color: #000;
+        }
+
+        .edit-button:hover {
+            background-color: #000;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding-top: 100px;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+
+        /* Input styling */
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        /* Form button styling */
+        .form-button {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .search-bar {
+    margin-bottom: 15px;
+    }
+    .search-bar input {
+            width: 97%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .special-color{
+            background-color:#555 ;
+        }
+       
+       .page-item{
+        float: left;
+       }
+       .page-link{
+        text-decoration: none;
+        margin: 15px;
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 0 4px;
+       border: 1px solid #ddd;
+       border-radius: 4px;
+       text-decoration: none;
+       color: #333;
+       }
+       .paginationdiv{
+        margin-left: 8cm;
+       }
+       .dis{
+        background-color: #dbd2d2;
+        cursor:unset;
+        color: #757373;
+       }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <h2 style="margin-left: .5cm;">Admin Dashboard</h2>
+        <nav>
+          <ul>
+            <li><a href="/admin/dashboard">Home</a></li>
+            <li><a href="/admin/userManagement">User</a></li>
+            <li><a href="/admin/productManagement">Products</a></li>
+            <li><a href="/admin/categoryManagement">Category </a></li>
+            <li><a href="/admin/orderManagement"  class="special-color">Orders</a></li>
+            <li><a href="/admin/inventoryManagement">inventory</a></li>
+            <li><a href="#reports">Sales Reports</a></li>
+            <li><a href="#profile">Profile</a></li>
+            <form action="/admin/logout" method="POST">
+              <button type="submit" class="logoutbtn" style="font-size: 13.3px;">Logout</button>
+          </form>
+          </ul>
+        </nav>
+      </aside>
+      
+
+    <div class="container">
+        <h1>Order Management</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search Order..." onkeyup="searchOrder()">
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Products</th>
+                    <th>Total Amount</th>
+                    <th>paymentMethod</th>
+                    <th>Order Status</th>
+                    <th>Date</th>
+                    <th>Cancel</th>
+                </tr>
+            </thead>
+            <% orders.forEach(order => { %>
+            <tbody id="categoryTableBody">
+                <% order.products.forEach(product => { %>
+                    <tr>
+                        <td><%= order.userId.name %></td>
+                        <td><%= product.name %> x <%= product.quantity %> </td>
+                        <td><%= product.price *product.quantity %></td>
+                        <% if( order.paymentMethod==='COD'){%>
+                        <td>Cash On Delivery</td>
+                         <%}else{%>   
+                        <td><%= order.paymentMethod %></td>
+                        <%}%>
+                        <% if(product.status==='Delivered'){%>
+                           <td style="color: rgb(19, 228, 19);">Delivered</td>
+                        <%}else{%>    
+                        <td>
+                            <select 
+                            name="status" 
+                            onchange="updateStatus('<%- order._id %>', '<%- product.productId._id %>', this.value)">
+                            <% ['Pending', 'Shipped', 'Delivered', 'Cancelled'].forEach((statusOption) => { %>
+                                <option value="<%= statusOption %>" <%= product.status === statusOption ? 'selected' : '' %>>
+                                    <%= statusOption %>
+                                </option>
+                            <% }) %>
+                        </select>                        
+                        </td>
+                        <%}%>
+                        
+                        
+                        <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                        <% if(product.status==='Delivered'){%>
+                            <td ><button class="dis" >Delivered</button></td>
+                         <%}else if(product.status==='Cancelled'){%>   
+                            <td ><button class="edit-button" disabled>Cancelled</button></td>
+                        <%}else{%>
+                        <td><button onclick="cancelProduct('<%= order._id %>', '<%= product.productId._id %>')" class="edit-button" >Cancel</button></td>
+
+                        <%}%>
+                    </tr>
+                    <%})%>
+            </tbody>
+            <%})%>
+        </table>
+        <nav id="pagination" aria-label="Page navigation" class="paginationdiv">
+            <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
+              <% if (previousPage) { %>
+                <li class="page-item">
+                  <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous" style="text-decoration: none;"><</a>                   
+                </li>         
+                <% } %>
+        
+                  <% for (let i=1; i <=totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                       
+                      <a class="page-link" href="?page=<%= i %>">
+                        <%= i %>
+                      </a>
+                      </li>
+                    <% } %>
+        
+                      <% if (nextPage) { %>
+                        <li class="page-item">
+                          <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next" style="text-decoration: none;">></a>
+                        </li>
+                        <% } %>
+            </ul>
+          </nav>
+
+    </div>
+
+    
+        
+    </body>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+
+        
+    function updateStatus(orderId, productId, status) {
+    console.log("Updating status:", { orderId, productId, status }); 
+    fetch(`/admin/update-product-status/${orderId}/${productId}/${status}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then((response) => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('An error occurred while changing status');
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the status');
+    });
+}
+
+// cancel product
+async function cancelProduct(orderId, productId) {
+
+    
+try {
+    const result = await Swal.fire({
+        title: "Are you sure you want to cancel the product?",
+        showCancelButton: true,
+        confirmButtonColor: '#000',
+        cancelButtonColor: '#000',
+        confirmButtonText: "OK",
+    });
+
+    if (result.isConfirmed) {
+        await fetch(`/admin/cancelOrder/${orderId}/${productId}`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to cancel the product');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        }); 
+    }      
+} catch (error) {
+    console.log('Error in cancel product:', error);
+}
+}
+
+
+//serch
+
+function searchOrder() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const rows = document.getElementById('categoryTableBody').getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+
+                
+                for (let j = 0; j < cells.length - 1; j++) { 
+                    if (cells[j] && cells[j].textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+    </script>
+
+</html>
+
+
+    
+
+  
+    
+    
+    
+  
+    

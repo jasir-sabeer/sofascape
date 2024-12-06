@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Address</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 100px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .cancel-button {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .cancel-button:hover {
+            background-color: #e55a5a;
+        }
+
+        .save-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .save-button:hover {
+            background-color: #45a049;
+        }
+        .errormessage {
+            color: red;
+            font-size: 12px;
+        }
+
+        .w{
+            margin-top: .5cm;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Edit User Informations</h1>
+    <form id="editProfileForm" action="/editProfile/<%= user._id %>" method="post">
+        <div id="error1" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="userName" name="userName" placeholder="Username" value=" <%= user.name %>" class="w">
+        <div id="error2" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="email" name="email" placeholder="Email" value="<%= user.email %>" class="w">
+        <div id="error3" class="errormessage" aria-live="assertive"></div>
+        <input type="text" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" value="<%= user.phone %>" class="w">
+        
+
+        <div class="form-actions">
+            <button type="button" class="cancel-button" onclick="cancelEditAddress()">Cancel</button>
+            <button type="submit" value="submit" class="save-button">Save</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function cancelEditAddress() {
+        window.location.href = '/profile'; 
+    }
+
+    const editProfileForm = document.getElementById('editProfileForm');
+    
+    const error1 = document.getElementById('error1');
+    const error2 = document.getElementById('error2');
+    const error3 = document.getElementById('error3');
+
+
+    editProfileForm.addEventListener("submit", (e) => {
+    
+        firstNameValidateChecking();
+        emailValidateChecking();
+        phoneNumberValidateChecking();
+
+        
+        if (
+            error1.textContent ||
+            error2.textContent ||
+            error3.textContent 
+        ) {
+            e.preventDefault();  
+        }
+    });
+
+    function firstNameValidateChecking() {
+        const nameInput = document.getElementById('userName').value.trim();
+        const usernamePattern = /^[a-zA-Z\s]{3,}$/;
+        if(nameInput === "") {
+            error1.textContent = "First name is required";
+        } else if (!nameInput.match(usernamePattern)) {
+            error1.textContent = "Please enter a valid name";
+        } else {
+            error1.textContent = "";
+        }
+    }
+
+    
+    function emailValidateChecking() {
+        const emailInput = document.getElementById('email').value.trim();
+        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+        if(emailInput===""){
+            error2.textContent = "email is required";
+            error2.classList.add("show-error");
+        }else if (!emailInput.match(emailPattern)) {
+            error2.textContent = "Please enter a valid email";
+            error2.classList.add("show-error");
+        } else {
+            error2.textContent = "";
+            error2.classList.remove("show-error");
+        }
+    }
+
+
+    function phoneNumberValidateChecking() {
+        const phoneInput = document.getElementById('phoneNumber').value.trim();
+        const phonePattern = /^[0-9]{10}$/;
+        if(phoneInput===""){
+            error3.textContent = "Phone number is required";
+            error3.classList.add("show-error");
+
+        }else if (!phoneInput.match(phonePattern)) {
+            error3.textContent = "Phone number must be 10 digits";
+            error3.classList.add("show-error");
+        } else {
+            error3.textContent = "";
+            error3.classList.remove("show-error");
+        }
+    }
+    
+
+    
+</script>
+
+</body>
+</html>

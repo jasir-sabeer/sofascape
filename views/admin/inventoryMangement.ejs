@@ -429,10 +429,10 @@ input[type="file"] {
         <ul>
           <li><a href="/admin/dashboard">Home</a></li>
           <li><a href="/admin/userManagement">Users</a></li>
-          <li><a href="/admin/productManagement" class="special-color">Products</a></li>
+          <li><a href="/admin/productManagement" >Products</a></li>
           <li><a href="/admin/categoryManagement">Category </a></li>
           <li><a href="/admin/orderManagement">Orders</a></li>
-          <li><a href="/admin/inventoryManagement">inventory</a></li>
+          <li><a href="/admin/inventoryManagement" class="special-color">inventory</a></li>
           <li><a href="#reports">Sales Reports</a></li>
           <li><a href="#profile">Profile</a></li>
           <form action="/admin/logout" method="POST">
@@ -444,15 +444,13 @@ input[type="file"] {
     
     <div class="main-content">
         <header class="dashboard-header">
-          <h1>Products Management</h1>
+          <h1>Inventory Management</h1>
           
     
     
     
         </header>
-         <a href="/admin/addProduct">
-        <button class="add-btn" >Add Product</button>
-      </a>
+        
         <section class="product-table">
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Search product..." onkeyup="searchProducts()">
@@ -462,14 +460,10 @@ input[type="file"] {
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Image</th>
                   <th>Price</th>
-                  <th>Category</th>
-                  <!-- <th>Description</th> -->
                   <th>Stock</th>
-                  <th>Status</th>
                   <th>Edit</th>
-                  <th>Toggle Status</th>
+             
                 </tr>
     
               </thead>
@@ -479,51 +473,29 @@ input[type="file"] {
                     <td>
                       <%= product.productname %>
                     </td>
-                    <td>
-                      <% if (product.images && Array.isArray(product.images) && product.images.length> 0) { %>
-                        <img src="/uploads/<%= product.images[0] %>" alt="<%= product.productname %>"
-                          style="height: 50px; width: 50px;">
-                        <% } else { %>
-                          <span>No image available</span>
-                          <% } %>
-                    </td>
+                  
                     <td>
                       <%= product.regularprice %>
                     </td>
-                    <td>
-                      <%= product.category ? product.category.name : 'No category' %>
-                    </td>
+                
   
                     <td>
                       <%= product.stock %>
                     </td>
-                    <td>
-                      <%= product.isListed ? 'Listed' : 'Unlisted' %>
-                    </td>
+                    
                     <td>
     
                       <button class="btn btn-primary action-btn"
                       onclick="openEditProductModal(
                         '<%= product._id %>', 
-                        '<%= product.productname %>', 
-                        '<%= product.description %>', 
+                        '<%= product.productname %>',  
                         '<%= product.regularprice %>', 
-                        '<%= product.category ? product.category._id :{} %>', 
                         '<%= product.stock %>', 
-                        '<%= JSON.stringify(product.images) %>'
                       )">
                       Edit
                     </button>
                     
     
-                    </td>
-                    <td>
-    
-                      <form action="/admin/productManagement/toggle-status/<%= product._id %>" method="POST">
-                        <button type="submit" class="btn <%= product.isListed ? 'btn-danger' : 'btn-warning' %>">
-                          <%= product.isListed ? 'Unlist' : 'List' %>
-                        </button>
-                      </form>
                     </td>
                   </tr>
                   <% }) %>
@@ -548,39 +520,23 @@ input[type="file"] {
     <div class="modal" id="editProductModal" style="display:none;">
         <div class="modal-content">
           <span class="close" onclick="closeEditProductModal()">&times;</span>
-          <h2>Edit Product</h2>
+          <h2>Edit Stock</h2>
           <form id="editProductForm" method="POST" enctype="multipart/form-data" onsubmit="submitEditProductForm(event)">
             <label for="productName">Product Name:</label>
-            <input type="text" id="editProductName" name="productname" required />
+            <input type="text" id="editProductName" name="productname" readonly/>
     
-            <label for="productDescription">Description:</label>
-            <textarea id="editProductDescription" name="description" rows="4" required></textarea>
+
     
             <label for="productPrice">Price:</label>
-            <input type="number" id="editProductPrice" name="regularprice" required />
+            <input type="number" id="editProductPrice" name="regularprice" readonly />
     
-            <label for="productCategory">Category:</label>
-            <select id="editProductCategory" name="category" required>
-              <% categories.forEach(category=> { %>
-                <option value="<%=category._id%>">
-                  <%=category.name%>
-                </option>
-                <%})%>
-            </select>
+            
     
             <label for="productStock">Stock:</label>
-            <input type="number" id="editProductStock" name="stock" required />
+            <input type="number" id="editProductStock" name="stock" min="0" required />
             <input type="text" id="productId" hidden>
-            <label for="productImage" class="file-upload-label">Update Images:</label>
-            <input type="file" id="editProductImage" name="images" accept="image/*" multiple />
-    
-            <div class="product-images"></div>
-            <div id="cropper-container" style="display: none;width: 250px;height: 250px;margin-top: 2cm;">
-      
-              <img id="imageToCrop" style="max-width: 100%; display: none;" />
-              <button id="cropImage" class="btn btn-success" style="margin-left: 300px;width: 2.5cm;height: 1cm;">Crop</button>
-            </div>
-            <button type="submit" class="btn" id="submit-btn">Update Product</button>
+           
+            <button type="submit" class="btn" id="submit-btn">Update Stock</button>
           </form>
         </div>
       </div>
@@ -623,259 +579,22 @@ input[type="file"] {
 
 
       <script>
-        function openProductModal() {
-          document.getElementById("addProductModal").style.display = "block";
-        }
-    
-        function closeProductModal() {
-          document.getElementById("addProductModal").style.display = "none";
-        }
-    
-        function closeCropperModal() {
-          document.getElementById('imageCropperModal').style.display = 'none';
-        }
-        let cropper;
-        let croppedImages = [];
-        let currentImageIndex = 0;
-        let currentImageElement = null; 
-    
-        document.getElementById('productImage').addEventListener('change', function (event) {
-          const files = event.target.files;
-          const previewContainer = document.getElementById('image-preview-container');
-          previewContainer.innerHTML = ''; 
-    
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const reader = new FileReader();
-    
-            reader.onload = function (e) {
-              
-              const imageContainer = document.createElement('div');
-              imageContainer.style.display = 'flex';
-              imageContainer.style.flexDirection = 'column'; 
-    
-              const image = new Image();
-              image.src = e.target.result;
-              image.style.maxWidth = '200px';
-              image.style.margin = '10px';
-    
-              // Create Change Image button
-              const changeImageBtn = document.createElement("button");
-              changeImageBtn.textContent = "Change Image";
-              changeImageBtn.classList.add("btn", "btn-warning", "w-50", "btn-sm", "mt-20");
-              changeImageBtn.addEventListener("click", function () {
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.accept = 'image/*';
-                fileInput.click();
-    
-                fileInput.onchange = function (e) {
-                  const newFile = e.target.files[0];
-                  if (newFile && newFile.type.startsWith('image/')) {
-                    const newReader = new FileReader();
-                    newReader.onload = function (event) {
-                      image.src = event.target.result; 
-                    };
-                    newReader.readAsDataURL(newFile);
-                  } else {
-                    alert("Invalid image file");
-                  }
-                };
-              });
-    
-              
-              const deleteImageBtn = document.createElement("button");
-              deleteImageBtn.textContent = "Delete Image";
-              deleteImageBtn.classList.add("btn", "btn-danger", "w-30", "btn-sm", "m-2");
-              deleteImageBtn.style.marginTop = "10px";
-              deleteImageBtn.addEventListener("click", function () {
-                previewContainer.removeChild(imageContainer); 
-              });
-    
-              
-              imageContainer.appendChild(image);
-              imageContainer.appendChild(changeImageBtn);
-              imageContainer.appendChild(deleteImageBtn);
-    
-              
-              previewContainer.appendChild(imageContainer);
-    
-              
-              image.addEventListener('click', function () {
-                const cropperModal = document.getElementById('imageCropperModal');
-                const cropperImage = document.getElementById('cropperImage');
-                cropperImage.src = e.target.result;
-                cropperModal.style.display = 'block';
-                currentImageIndex = i;
-                currentImageElement = image; 
-    
-                
-                if (cropper) {
-                  cropper.destroy();
-                }
-    
-                cropper = new Cropper(cropperImage, {
-                  aspectRatio: 1 / 1,  
-                  viewMode: 1
-                });
-              });
-            };
-    
-            reader.readAsDataURL(file);
-          }
-        });
-    
-        
-        document.getElementById('cropButton').addEventListener('click', function () {
-          if (cropper) {
-            const croppedCanvas = cropper.getCroppedCanvas();
-            if (croppedCanvas) {
-              const croppedImageURL = croppedCanvas.toDataURL('image/jpeg');
-    
-              // Push the cropped image for uploading later
-              croppedImages[currentImageIndex] = croppedImageURL;
-    
-              // Replace the original image in the preview with the cropped one
-              const croppedImage = new Image();
-              croppedImage.src = croppedImageURL;
-              croppedImage.style.maxWidth = '200px';
-              croppedImage.style.margin = '10px';
-    
-              // Use the reference of the clicked image to replace it directly
-              if (currentImageElement) {
-                currentImageElement.src = croppedImageURL; 
-              }
-    
-              
-              document.getElementById('imageCropperModal').style.display = 'none';
-              cropper.destroy();
-              cropper = null;
-            }
-          }
-        });
-    
-        // Close modal
-        document.getElementById('closeModalButton').addEventListener('click', function () {
-          if (cropper) {
-            cropper.destroy();
-            cropper = null;
-          }
-          document.getElementById('imageCropperModal').style.display = 'none';
-        });
-    
+  
+
     
         // edit modal
     
-        function openEditProductModal(id, productname, description, regularprice, category, stock, imagesJson) {
+        function openEditProductModal(id, productname,regularprice,stock) {
     
-          console.log(imagesJson)
+      
           
           document.getElementById('editProductName').value = productname;
-          document.getElementById('editProductDescription').value = description;
+
           document.getElementById('editProductPrice').value = regularprice;
           document.getElementById('editProductStock').value = stock;
-          document.getElementById('editProductCategory').value = category;
+      
           document.getElementById("productId").value = id
     
-          const images = JSON.parse(imagesJson);
-          console.log(images);
-    
-          const imagePreview = document.querySelector(".product-images");
-          imagePreview.innerHTML = "";  
-    
-          images.forEach((image, index) => {
-            const imageContainer = document.createElement("div");
-            imageContainer.classList.add("image-wrapper", "m-2" ,"mb-3");
-    
-            // Display the current image
-            const imgElement = document.createElement("img");
-            imgElement.src = `/uploads/${image}`;
-            imgElement.width = 150;
-            imgElement.height = 150;
-            imgElement.classList.add("preview-image");
-            imgElement.id = `preview-image-${index}`;
-            imageContainer.appendChild(imgElement);
-    
-        
-            const replaceInput = document.createElement("input");
-            replaceInput.type = "file";
-            replaceInput.classList.add("replace-image-input", "d-none");
-            replaceInput.name = `images[${index}]`;
-            replaceInput.accept = "image/png, image/jpeg, image/jpg,";
-            
-            replaceInput.addEventListener("change", (event) => {
-              openCropper(event.target, index);
-            });
-    
-            imageContainer.appendChild(replaceInput);
-    
-            
-            const changeButton = document.createElement("button");
-            changeButton.classList.add("btn", "btn-outline-primary");
-            changeButton.innerText = "Change Image";
-            changeButton.onclick = (event) => {
-              event.preventDefault();
-              replaceInput.click();
-            };
-    
-            imageContainer.appendChild(changeButton);
-            imagePreview.appendChild(imageContainer);
-          });
-    
-          // Function to open the cropper
-          function openCropper(input, index) {
-            const file = input.files[0];
-            currentReplaceInput = input;  // Track which input is being updated
-    
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const imageToCrop = document.getElementById('imageToCrop');
-                imageToCrop.src = e.target.result;
-                imageToCrop.style.display = "block"; // Show the image
-    
-                // Initialize or reinitialize the cropper
-                if (cropper) cropper.destroy();
-                cropper = new Cropper(imageToCrop, {
-                  aspectRatio: 1,
-                  viewMode: 0,
-                  autoCropArea: 1,
-                  ready: () => {
-                    document.getElementById('cropper-container').style.display = 'flex'; 
-                  }
-                });
-              };
-              reader.readAsDataURL(file);
-            }
-          }
-    
-          // Crop the image and update the preview
-          document.getElementById('cropImage').addEventListener('click', function (e) {
-            e.preventDefault()
-            if (cropper) {
-              const canvas = cropper.getCroppedCanvas({
-                width: 500,
-                height: 500,
-                fillColor: '#fff',
-              });
-    
-              canvas.toBlob((blob) => {
-                const croppedFile = new File([blob], "croppedImage.png", { type: "image/png" });
-    
-                // Use DataTransfer to simulate file input behavior
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(croppedFile);
-                currentReplaceInput.files = dataTransfer.files;
-    
-                // Show the preview of the cropped image
-                const index = currentReplaceInput.name.match(/\d+/)[0];
-                const imgElement = document.getElementById(`preview-image-${index}`);
-                imgElement.src = URL.createObjectURL(croppedFile);
-    
-                document.getElementById('cropper-container').style.display = 'none';
-              });
-            }
-          });
           document.getElementById('editProductModal').style.display = 'block';
         }
     
@@ -896,25 +615,25 @@ input[type="file"] {
           e.preventDefault(); 
     
           let productname = document.getElementById('editProductName').value;
-          let description = document.getElementById('editProductDescription').value;
+
           let regularprice = document.getElementById('editProductPrice').value;
           let stock = document.getElementById('editProductStock').value;
-          let category = document.getElementById('editProductCategory').value;
           let id = document.getElementById("productId").value; 
     
-          const formData = { productname, description, regularprice, stock, category };
+          const formData = { productname, regularprice, stock};
     
-          const response = await fetch(`/admin/productManagement/edit/${id}`, { 
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(formData)
-          });
+          const response = await fetch(`/admin/inventoryManagement/edit/${id}`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(formData)
+});
+
     
           if (response.ok) {
             closeEditProductModal();
-            window.location.href = '/admin/productManagement';
+            window.location.href = '/admin/inventoryManagement';
           } else {
             console.error('Failed to update product');
           }

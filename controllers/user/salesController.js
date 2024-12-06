@@ -14,6 +14,7 @@ try {
 
     const cartProduct=await Cart.findOne({userId:user}).populate("products.productId").exec()
     let subtotal = 0;
+    
           cartProduct.products.forEach(item => {
             const productTotal = item.quantity * item.productId.regularprice; 
             item.subtotal = productTotal; 
@@ -170,46 +171,60 @@ const loadOrderTable=async (req,res)=>{
     }
 }
 
-const loadOrderDetails=async(req,res)=>{
+const loadOrderDetails = async (req, res) => {
     const { orderId } = req.params;
     const user = req.session.user;
-    console.log('ithann order id',orderId);
     
     try {
-        const orders = await Order.findOne({ _id: orderId, userId: user}).populate('address');
-        console.log(orders);
+        const orders = await Order.findOne({ _id: orderId, userId: user }).populate('address');
         
         if (!orders) {
-            return res.status(404).json( { message: 'Order not found' });
+            return res.status(404).json({ message: 'Order not found' });
         }
-        res.render('orderDetails', { orders })
-    } catch (error) {
-        res.status(500).json({ message: 'Error adding order', error });
-    }
 
-}
+        
+        res.render('orderDetails', { orders });
+    } catch (error) {
+        res.status(500).json({ message: 'Error loading order details', error });
+    }
+};
 
 
 const cancelProduct = async (req, res) => {
-    const { orderId, productId } = req.params;
-    const user = req.session.user;
+    const { orderId, productId } = req.params; 
 
     try {
+        const order = await Order.findById(orderId);
+        if (!order) return res.status(404).send('Order not found');
 
-        const updatedOrder = await Order.findOneAndUpdate(
-            { _id: orderId, userId: user._id, 'products.productId': productId },
-            { 'products.$.status': 'Cancelled' }, 
-            { new: true } 
-        );
+        const product = order.products.find(p => p.productId.toString() === productId);
+        if (!product) return res.status(404).send('Product not found in the order');
 
-        if (!updatedOrder) {
-            return res.status(404).json({ message: 'Product not found in the order or not authorized to cancel' });
+        product.status = 'Cancelled';
+
+        
+        let newSubtotal = 0; 
+        let shipping=50;
+       
+        
+        order.products.forEach(product => {
+            if (product.status !== 'Cancelled') {
+                newSubtotal += product.price * product.quantity; 
+            }
+        });
+ const newTotal=shipping+newSubtotal;
+        if (newSubtotal !== order.subtotal) {
+            order.subtotal = newSubtotal;
+            order.total=newTotal;
+            await order.save();
         }
 
-        res.json({ message: 'Product cancelled successfully', order: updatedOrder });
+        
+
+        res.status(200).send('Product cancelled successfully');
     } catch (error) {
-        console.error('Error cancelling product:', error);
-        res.status(500).json({ message: 'Error cancelling product', error });
+        console.error(error);
+        res.status(500).send('Error processing request');
     }
 };
 

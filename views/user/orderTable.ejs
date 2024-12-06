@@ -44,9 +44,11 @@
                 <div class="percentage"><%= product.quantity%></div>
                 <div class="country"><%= product.price %></div>
                 <div class="country"><%= product.status %></div>
-                <div class="country"><a  onclick="cancelProduct('<%= order._id %>', '<%= product.productId %>')" class="genric-btn danger-border circle">Cancel</a></div>
-
-
+                <% if(product.status==="Cancelled" ){%>
+                    <div class="country"><th> <span>Cancelled</span></th></div>
+                <%}else{%>
+                    <div class="country"><button onclick="cancelProduct('<%= order._id %>', '<%= product.productId._id %>')" class="genric-btn danger-border circle"> Cancel</button></div>
+                <%}%>
             </div>
             <% }); %>
             <p class="last">Total Amount:<%= order.total %></p>
@@ -73,18 +75,40 @@
 
 <%-include("../../views/partials/user/footer")%>
 <script>
-    function cancelProduct(orderId, productId) {
-    if (confirm('Are you sure you want to cancel this product?')) {
-        fetch(`/cancelOrder/${orderId}/${productId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            alert(data.message);
-            window.location.reload();
-        })
-        .catch((error) => console.error('Error cancelling product:', error));
+async function cancelProduct(orderId, productId) {
+
+    
+    try {
+        const result = await Swal.fire({
+            title: "Are you sure you want to cancel the product?",
+            showCancelButton: true,
+            confirmButtonColor: '#000',
+            cancelButtonColor: '#000',
+            confirmButtonText: "OK",
+        });
+
+        if (result.isConfirmed) {
+            await fetch(`/cancelOrder/${orderId}/${productId}`, { // Added `await` here if you want to wait for the response
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Failed to cancel the product');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }); 
+        }      
+    } catch (error) {
+        console.log('Error in cancel product:', error);
     }
 }
+
 </script>
