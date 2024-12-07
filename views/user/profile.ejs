@@ -220,13 +220,16 @@
             <form action="/userlogout" method="post">
                 <button class="logout-button">Logout</button>
             </form>
+            
         </div>
 
         <div class="profile-info">
             <h3>General Information</h3>
             <p><strong>Username:</strong> <%= users.name %></p>
             <p><strong>Email:</strong> <%= users.email %></p>
-          
+            <a href="/orderTable">
+                <button id="change-password-button" class="genric-btn danger circle arrow">Orders</button>
+            </a>
             <a href="/editProfile">
                 <button id="change-password-button" class="genric-btn danger circle arrow">Edit Profile</button>
             </a>
@@ -270,37 +273,7 @@
         </div>
     </div>
 
-   <div class="section-top-border" style="margin: 2cm;">
-    <h2 class="mb-30">Your Orders</h2>
-
-    <div class="progress-table-wrap" id="table">
-        <div class="progress-table">
-            <div class="table-head">
-                <div class="serial">#</div>
-                <div class="percentage">Products</div>
-                <div class="percentage">No.Products</div>
-                <div class="country">Price</div>
-                <div class="country">Status</div>
-            </div>
-
-            <% let serial = 1; %>
-            <% orders.forEach(order => { %>
-            
-                <div class="table-row">
-                    <div class="serial"><%= serial++ %></div>
-                    <div class="percentage"> <%= order._id %></div>
-                    <div class="percentage"><%= order.products %></div>
-                    <div class="country"><%= order.total %></div>
-                    <div class="country"><%= order.status %></div>
-                </div>
-            
-                <div id="viewmore" class="country">
-                    <a href="/orderDetails/<%= order._id %>" class="genric-btn success-border circle">View More</a>
-                </div>
-            <% }); %>
-        </div>
-    </div>
-</div>
+ 
 
 
 

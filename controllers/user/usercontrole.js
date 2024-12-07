@@ -1,10 +1,12 @@
 const { name } = require("ejs");
 const User = require("../../models/userschema");
 const  Product=require('../../models/prductschema')
+const Category=require('../../models/categoryschema')
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const Review= require('../../models/reviewSchema');
+const session=require('express-session')
 
 // Page not found handler
 const pagenotfound = async (req, res) => {
@@ -42,13 +44,53 @@ const loadHomepage = (req, res) => {
 // Load product page
 const loadproductpage = async (req, res) => {
     try {
-        const products = await Product.find({ isListed: true }).sort({_id:-1});
-        res.render("shop", { products }); 
+        // Extract query parameters
+        const { category, sort, minPrice, maxPrice } = req.query;
+
+        // Initialize a filter object
+        let filter = { isListed: true };
+
+        // Add category filter if selected
+        if (category) {
+            filter.category = category; // Assuming `category` is a field in the Product model
+        }
+
+        // Add price range filter if provided
+        if (minPrice) {
+            filter.regularprice = { ...filter.regularprice, $gte: Number(minPrice) };
+        }
+        if (maxPrice) {
+            filter.regularprice = { ...filter.regularprice, $lte: Number(maxPrice) };
+        }
+
+        // Initialize sort options
+        let sortOption = {};
+
+        if (sort === "priceLowHigh") {
+            sortOption.regularprice = 1; // Ascending order
+        } else if (sort === "priceHighLow") {
+            sortOption.regularprice = -1; // Descending order
+        } else if (sort === "newArrivals") {
+            sortOption._id = -1; // Latest products
+        } else if (sort === "nameAsc") {
+            sortOption.productname = 1; // Alphabetical order
+        } else if (sort === "nameDesc") {
+            sortOption.productname = -1; // Reverse alphabetical order
+        }
+
+        // Fetch filtered and sorted products
+        const products = await Product.find(filter).sort(sortOption);
+
+        // Fetch categories for the dropdown
+        const categories = await Category.find({ isListed: true });
+
+        res.render("shop", { products, categories });
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');
     }
 };
+
 
 
 
@@ -169,7 +211,7 @@ const signup = async (req, res) => {
 
     } catch (error) {
         console.error("Signup error:", error);
-        res.redirect("pagenotfound");
+        res.redirect("/pagenotfound");
     }
 };
 
@@ -305,7 +347,155 @@ const productReview = async (req, res) => {
       res.status(500).json({ message: 'Error adding review', error });
     }
   };
+
+
+
+  const loadForgetPass=async(req,res)=>{
+    try {
+        res.render('forgetPassword')
+    } catch (error) {
+        console.error("Signup error:", error);
+        res.redirect("/pagenotfound");
+    }
+
+  }
+
+
+  const forgetPassValid = async (req,res)=>{
+    try {
+        const {email}=req.body;
+       
+        
+        const findUser=await User.findOne({email:email})
+
+        if(findUser){
+          const otp= generateOtp();
+          const emailSent= await sendVerification(email,otp)
+          if(emailSent){
+            req.session.userOtp=otp;
+            req.session.email=email;
+            res.render('forgetPassOtp')
+            console.log('otp',otp);
+            
+          }else{
+            res.json({success:false,message:'failed to sent OTP  .please try again'})
+          }
+        }else{
+            res.render('forgetPassword',{
+                message:"user with this email does not exist"
+            })
+        }
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error adding review', error });
+    }
+  }
+
+
+  const otpChecking=async(req,res)=>{
+    try {
+        const enteredOTP=req.body.otp;
+        if(enteredOTP=== req.session.userOtp){
+            res.json({success:true,redirectUrl:"/resetPassword"})
+        }else{
+            res.json({success:false,message:"Otp not Matching"})
+        }
+    } catch (error) {
+        res.status(500).json({success:false,message:" an errror occured plese try again"})
+    }
+  }
+
+
+ 
+
+  const resendOTPF = async (req, res) => {
+    try {
+        const email  = req.session.email;
+
+        
+        
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email not found in session" });
+        }
+
+        const otp = generateOtp();
+        req.session.userOtp = otp;
+
+        const emailSent = await sendVerification(email, otp);
+        if (emailSent) {
+            console.log("Resent OTP:", otp);
+            res.status(200).json({ success: true, message: "OTP Resent Successfully" });
+        } else {
+            res.status(500).json({ success: false, message: "Failed to resend OTP, please try again" });
+        }
+    } catch (error) {
+        console.error("Error resending OTP:", error);
+        res.status(500).json({ success: false, message: "Internal server error. Please try again" });
+    }
+};
+
+const loadResetPassword=async(req,res)=>{
+    try {
+        res.render('resetPassword')
+    } catch (error) {
+        console.error("Signup error:", error);
+        res.redirect("/pagenotfound");
+    }
+  }
   
+
+  const setNewPassword = async (req, res) => {
+    const email = req.session.email;
+     
+    if (!email) {
+        return res.render('resetPassword', { message: 'Session expired. Please log in again.' });
+    }
+
+    try {
+        const { password, confirmPassword } = req.body || {};
+
+    
+        if (!password || !confirmPassword) {
+            return res.render('resetPassword', { message: 'All fields are required.' });
+        }
+
+    
+        const user = await User.findOne({email:email});
+        if (!user) {
+            return res.render('resetPassword', { message: 'User not found.' });
+        }
+
+        
+        if (password !== confirmPassword) {
+            return res.render('resetPassword', { message: 'Passwords do not match.' });
+        }
+
+        
+        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+        if (!password.match(passwordPattern)) {
+            return res.render('resetPassword', { message: 'Password must be at least 8 characters long and include letters and numbers.' });
+        }
+
+        
+        try {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user.password = hashedPassword;
+            await user.save();
+        } catch (hashError) {
+            console.error('Error hashing or saving password:', hashError);
+            return res.render('resetPassword', { message: 'Could not update password. Please try again.' });
+        }
+
+    
+        res.redirect('/homepage');
+    } catch (error) {
+        console.error('Error changing password:', error);
+        return res.render('resetPassword', { message: 'An error occurred. Please try again later.' });
+    }
+};
+
 
 module.exports = {
     loadhomepage,
@@ -319,6 +509,12 @@ module.exports = {
     login,
     loadsingleproductpage,
     productReview,
-    loadHomepage
+    loadHomepage,
+    loadForgetPass,
+    forgetPassValid,
+    otpChecking,
+    loadResetPassword,
+    resendOTPF,
+    setNewPassword
    
 };

@@ -36,65 +36,79 @@ const loadCartPage = async (req, res) => {
         }
     }
 
-const addCart = async (req, res) => {
-    const productId = req.params.id;
-    const userId = req.session.user; 
-    console.log(req.body.qty)
+    const addCart = async (req, res) => {
+      const productId = req.params.id;
+      const userId = req.session.user; 
+      console.log(req.body.qty);
   
-    if (!userId) {
-      return res.status(401).send("Please login ");
-    }
-  
-    try {
-      
-      const product = await Product.findById(productId);
-      if (!product) {
-        return res.status(404).send("Product not found");
+      if (!userId) {
+          return res.status(401).send("Please login ");
       }
   
-    
-      let cart = await Cart.findOne({ userId });
+      try {
+          // Fetch the product
+          const product = await Product.findById(productId);
+          if (!product) {
+              return res.status(404).send("Product not found");
+          }
   
-      if (!cart) {
-        cart = new Cart({
-          userId,
-          products: [
-            {
-              productId,
-              quantity: 1,
-              name: product.productname,
-              images: product.images[0],
-              price: product.regularprice,
-            },
-          ],
-        });
-      } else {
-        const existingProductIndex = cart.products.findIndex(
-          (item) => item.productId.toString() === productId
-        );
+          // Check if stock is available
+          if (product.stock <= 0) {
+              return res.status(400).send("Product is out of stock");
+          }
   
-        if (existingProductIndex > -1) {
-          cart.products[existingProductIndex].quantity += 1;
-        } else {
-
-          cart.products.push({
-            productId,
-            quantity: 1,
-            name: product.productname,
-            images: product.images[0],
-            price: product.regularprice,
-          });
-        }
+          // Fetch or create the user's cart
+          let cart = await Cart.findOne({ userId });
+  
+          if (!cart) {
+              cart = new Cart({
+                  userId,
+                  products: [
+                      {
+                          productId,
+                          quantity: 1,
+                          name: product.productname,
+                          images: product.images[0],
+                          price: product.regularprice,
+                      },
+                  ],
+              });
+          } else {
+              // Check if the product is already in the cart
+              const existingProductIndex = cart.products.findIndex(
+                  (item) => item.productId.toString() === productId
+              );
+  
+              if (existingProductIndex > -1) {
+                  // Increase the quantity of the existing product in the cart
+                  cart.products[existingProductIndex].quantity += 1;
+              } else {
+                  // Add the new product to the cart
+                  cart.products.push({
+                      productId,
+                      quantity: 1,
+                      name: product.productname,
+                      images: product.images[0],
+                      price: product.regularprice,
+                  });
+              }
+          }
+  
+          // Save the cart
+          await cart.save();
+  
+          // Decrease the product stock
+          product.stock -= 1;
+          await product.save();
+  
+          // Redirect to the cart page
+          res.redirect("/cartPage");
+      } catch (error) {
+          console.error("Error adding product to cart:", error);
+          res.status(500).send("Internal server error");
       }
-  
-      await cart.save();
-      res.redirect("/cartPage");
-    } catch (error) {
-      console.error("Error adding product to cart:", error);
-      res.status(500).send("Internal server error");
-    }
   };
-
+  
 
  const updateCartQuantity = async (req, res) => {
     try {
@@ -206,7 +220,7 @@ const addCart = async (req, res) => {
 
 const cancelProduct = async (req, res) => {
   try {
-      const { productId } = req.params; 
+      const { productId } = req.params;
       const userId = req.session.user;
 
       if (!userId) {
@@ -231,26 +245,27 @@ const cancelProduct = async (req, res) => {
       const quantityToRemove = cart.products[productIndex].quantity;
       const newStock = product.stock + quantityToRemove;
 
+      
       await Product.findByIdAndUpdate(productId, { stock: newStock });
 
-  
+      
       cart.products.splice(productIndex, 1);
 
       if (cart.products.length === 0) {
+          
           await Cart.deleteOne({ _id: cart._id });
           return res.json({ success: true, message: 'Cart deleted as no products are left' });
       } else {
+        
           await cart.save();
           return res.json({ success: true, message: 'Product removed from cart and stock updated' });
       }
-
-      // res.redirect('/cartPage')
-
   } catch (error) {
       console.error('Error canceling product:', error);
       res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 
 
 module.exports = {

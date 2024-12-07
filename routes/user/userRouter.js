@@ -6,6 +6,7 @@ const passport = require('passport');
 const userAuth=require('../../middlewares/userAuth')
 
 
+
 router.get('/', usercontroller. loadHomepage);
 router.get('/pagenotfound', usercontroller.pagenotfound);
 router.get('/homepage', usercontroller.loadhomepage);
@@ -28,6 +29,13 @@ router.get('/auth/google/callback',
 router.post("/login",usercontroller.login)
 router.get("/productpage/:id",usercontroller.loadsingleproductpage)
 router.post('/review/:id',userAuth.userLogin,usercontroller.productReview)
+router.get('/forgetPass',usercontroller.loadForgetPass)
+router.post('/forgetPassValid',usercontroller.forgetPassValid)
+router.post('/otpChecking',usercontroller.otpChecking)
+router.get('/resetPassword',usercontroller.loadResetPassword)
+router.post('/resendOTPF',usercontroller.resendOTPF)
+router.post('/setNewPassword',usercontroller.setNewPassword)
+
 
 
 module.exports = router;
