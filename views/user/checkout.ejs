@@ -434,8 +434,7 @@ if(!selectedAddressElement){
 
         const selectedAddress = selectedAddressElement.value;
         const paymentMethod = paymentMethodElement.value;
-        console.log(paymentMethod);
-        // console.log(selectedAddress)
+      
           
         const cartItems = [];
         '<% cartProduct.forEach(function(product) { %>'
@@ -482,7 +481,7 @@ if(!selectedAddressElement){
        .then(response => response.json())
        .then(data => {
         if (data.success) {
-          const orderId = data.orderId; // Extr
+          const orderId = data.orderId; 
           console.log(orderId);
           
             window.location.href = `/thankyou?orderId=${orderId}`

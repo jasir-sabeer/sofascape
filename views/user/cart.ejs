@@ -137,7 +137,11 @@
                   </div>
                 </td>
                 <td>
-                  <h5>₹<%= product.productId.regularprice %></h5>
+                  <% if (product.productId.discountPrice &&product.productId.discountPrice < product.productId.regularprice) { %>
+                    <h5> ₹<%=Math.round(product.productId.discountPrice) %></h5>
+                <% } else { %>
+                    <h5>₹<%=product.productId.regularprice %></h5>
+                <% } %>
                 </td>
                 <td>
                   <div class="product_count">
@@ -151,10 +155,16 @@
                   </div>
                 </td>
                 
-              
                  <td>
-                  <h5 id="price-<%= product.productId._id %>">₹<%= product.productId.regularprice * product.quantity %></h5>
+                  <% if (product.productId.discountPrice && product.productId.discountPrice < product.productId.regularprice) { %>
+                    <h5 id="price-<%- product.productId._id %>">₹<%= (product.productId.discountPrice * product.quantity).toFixed(0) %></h5>
+                  <% } else { %>
+                    <h5 id="price-<%- product.productId._id %>">₹<%= (product.productId.regularprice * product.quantity).toFixed(0) %></h5>
+                  <% } %>
+                  
+
                 </td>
+
                 <td>
                   <form action="/cart/cancel/<%= product.productId._id %>?_method=DELETE" method="POST"
                       onsubmit="event.preventDefault(); cancelProduct('<%= product.productId._id %>')">
@@ -167,14 +177,13 @@
               
               <tr class="bottom_button">
                 <td>
-                  <a class="btn_1" href="/products">Update Cart</a>
+                  <div class="cupon_text float-right">
+                    <a class="btn_1"  href="#">Close Coupon</a>
+                  </div>
                 </td>
                 <td></td>
                 <td></td>
                 <td>
-                  <div class="cupon_text float-right">
-                    <a class="btn_1"  href="#">Close Coupon</a>
-                  </div>
                 </td>
               </tr>
               <tr>

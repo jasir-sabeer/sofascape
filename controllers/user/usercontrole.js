@@ -41,21 +41,15 @@ const loadHomepage = (req, res) => {
 };
 
 
-// Load product page
+
 const loadproductpage = async (req, res) => {
     try {
-        // Extract query parameters
         const { category, sort, minPrice, maxPrice } = req.query;
-
-        // Initialize a filter object
         let filter = { isListed: true };
 
-        // Add category filter if selected
         if (category) {
-            filter.category = category; // Assuming `category` is a field in the Product model
-        }
-
-        // Add price range filter if provided
+            filter.category = category; 
+        }    
         if (minPrice) {
             filter.regularprice = { ...filter.regularprice, $gte: Number(minPrice) };
         }
@@ -63,33 +57,55 @@ const loadproductpage = async (req, res) => {
             filter.regularprice = { ...filter.regularprice, $lte: Number(maxPrice) };
         }
 
-        // Initialize sort options
         let sortOption = {};
-
         if (sort === "priceLowHigh") {
-            sortOption.regularprice = 1; // Ascending order
+            sortOption.regularprice = 1; 
         } else if (sort === "priceHighLow") {
-            sortOption.regularprice = -1; // Descending order
+            sortOption.regularprice = -1; 
         } else if (sort === "newArrivals") {
-            sortOption._id = -1; // Latest products
+            sortOption._id = -1; 
         } else if (sort === "nameAsc") {
-            sortOption.productname = 1; // Alphabetical order
+            sortOption.productname = 1; 
         } else if (sort === "nameDesc") {
-            sortOption.productname = -1; // Reverse alphabetical order
+            sortOption.productname = -1; 
         }
 
-        // Fetch filtered and sorted products
-        const products = await Product.find(filter).sort(sortOption);
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 6; 
+        const skip = (page - 1) * limit;
 
-        // Fetch categories for the dropdown
-        const categories = await Category.find({ isListed: true });
+const totalProducts = await Product.countDocuments(filter);
+const products = await Product.find(filter)
+    .populate('offer')
+    .sort(sortOption)
+    .skip(skip)
+    .limit(limit);
+const categories = await Category.find({ isListed: true });
+const offerPrices = products.map(product => product.offer?.discountValue);
+console.log('Offer prices:', offerPrices);
 
-        res.render("shop", { products, categories });
+
+
+        const totalPages = Math.ceil(totalProducts / limit);
+        const previousPage = page > 1 ? page - 1 : null;
+        const nextPage = page < totalPages ? page + 1 : null;
+          console.log(products);
+          
+        res.render('shop', {
+            categories,
+            products,
+            currentPage: page,
+            totalPages,
+            previousPage,
+            nextPage,
+        });
+
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');
     }
 };
+
 
 
 

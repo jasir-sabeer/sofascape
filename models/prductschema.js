@@ -16,9 +16,16 @@ const productSchema = new Schema({
         ref: 'category',
         required: true,
     },
+    offer: {
+        type: mongoose.Schema.Types.ObjectId,
+       ref: 'offer',
+   },
     regularprice: {
         type: Number,
         required: true,
+    },
+    discountPrice: {
+        type: Number,
     },
     stock: {
         type: Number,

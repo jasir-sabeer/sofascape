@@ -13,7 +13,10 @@ const categorySchema=new mongoose.Schema({
    isListed:{
     type:Boolean,
     trim:true
-   }
+   }, offer: {
+      type: mongoose.Schema.Types.ObjectId,
+     ref: 'offer',
+   },
 
 },{timestamps:true})
 module.exports=mongoose.model('category',categorySchema)

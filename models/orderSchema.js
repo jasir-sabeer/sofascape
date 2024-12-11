@@ -24,9 +24,9 @@ const orderSchema = new mongoose.Schema({
             type: Number,
             required: true
         },
-        image: {
-            type: String,
-            required: true
+        discountedPrice: {
+            type: Number,  
+            required: false
         },
         status: {
             type: String,
@@ -37,14 +37,10 @@ const orderSchema = new mongoose.Schema({
     ],
     address: {
         type: mongoose.Schema.ObjectId,
-        ref: 'address',
+        ref: 'Address',
         required: true
     },
     total: {
-        type: Number,
-        required: true
-    },
-    subtotal: {
         type: Number,
         required: true
     },
@@ -55,19 +51,33 @@ const orderSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['COD', "Razorpay", "Wallet"],
-        default: "COD"
+        enum: ['CashOnDelivery', "Razorpay", "Wallet"],
+        default: "CashOnDelivery"
     },
     shippingCost: {
         type: Number,
         required: true
     },
-  
+    couponCode: {
+        type: String,
+        default: ''
+    },
+    discountAmount: {
+        type: Number
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['Pending', 'Completed', 'Failed'],
+        default: 'Pending'
+    },
     createdAt: {
         type: Date,
         default: Date.now
     },
-    
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    }
 
 }, { timestamps: true });
 

@@ -275,7 +275,7 @@ const addProduct = async (req, res) => {
         
         if (!productname || !regularprice || !category || !description || !stock) {
             console.error("Validation failed: Missing fields");
-            // return res.status(400).json({ message: 'Please fill all required fields' })
+        
             return 
         }
 

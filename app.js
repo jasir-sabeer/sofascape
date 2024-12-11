@@ -5,14 +5,22 @@ const session =require('express-session')
 const passport=require("./config/passport")
 require("dotenv").config();
 const db=require("./config/db");
-const userRouter=require('./routes/user/userRouter')
 const nocache = require("nocache");
+
+//admin routers
 const adminRouter=require('./routes/admin/adminRouter')
 const orderRouter=require('./routes/admin/orderRouter')
 const stockRouter=require('./routes/admin/stockRouter')
+const couponRouter=require('./routes/admin/couponRouter')
+const offerRouter=require('./routes/admin/offerRouter')
+
+//user routers
+const userRouter=require('./routes/user/userRouter')
 const profileRouter=require('./routes/user/profileRouter')
 const cartRouter=require('./routes/user/cartRouter')
 const salesRouter=require('./routes/user/salesRouter')
+
+
 const fash=require('connect-flash')
 const methodOverride = require('method-override');
 db()
@@ -54,11 +62,17 @@ app.use('/',profileRouter)
 app.use('/admin',adminRouter)
 app.use('/admin',orderRouter)
 app.use('/admin',stockRouter)
+app.use('/admin',couponRouter)
+app.use('/admin',offerRouter)
 
 
 app.use(methodOverride('_method'));
 
-
+app.use((err, req, res, next) => {
+    console.error("Error: ", err.message); 
+    console.error(err.stack); 
+    res.status(err.status || 500).render('page-404')
+});
 
 app.listen(3000,()=>{
     console.log("server running")

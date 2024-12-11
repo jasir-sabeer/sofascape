@@ -1,41 +1,80 @@
+<style>
+#btn{
+    margin-top: 1cm;
+}
+.search-bar{
+    height: 1cm;
+    width: 6cm;
+}
+</style>
 <%-include("../../views/partials/user/header")%>
  
     <section class="cat_product_area section_padding">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3">
+                    <div >
+                        <input
+                            class="search-bar"
+                            type="text"
+                            id="search_input"
+                            placeholder="Search products...."
+                            onkeyup="filterProducts()"
+                        >
+                    </div>
+                      
                     <form action="/products" method="get">
                         <div class="single-element-widget mt-30">
                             <h3 class="mb-30">Select Category</h3>
-                            <select name="category">
-                                
+                            <div>
+            
+                            
                                 <% categories.forEach(category => { %>
-                                  <option value="<%= category._id %>"><%= category.variant %> <%= category.name %></option>
+                                    <label>
+                                        <input type="radio" name="category" value="<%= category._id %>">
+                                        <%= category.variant %> <%= category.name %>
+                                    </label>
+                                    <br>
                                 <% }); %>
-                            </select>
+                            </div>
+                            
                         </div>
                     
                         <div class="single-element-widget mt-30">
                             <h3 class="mb-30">Sort By</h3>
-                            <select name="sort">
-                                <option value="">None</option>
-                                <option value="priceLowHigh">Price: Low to High</option>
-                                <option value="priceHighLow">Price: High to Low</option>
-                                <option value="newArrivals">New Arrivals</option>
-                                <option value="nameAsc">A-Z</option>
-                                <option value="nameDesc">Z-A</option>
-                            </select>
+                            <div>
+                                <label>
+                                    <input type="radio" name="sort" value="priceLowHigh"> Price: Low to High
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="sort" value="priceHighLow"> Price: High to Low
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="sort" value="newArrivals"> New Arrivals
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="sort" value="nameAsc"> A-Z
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="sort" value="nameDesc"> Z-A
+                                </label>
+                            </div>
+                            
                         </div>
                     
                         <div class="single-element-widget mt-30">
                             <h3 class="mb-30">Price Range</h3>
-                            <input type="number" name="minPrice" placeholder="Enter Min Price">
+                            <input type="number" name="minPrice" placeholder="Enter Min Price" min="0">
                             <p>To</p>
-                            <input type="number" name="maxPrice" placeholder="Enter Max Price">
+                            <input type="number" name="maxPrice" placeholder="Enter Max Price" min="0">
                         </div>
                     
                         <div>
-                            <button type="submit" class="genric-btn danger radius">Apply Filters</button>
+                            <button type="submit" id="btn" class="genric-btn danger radius">Apply Filters</button>
                         </div>
                     </form>
                 </div>
@@ -46,28 +85,61 @@
                     
                     <div class="row align-items-center latest_product_inner">
                         <% products.forEach(product => { %>
-                        <div class="col-lg-4 col-sm-6">
-                            <div class="single_product_item">
-                                <a href="/productpage/<%= product._id %>">
-                                    <img src="/uploads/<%= product.images[1] %>" alt="">
-                                </a>
-                                <div class="single_product_text">
-                                    <h4><%= product.productname %></h4>
-                                    <h3>₹<%= product.regularprice %></h3>
-                                    <%if(product.stock<=0){%>
-                                        <a  class="add_cart">Out of Stock<i class="ti-heart"></i></a>
-                                    <% } else {%>
-                                    <a style="cursor: pointer;" onclick=" addToCart('<%= product._id %>')" class="add_cart">+ add to cart<i class="ti-heart"></i></a>
-                                    <%}%>
+                            <div class="col-lg-4 col-sm-6 product-card">
+                                <div class="single_product_item">
+                                    <a href="/productpage/<%= product._id %>">
+                                        <img src="/uploads/<%= product.images[1] %>" alt="">
+                                    </a>
+                                    <div class="single_product_text">
+                                        <h6><%= product.productname %></h6>
+                                        <% if (product.discountPrice && product.discountPrice < product.regularprice) { %>
+                                            <h3><s style="color: red;">₹<%= product.regularprice %></s> ₹<%=Math.round(product.discountPrice) %></h3>
+                                        <% } else { %>
+                                            <h3>₹<%= product.regularprice %></h3>
+                                        <% } %>
+                                         <% if (product.stock <= 0) { %>
+                                            <a class="add_cart">Out of Stock <i class="ti-heart"></i></a>
+                                        <% } else { %>
+                                            <a
+                                                style="cursor: pointer;"
+                                                onclick="addToCart('<%= product._id %>')"
+                                                class="add_cart"
+                                            >+ add to cart <i class="ti-heart"></i></a>
+                                        <% } %>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <% }) %>
+                            <% }) %>
+                    
                     </div>
                     
                         <div class="col-lg-12">
                             <div class="pageination">
-                                <nav aria-label="Page navigation example">
+                                <nav id="pagination" aria-label="Page navigation" class="paginationdiv">
+                                    <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
+                                      <% if (previousPage) { %>
+                                        <li class="page-item">
+                                          <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous" style="text-decoration: none;"><i class="ti-angle-double-left"></i></a>                   
+                                        </li>         
+                                        <% } %>
+                                
+                                          <% for (let i=1; i <=totalPages; i++) { %>
+                                            <li class="page-item  <%= i === currentPage ? 'active' : '' %>" >
+                                               
+                                              <a class="page-link" href="?page=<%= i %>">
+                                                <%= i %>
+                                              </a>
+                                              </li>
+                                            <% } %>
+                                
+                                              <% if (nextPage) { %>
+                                                <li class="page-item">
+                                                  <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next" style="text-decoration: none;"><i class="ti-angle-double-right"></i></a>
+                                                </li>
+                                                <% } %>
+                                    </ul>
+                                  </nav>
+                                <!-- <nav aria-label="Page navigation example">
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item">
                                             <a class="page-link" href="#" aria-label="Previous">
@@ -86,7 +158,7 @@
                                             </a>
                                         </li>
                                     </ul>
-                                </nav>
+                                </nav> -->
                             </div>
                         </div>
                     </div>
@@ -296,6 +368,24 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     toastr.error("An unexpected error occurred.", "Error");
   }
 }
+
+
+function filterProducts() {
+            const input = document.getElementById('search_input');
+            const filter = input.value.toLowerCase();
+            const productCards = document.querySelectorAll('.product-card');
+
+            productCards.forEach(card => {
+                const name = card.querySelector('h6').textContent.toLowerCase();
+       
+
+                if (name.includes(filter)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
 
     </script>
 </body>

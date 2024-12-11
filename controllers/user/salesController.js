@@ -4,6 +4,7 @@ const User = require("../../models/userschema");
 const Address = require('../../models/addressschema')
 const Cart=require('../../models/cartSchema')
 const Order=require('../../models/orderSchema')
+const razorpay=require('razorpay')
 
 
 const loadCheckout=async(req,res)=>{
@@ -161,6 +162,7 @@ const loadOrderTable=async (req,res)=>{
         const orders = await Order.find({ userId })
         .populate('products.productId')    
         .populate('address')
+        .sort({_id:-1})
 
         
         

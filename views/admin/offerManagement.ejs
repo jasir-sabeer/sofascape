@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -127,13 +127,6 @@ tbody tr:nth-child(even) {
 
 
 
-.block-btn {
-  background-color: rgb(255, 0, 0); /
-}
-
-.unblock-btn {
-  background-color: rgb(0, 234, 62); 
-}
 
 .user-profile {
   display: flex; 
@@ -173,44 +166,6 @@ table, th, td {
   display: flex;
  justify-content: center;
  gap:10px;
-}
-
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  background-color: rgba(0, 0, 0, 0.5); /* Black with opacity */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  display: flex; /* Flexbox for centering */
-}
-
-.modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 80%; /* Adjust this value to control modal width */
-  max-width: 700px; /* Set a maximum width */
-  height: auto; /* Allow height to adjust based on content */
-  max-height: 80vh; /* Set a maximum height to prevent overflow */
-  overflow-y: auto; /* Enable vertical scrolling if content exceeds max height */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  bottom: 180px;
-}
-
-/* Modal Heading */
-.modal-content h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-family: 'Arial', sans-serif;
-  font-weight: 600;
-  font-size: 22px; /* Adjusted for better spacing */
-  color: #333;
 }
 
 
@@ -333,23 +288,7 @@ select:focus {
   box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
 }
 
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto; /* 15% from the top and centered */
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
-  position: relative; /* Allows absolute positioning of child elements */
-}
 
-.close {
-  position: absolute; /* Position the close button absolutely */
-  top: 10px; /* Adjust this value to position it at the top of the modal */
-  right: 20px; /* Adjust this value for horizontal positioning */
-  font-size: 24px; /* Adjust font size as needed */
-  color: #000; /* Change color if desired */
-  cursor: pointer; /* Change cursor to pointer */
-}
 
 
 .add-btn {
@@ -432,9 +371,9 @@ input[type="file"] {
           <li><a href="/admin/productManagement" >Products</a></li>
           <li><a href="/admin/categoryManagement">Category </a></li>
           <li><a href="/admin/orderManagement">Orders</a></li>
-          <li><a href="/admin/inventoryManagement" class="special-color">inventory</a></li>
-          <li><a href="/admin/couponManagement">Coupon</a></li>
-          <li><a href="/admin/offerManagement">Offer</a></li>
+          <li><a href="/admin/inventoryManagement">inventory</a></li>
+          <li><a href="/admin/couponManagement" >Coupon</a></li>
+          <li><a href="/admin/offerManagement"  class="special-color">Offer</a></li>
           <li><a href="#reports">Sales Reports</a></li>
           <li><a href="#profile">Profile</a></li>
           <form action="/admin/logout" method="POST">
@@ -446,61 +385,58 @@ input[type="file"] {
     
     <div class="main-content">
         <header class="dashboard-header">
-          <h1>Inventory Management</h1>
-          
-    
-    
-    
+          <h1>Offer Management</h1>
         </header>
+        <a href="/admin/addOffer">
+         <button class="btn btn-primary action-btn">
+            ADD OFFER 
+          </button>
+        </a>
         
         <section class="product-table">
             <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search product..." onkeyup="searchProducts()">
+                <input type="text" id="searchInput" placeholder="Search offer..." onkeyup="searchProducts()">
             </div>
           <div class="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Edit</th>
+                  <th>Offer name</th>
+                  <th>Discount </th>
+                  <th>Expiry Date</th>
+                  <th>Applicaple </th>
+                  <th>Remove</th>
              
                 </tr>
     
               </thead>
               <tbody id="productTableBody">
-                <% products.forEach(product=> { %>
+                   <% offers.forEach(offer=>{%>
                   <tr>
                     <td>
-                      <%= product.productname %>
+                     <%=offer.offerName%>
                     </td>
-                  
                     <td>
-                      <%= product.regularprice %>
+                     <%=offer.discountValue%>%
                     </td>
-                
-  
                     <td>
-                      <%= product.stock %>
+                        <%= new Date(offer.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %>
                     </td>
+      
+                   <td>
+                    <%=offer.applicableTo %>
+                   </td>
+                      <td>
+                        <form action="/admin/offer/remove/<%= offer._id %>?_method=DELETE" method="POST"
+                            onsubmit="return confirmAndRemoveOffer('<%= offer._id %>')">
+                          <button class="btn">Remove</button>
+                      </form>
+                      </td>
                     
-                    <td>
-    
-                      <button class="btn btn-primary action-btn"
-                      onclick="openEditProductModal(
-                        '<%= product._id %>', 
-                        '<%= product.productname %>',  
-                        '<%= product.regularprice %>', 
-                        '<%= product.stock %>', 
-                      )">
-                      Edit
-                    </button>
-                    
-    
-                    </td>
                   </tr>
-                  <% }) %>
+                  <%})%>
+                
+                
     
     
               </tbody>
@@ -510,137 +446,46 @@ input[type="file"] {
     
       </div>
     
-    <!--add product modal-->>
     
-    
-   
- 
-    
-
-    <!--edit modal-->
-    
-    <div class="modal" id="editProductModal" style="display:none;">
-        <div class="modal-content">
-          <span class="close" onclick="closeEditProductModal()">&times;</span>
-          <h2>Edit Stock</h2>
-          <form id="editProductForm" method="POST" enctype="multipart/form-data" onsubmit="submitEditProductForm(event)">
-            <label for="productName">Product Name:</label>
-            <input type="text" id="editProductName" name="productname" readonly/>
-    
-
-    
-            <label for="productPrice">Price:</label>
-            <input type="number" id="editProductPrice" name="regularprice" readonly />
-    
-            
-    
-            <label for="productStock">Stock:</label>
-            <input type="number" id="editProductStock" name="stock" min="0" required />
-            <input type="text" id="productId" hidden>
-           
-            <button type="submit" class="btn" id="submit-btn">Update Stock</button>
-          </form>
-        </div>
-      </div>
-    
-    
-    
-    
-    <!--pagination-->>
-    
-    <nav id="pagination" aria-label="Page navigation" class="paginationdiv" style="margin-left: 16cm;">
-        <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
-          <% if (previousPage) { %>
-            <li class="page-item">
-              <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous" style="text-decoration: none;"><</a>                   
-            </li>         
-            <% } %>
-    
-              <% for (let i=1; i <=totalPages; i++) { %>
-                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                   
-                  <a class="page-link" href="?page=<%= i %>">
-                    <%= i %>
-                  </a>
-                  </li>
-                <% } %>
-    
-                  <% if (nextPage) { %>
-                    <li class="page-item">
-                      <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next" style="text-decoration: none;">></a>
-                    </li>
-                    <% } %>
-        </ul>
-      </nav>
-    
-    
-      
-    
-    
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-
-
       <script>
   
 
-    
-        // edit modal
-    
-        function openEditProductModal(id, productname,regularprice,stock) {
-    
-      
-          
-          document.getElementById('editProductName').value = productname;
-
-          document.getElementById('editProductPrice').value = regularprice;
-          document.getElementById('editProductStock').value = stock;
-      
-          document.getElementById("productId").value = id
-    
-          document.getElementById('editProductModal').style.display = 'block';
+  function confirmAndRemoveOffer(offerId) {
+        const isConfirmed = confirm('Are you sure you want to remove this offer?');
+        if (isConfirmed) {
+            removeOffer(offerId); 
         }
-    
-    
-    
-        //closee modal 
-    
-        function closeEditProductModal() {
-          document.getElementById("editProductModal").style.display = "none"
-        }
-    
-    
-    
-    
-        document.getElementById('editProductForm').addEventListener('submit', submitEditProductForm);
-    
-        async function submitEditProductForm(e) {
-          e.preventDefault(); 
-    
-          let productname = document.getElementById('editProductName').value;
-
-          let regularprice = document.getElementById('editProductPrice').value;
-          let stock = document.getElementById('editProductStock').value;
-          let id = document.getElementById("productId").value; 
-    
-          const formData = { productname, regularprice, stock};
-    
-          const response = await fetch(`/admin/inventoryManagement/edit/${id}`, {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify(formData)
-});
+        return false; 
+    }
 
     
-          if (response.ok) {
-            closeEditProductModal();
-            window.location.href = '/admin/inventoryManagement';
-          } else {
-            console.error('Failed to update product');
-          }
-        }
-    //serch product
+    function removeOffer(offerId) {
+        fetch(`/admin/offer/remove/${offerId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then((response) => {
+            if (!response.ok) {
+                console.error('Error occurred while removing the offer');
+                return;
+            }
+            return response.json();
+        })
+        .then((data) => {
+            if (data.success) {
+        
+                window.location.reload();
+            } else {
+                console.error('Error:', data.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error removing offer:', error);
+        });
+    }
+    
         function searchProducts() {
             const input = document.getElementById('searchInput');
             const filter = input.value.toLowerCase();
@@ -650,15 +495,14 @@ input[type="file"] {
                 const cells = rows[i].getElementsByTagName('td');
                 let match = false;
 
-                // Check each cell in the row for a match
-                for (let j = 0; j < cells.length - 1; j++) { // Exclude the Action column
+          
+                for (let j = 0; j < cells.length - 1; j++) { 
                     if (cells[j] && cells[j].textContent.toLowerCase().includes(filter)) {
                         match = true;
                         break;
                     }
                 }
 
-                // Show or hide the row based on whether there's a match
                 rows[i].style.display = match ? '' : 'none';
             }
         }

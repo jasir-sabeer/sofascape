@@ -30,7 +30,7 @@ body {
   position: fixed; /* Fixed sidebar */
 }
 
-.sidebar li {
+.sidebar {
   text-align: center;
   padding: 10px 0;
 }
@@ -433,6 +433,8 @@ input[type="file"] {
           <li><a href="/admin/categoryManagement">Category </a></li>
           <li><a href="/admin/orderManagement">Orders</a></li>
           <li><a href="/admin/inventoryManagement">inventory</a></li>
+          <li><a href="/admin/couponManagement">Coupon</a></li>
+          <li><a href="/admin/offerManagement">Offer</a></li>
           <li><a href="#reports">Sales Reports</a></li>
           <li><a href="#profile">Profile</a></li>
           <form action="/admin/logout" method="POST">
@@ -732,16 +734,16 @@ input[type="file"] {
             if (croppedCanvas) {
               const croppedImageURL = croppedCanvas.toDataURL('image/jpeg');
     
-              // Push the cropped image for uploading later
+              
               croppedImages[currentImageIndex] = croppedImageURL;
     
-              // Replace the original image in the preview with the cropped one
+              
               const croppedImage = new Image();
               croppedImage.src = croppedImageURL;
               croppedImage.style.maxWidth = '200px';
               croppedImage.style.margin = '10px';
     
-              // Use the reference of the clicked image to replace it directly
+              
               if (currentImageElement) {
                 currentImageElement.src = croppedImageURL; 
               }
@@ -822,19 +824,19 @@ input[type="file"] {
             imagePreview.appendChild(imageContainer);
           });
     
-          // Function to open the cropper
+          
           function openCropper(input, index) {
             const file = input.files[0];
-            currentReplaceInput = input;  // Track which input is being updated
+            currentReplaceInput = input;  
     
             if (file) {
               const reader = new FileReader();
               reader.onload = (e) => {
                 const imageToCrop = document.getElementById('imageToCrop');
                 imageToCrop.src = e.target.result;
-                imageToCrop.style.display = "block"; // Show the image
+                imageToCrop.style.display = "block"; 
     
-                // Initialize or reinitialize the cropper
+            
                 if (cropper) cropper.destroy();
                 cropper = new Cropper(imageToCrop, {
                   aspectRatio: 1,
@@ -849,7 +851,7 @@ input[type="file"] {
             }
           }
     
-          // Crop the image and update the preview
+          
           document.getElementById('cropImage').addEventListener('click', function (e) {
             e.preventDefault()
             if (cropper) {
@@ -862,12 +864,12 @@ input[type="file"] {
               canvas.toBlob((blob) => {
                 const croppedFile = new File([blob], "croppedImage.png", { type: "image/png" });
     
-                // Use DataTransfer to simulate file input behavior
+                
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(croppedFile);
                 currentReplaceInput.files = dataTransfer.files;
     
-                // Show the preview of the cropped image
+                
                 const index = currentReplaceInput.name.match(/\d+/)[0];
                 const imgElement = document.getElementById(`preview-image-${index}`);
                 imgElement.src = URL.createObjectURL(croppedFile);
@@ -881,7 +883,7 @@ input[type="file"] {
     
     
     
-        //closee modal 
+        
     
         function closeEditProductModal() {
           document.getElementById("editProductModal").style.display = "none"

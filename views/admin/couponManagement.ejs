@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -432,8 +432,8 @@ input[type="file"] {
           <li><a href="/admin/productManagement" >Products</a></li>
           <li><a href="/admin/categoryManagement">Category </a></li>
           <li><a href="/admin/orderManagement">Orders</a></li>
-          <li><a href="/admin/inventoryManagement" class="special-color">inventory</a></li>
-          <li><a href="/admin/couponManagement">Coupon</a></li>
+          <li><a href="/admin/inventoryManagement">inventory</a></li>
+          <li><a href="/admin/couponManagement"  class="special-color">Coupon</a></li>
           <li><a href="/admin/offerManagement">Offer</a></li>
           <li><a href="#reports">Sales Reports</a></li>
           <li><a href="#profile">Profile</a></li>
@@ -446,61 +446,72 @@ input[type="file"] {
     
     <div class="main-content">
         <header class="dashboard-header">
-          <h1>Inventory Management</h1>
+          <h1>Coupon Management</h1>
           
-    
-    
-    
         </header>
+        <a href="/admin/addCoupon">
+         <button class="btn btn-primary action-btn">
+            ADD COUPON
+          </button>
+        </a>
         
         <section class="product-table">
             <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search product..." onkeyup="searchProducts()">
+                <input type="text" id="searchInput" placeholder="Search coupon..." onkeyup="searchProducts()">
             </div>
           <div class="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Edit</th>
+                  <th>Coupon Code</th>
+                  <th>Discount</th>
+                  <th>Min Purchace</th>
+                  <th>Expiry Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                  <th>Remove</th>
              
                 </tr>
     
               </thead>
               <tbody id="productTableBody">
-                <% products.forEach(product=> { %>
+                <% coupons.forEach(coupon => { %>
                   <tr>
                     <td>
-                      <%= product.productname %>
+                      <%= coupon.code %>
                     </td>
-                  
                     <td>
-                      <%= product.regularprice %>
+                      <%= coupon.discountValue %> %
                     </td>
-                
-  
                     <td>
-                      <%= product.stock %>
+                      <%= coupon.minPurchase %>
+
+                    </td>
+              
+                    <td>
+                      <%= new Date(coupon.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+
+                    </td>
+                    <td>
+                      <%= coupon.isListed ? 'Listed' : 'Unlisted' %>
+                    </td>
+                    <td>
+                      <form action="/admin/couponManagement/toggle-status/<%= coupon._id %>" method="POST">
+                        <button type="submit" class="btn <%= coupon.isListed ? 'btn-danger' : 'btn-warning' %>">
+                          <%= coupon.isListed ? 'Unlist' : 'List' %>
+                        </button>
+                      </form>
+                    </td>
+                    <td>
+                      <form action="/admin/coupon/remove/<%= coupon._id %>?_method=DELETE" method="POST"
+                        onsubmit="return confirmAndRemoveCoupon('<%= coupon._id %>')">
+                        <button class="btn">Remove</button>
+                      </form>
                     </td>
                     
-                    <td>
-    
-                      <button class="btn btn-primary action-btn"
-                      onclick="openEditProductModal(
-                        '<%= product._id %>', 
-                        '<%= product.productname %>',  
-                        '<%= product.regularprice %>', 
-                        '<%= product.stock %>', 
-                      )">
-                      Edit
-                    </button>
-                    
-    
-                    </td>
                   </tr>
-                  <% }) %>
+                <% }) %>
+                
     
     
               </tbody>
@@ -510,137 +521,49 @@ input[type="file"] {
     
       </div>
     
-    <!--add product modal-->>
     
-    
-   
- 
-    
-
-    <!--edit modal-->
-    
-    <div class="modal" id="editProductModal" style="display:none;">
-        <div class="modal-content">
-          <span class="close" onclick="closeEditProductModal()">&times;</span>
-          <h2>Edit Stock</h2>
-          <form id="editProductForm" method="POST" enctype="multipart/form-data" onsubmit="submitEditProductForm(event)">
-            <label for="productName">Product Name:</label>
-            <input type="text" id="editProductName" name="productname" readonly/>
-    
-
-    
-            <label for="productPrice">Price:</label>
-            <input type="number" id="editProductPrice" name="regularprice" readonly />
-    
-            
-    
-            <label for="productStock">Stock:</label>
-            <input type="number" id="editProductStock" name="stock" min="0" required />
-            <input type="text" id="productId" hidden>
-           
-            <button type="submit" class="btn" id="submit-btn">Update Stock</button>
-          </form>
-        </div>
-      </div>
-    
-    
-    
-    
-    <!--pagination-->>
-    
-    <nav id="pagination" aria-label="Page navigation" class="paginationdiv" style="margin-left: 16cm;">
-        <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
-          <% if (previousPage) { %>
-            <li class="page-item">
-              <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous" style="text-decoration: none;"><</a>                   
-            </li>         
-            <% } %>
-    
-              <% for (let i=1; i <=totalPages; i++) { %>
-                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                   
-                  <a class="page-link" href="?page=<%= i %>">
-                    <%= i %>
-                  </a>
-                  </li>
-                <% } %>
-    
-                  <% if (nextPage) { %>
-                    <li class="page-item">
-                      <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next" style="text-decoration: none;">></a>
-                    </li>
-                    <% } %>
-        </ul>
-      </nav>
-    
-    
-      
-    
-    
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-
-
       <script>
   
 
-    
-        // edit modal
-    
-        function openEditProductModal(id, productname,regularprice,stock) {
+  function confirmAndRemoveCoupon(couponId) {
+    const isConfirmed = confirm('Are you sure you want to remove this coupon?');
+    if (isConfirmed) {
+        removeCoupon(couponId);
+    }
+    return false; 
+}
+
+function removeCoupon(couponId) {
+    fetch(`/admin/coupon/remove/${couponId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+        .then((response) => {
+            if (!response.ok) {
+               console.log('an error in rmeve coupon');
+               
+            }
+            return response.json();
+        })
+        .then((data) => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+              
+                console.error('Error:', data.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error removing coupon:', error);
+      
+        });
+}
+
     
       
-          
-          document.getElementById('editProductName').value = productname;
-
-          document.getElementById('editProductPrice').value = regularprice;
-          document.getElementById('editProductStock').value = stock;
-      
-          document.getElementById("productId").value = id
     
-          document.getElementById('editProductModal').style.display = 'block';
-        }
-    
-    
-    
-        //closee modal 
-    
-        function closeEditProductModal() {
-          document.getElementById("editProductModal").style.display = "none"
-        }
-    
-    
-    
-    
-        document.getElementById('editProductForm').addEventListener('submit', submitEditProductForm);
-    
-        async function submitEditProductForm(e) {
-          e.preventDefault(); 
-    
-          let productname = document.getElementById('editProductName').value;
-
-          let regularprice = document.getElementById('editProductPrice').value;
-          let stock = document.getElementById('editProductStock').value;
-          let id = document.getElementById("productId").value; 
-    
-          const formData = { productname, regularprice, stock};
-    
-          const response = await fetch(`/admin/inventoryManagement/edit/${id}`, {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify(formData)
-});
-
-    
-          if (response.ok) {
-            closeEditProductModal();
-            window.location.href = '/admin/inventoryManagement';
-          } else {
-            console.error('Failed to update product');
-          }
-        }
-    //serch product
         function searchProducts() {
             const input = document.getElementById('searchInput');
             const filter = input.value.toLowerCase();

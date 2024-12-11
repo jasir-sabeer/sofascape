@@ -37,9 +37,10 @@
 
 
             </div>
+            <% let count=1%>
             <% order.products.forEach(product => { %>
             <div class="table-row">
-                <div class="serial">01</div>
+                <div class="serial"><%=  count++ %></div>
                 <div class="percentage"> <img src="/uploads/<%= product.image %>" alt="flag" style="width: 1.5cm;"><%= product.name %></div>
                 <div class="percentage"><%= product.quantity%></div>
                 <div class="country"><%= product.price %></div>
