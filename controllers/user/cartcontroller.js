@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Cart = require('../../models/cartSchema')
 const User = require('../../models/userschema')
 const Product = require('../../models/prductschema')
+const Coupon=require('../../models/couponSchema')
 
 
 const loadCartPage = async (req, res) => {
@@ -45,7 +46,7 @@ const loadCartPage = async (req, res) => {
     const addCart = async (req, res) => {
         const productId = req.params.id;
         const userId = req.session.user;
-        const quantity = parseInt(req.body.qty, 10) || 1; 
+        const quantity = parseInt(req.body.qty, 10) || 1;
     
         if (!userId) {
             return res.status(401).send("Please login");
@@ -56,7 +57,6 @@ const loadCartPage = async (req, res) => {
         }
     
         try {
-            t
             const product = await Product.findById(productId);
             if (!product) {
                 return res.status(404).send("Product not found");
@@ -76,49 +76,43 @@ const loadCartPage = async (req, res) => {
                             quantity,
                             name: product.productname,
                             images: product.images[0],
-                            price: product.discountPrice && product.discountPrice < product.regularprice 
-                                ? product.discountPrice 
+                            price: product.discountPrice && product.discountPrice < product.regularprice
+                                ? product.discountPrice
                                 : product.regularprice,
                         },
                     ],
                 });
             } else {
-       
                 const existingProductIndex = cart.products.findIndex(
                     (item) => item.productId.toString() === productId
                 );
     
                 if (existingProductIndex > -1) {
-         
                     cart.products[existingProductIndex].quantity += quantity;
                 } else {
-          
                     cart.products.push({
                         productId,
                         quantity,
                         name: product.productname,
                         images: product.images[0],
-                        price: product.discountPrice && product.discountPrice < product.regularprice 
-                            ? product.discountPrice 
+                        price: product.discountPrice && product.discountPrice < product.regularprice
+                            ? product.discountPrice
                             : product.regularprice,
                     });
                 }
             }
     
-            
             await cart.save();
-    
-            
             product.stock -= quantity;
             await product.save();
     
-
             res.redirect("/cartPage");
         } catch (error) {
             console.error("Error adding product to cart:", error);
             res.status(500).send("Internal server error");
         }
     };
+    
     
 
   const updateCartQuantity = async (req, res) => {
@@ -280,9 +274,12 @@ const cancelProduct = async (req, res) => {
 
 
 
+
+
 module.exports = {
     loadCartPage,
     addCart,
     updateCartQuantity,
-    cancelProduct
+    cancelProduct,
+
 }

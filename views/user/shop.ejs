@@ -91,20 +91,27 @@
                                         <img src="/uploads/<%= product.images[1] %>" alt="">
                                     </a>
                                     <div class="single_product_text">
-                                        <h6><%= product.productname %></h6>
+                                        <a style="cursor: pointer;"
+                                        onclick="addToWishlist('<%= product._id %>')"
+                                        ><i class="ti-heart" style="margin-left: 4cm;"></i></a>
+                                          
+
+                                        
+
+                                        <h6 style="margin-top: 1cm;"><%= product.productname %></h6>
                                         <% if (product.discountPrice && product.discountPrice < product.regularprice) { %>
                                             <h3><s style="color: red;">₹<%= product.regularprice %></s> ₹<%=Math.round(product.discountPrice) %></h3>
                                         <% } else { %>
                                             <h3>₹<%= product.regularprice %></h3>
                                         <% } %>
                                          <% if (product.stock <= 0) { %>
-                                            <a class="add_cart">Out of Stock <i class="ti-heart"></i></a>
+                                            <a class="add_cart">Out of Stock</a>
                                         <% } else { %>
                                             <a
                                                 style="cursor: pointer;"
                                                 onclick="addToCart('<%= product._id %>')"
                                                 class="add_cart"
-                                            >+ add to cart <i class="ti-heart"></i></a>
+                                            >+ add to cart </a>
                                         <% } %>
                                     </div>
                                 </div>
@@ -361,6 +368,30 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
       const errorMessage = await response.text();
       
       toastr.error(`Failed to add to cart: ${errorMessage}`, "Error");
+    }
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    
+    toastr.error("An unexpected error occurred.", "Error");
+  }
+}
+
+async function addToWishlist(productId) {
+    console.log('pppppppppppp',productId);
+    
+  try {
+    const response = await fetch(`/wishlist/add/${productId}`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+
+    });
+
+    if (response.ok) {
+      toastr.success("Product added to wishlist!", "Success");
+    } else {
+      const errorMessage = await response.text();
+      
+      toastr.error(`Failed to add to wishlist: ${errorMessage}`, "Error");
     }
   } catch (error) {
     console.error("Error adding to cart:", error);

@@ -63,8 +63,20 @@
             <a href="#">Click here to enter your code</a>
           </h2>
         </div>
-        <input type="text" placeholder="Enter coupon code" />
-        <a class="tp_btn" href="#">Apply Coupon</a>
+        <form id="couponForm">
+          <input type="text" placeholder="Enter coupon code" id="coupuncode" name="coupuncode" />
+          <button class="tp_btn" type="submit">Apply Coupon</button>
+      </form>
+             <div style="display: flex;">
+           <%coupons.forEach(coupon=>{%>
+          <div style="width: 5cm;height: 4cm;background-color: #ecfdff;margin-top: 1cm;margin-left: 1cm;padding-top: .5cm;">
+          <h4  style="margin-left: 1.3cm;" ><strong> <%= coupon.discountValue %>% offer</strong></h4>
+           <div  style="width: 100%;height: 1cm;background-color: #f44a40;"><p style="margin-left: 1.5cm;margin-top: .4cm;font-size: 18px;color: #fff;"><%= coupon.code %></p></div>
+           <p style="margin-top: .4cm;font-size: 12px;margin-left: .2cm;">Expiry Date:<%= new Date(coupon.expiryDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+           </p>
+          </div>
+          <%})%>
+        </div>
       </div>
       <div class="billing_details">
         <div class="row">
@@ -129,7 +141,7 @@
                         <p><strong>State:</strong> <%= address.state %></p>
                         <div class="address-actions">
                             <a href='/editAddressPage?id=<%= address._id %>'>
-                                <button class="genric-btn warning radius">Edit</button>
+                                <button class="genric-btn info radius">Edit</button>
                             </a>
                         </div>
                     </div>
@@ -163,7 +175,7 @@
               <ul class="list list_2">
                 <li>
                   <a href="#">Subtotal
-                    <span>₹<%=subtotal%></span>
+                    <span id="afterCoupon">₹<%=subtotal%></span>
                   </a>
                 </li>
                 <li>
@@ -173,7 +185,7 @@
                 </li>
                 <li>
                   <a href="#">Total
-                    <span>₹<%=subtotal + 50%></span>
+                    <span id="afterCouponWithShipping">₹<%=subtotal + 50%></span>
                   </a>
                 </li>
               </ul>
@@ -181,7 +193,7 @@
                
               <div class="payment_item">
                 <div class="radion_btn">
-                  <input type="radio" id="f-option5" name="paymentMethod" value="COD"  />
+                  <input type="radio" id="f-option5" name="paymentMethod" value="CashOnDelivery"  />
                   <label for="f-option5">Cash On Delivery</label>
                   <div class="check"></div>
                 </div>
@@ -400,7 +412,7 @@
 
     function submitOrder() {
       const selectedAddressElement = document.querySelector('input[name="selectedAddress"]:checked');
-        const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
+      const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
         
    
 
@@ -434,6 +446,8 @@ if(!selectedAddressElement){
 
         const selectedAddress = selectedAddressElement.value;
         const paymentMethod = paymentMethodElement.value;
+        const afterCoupon=document.getElementById('afterCoupon').value
+        const afterCouponWithShipping=document.getElementById('afterCouponWithShipping').value
       
           
         const cartItems = [];
@@ -462,7 +476,7 @@ if(!selectedAddressElement){
         
         if (paymentMethod === "razorpay") {
             createRazorpayOrder(orderData);
-        } else if (paymentMethod === "COD") {
+        } else if (paymentMethod === "CashOnDelivery") {
             submitOrderToBackend(orderData);
         }
     }
@@ -508,4 +522,40 @@ if(!selectedAddressElement){
         }
 
 
+
+
+
+//coupon 
+document.getElementById('couponForm').addEventListener('submit', async (event) => {
+        event.preventDefault(); 
+
+        const coupuncode = document.getElementById('coupuncode').value;
+       
+       
+
+        try {
+            const response = await fetch('/discount', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ coupuncode })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Discount applied:', data);
+                afterCoupon.innerText=`${data.afterCoupon}`
+                afterCouponWithShipping.innerText=`${data.afterCoupon+50}`
+                alert(`Coupon Applied! New Total: ${data.afterCoupon}`);
+            } else {
+                const error = await response.json();
+                console.error('Error applying coupon:', error.message);
+                alert(`Error: ${error.message}`);
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+            alert('An unexpected error occurred.');
+        }
+    });
 </script>

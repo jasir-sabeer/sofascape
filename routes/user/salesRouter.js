@@ -11,6 +11,10 @@ router.get('/thankyou',salesController.loadThankyou)
 router.get('/orderTable',salesController.loadOrderTable)
 router.get('/orderDetails/:orderId',salesController.loadOrderDetails)
 router.post('/cancelOrder/:orderId/:productId', salesController.cancelProduct);
+router.get('/wishlist',salesController.loadWishList)
+router.post('/discount',salesController.discountCoupon)
+router.post('/wishlist/add/:id',salesController.addWishlist)
+
 
 
 
