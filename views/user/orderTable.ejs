@@ -23,6 +23,7 @@
 
 <div class="section-top-border">
     <h2 class="mb-30">Your Orders</h2>
+    <% if(orders.length>0){%>
     <% orders.forEach(order => { %>
     <h5 class="country">OrderId :<%= order._id%></h5>
     <div class="progress-table-wrap " id="table">
@@ -41,7 +42,7 @@
             <% order.products.forEach(product => { %>
             <div class="table-row">
                 <div class="serial"><%=  count++ %></div>
-                <div class="percentage"> <img src="/uploads/<%= product.image %>" alt="flag" style="width: 1.5cm;"><%= product.name %></div>
+                <div class="percentage"> <img src="/uploads/<%= product.productId.images[0] %>" alt="flag" style="width: 1.5cm;"><%= product.name %></div>
                 <div class="percentage"><%= product.quantity%></div>
                 <div class="country"><%= product.price %></div>
                 <div class="country"><%= product.status %></div>
@@ -64,6 +65,12 @@
         </div>
     </div>
     <% }); %>
+    <%}else{%>
+        <div>
+            <p colspan="4" style="margin-left: 9cm;font-size: 18px;">Your Orders is empty....! Please add products </p><br>
+                 <a href="/products" class="genric-btn primary e-large" style="margin-left: 12cm;">SHOP NOW</a>
+        </div>
+      <%}%>  
    
 </div>
 <a href="/homepage" id="btn" class="genric-btn default circle">Back To Home</a>

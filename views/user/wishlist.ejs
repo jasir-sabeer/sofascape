@@ -12,9 +12,8 @@
                 <h2>Wishlist</h2>
                   
                     <li style="float: left;" class="breadcrumb-item"><a href="/homepage">Home</a></li>
-                    <li  style="float: left;" class="breadcrumb-item active" aria-current="page">Cart</li>
-                
-          
+                    <li  style="float: left;" class="breadcrumb-item active" aria-current="page">Wishlist</li>
+              
               </div>
             </div>
           </div>
@@ -29,44 +28,55 @@
         <div class="cart_inner">
           <div class="table-responsive">
             <table class="table">
-             
+               <% if(wishlistProducts.length>0){%>
               <thead>
                 <tr>
                   <th scope="col">Image</th>
                   <th scope="col">Product</th>
                   <th scope="col">Price</th>
                   <th scope="col">Add Cart</th>
+                  <th scope="col">Remove</th>
                 </tr>
               </thead>
               <tbody>
-                
+                <% wishlistProducts.forEach(product => { %>
          
                 <tr>
                   <td>
-                  
-                       kkkkk
+                    <img style="width: 2cm;height: 2cm;" src="/uploads/<%= product.productId.images[0] %>" alt="<%= product.productId.productname %>" />
                   </td>
                   <td>
-                    ggh
+                    <p><%= product.productId.productname %></p>
                   </td>
                   <td>
-                   tyui
+                    <p><%= product.productId.regularprice %></p>
+
                   </td>
                   
                    <td>
-                    tyu
+                   <a onclick="addToCart('<%= product.productId._id %>')" style="cursor:pointer ;"><p>+add to cart</p></a> 
+
                   </td>
-  
+                  <td>
+                    <form action="/wishlist/cancel/<%= product.productId._id %>?_method=DELETE" method="POST"
+                      onsubmit="event.preventDefault(); cancelProduct('<%= product.productId._id %>')">
+                      <button class="genric-btn danger-border radius">Remove</button>
+                  </form>
+                  </td>
             
                 </tr>
-          
+             <%})%>
         
             </tbody>
-            
-       
+            <%}else{%>
+              <div>
+                <p colspan="4" style="margin-left: 9cm;font-size: 18px;">Your Wishlist is empty....! Please add products </p><br>
+                     <a href="/products" class="genric-btn primary e-large" style="margin-left: 12cm;">ADD NOW</a>
+            </div>
+           <%}%>
             </table>
             <div class="checkout_btn_inner float-right">
-              <a class="btn_1" href="/products">Continue Shopping</a>
+              <a class="btn_1" href="/products">Add more to wishlist</a>
             </div>
           </div>
         </div>
@@ -74,5 +84,64 @@
     <!--================End Cart Area =================-->
   
     <%-include("../partials/user/footer")%>
+
+    <script>
+      function cancelProduct(productId) {
+    fetch(`/wishlist/cancel/${productId}`, { 
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+           
+        }else{
+          toastr.error("wishlist Item Removed ", "Error");
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const productRow = document.querySelector(`#product-${productId}`);
+            window.location.reload()
+            if (productRow) {
+                productRow.remove();
+            }
+        } else {
+            console.error('Error:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error canceling product:', error);
+    });
+}
+
+
+
+//add to cart
+async function addToCart(productId) {
+  console.log('jjjjjjjjj',productId);
+  
+  try {
+    const response = await fetch(`/cart/add/${productId}`, {
+      method: "POST",
+    });
+
+    if (response.ok) {
+      toastr.success("Product added to cart!", "Success");
+    } else {
+      const errorMessage = await response.text();
+      
+      toastr.error(`Failed to add to cart: ${errorMessage}`, "Error");
+    }
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    
+    toastr.error("An unexpected error occurred.", "Error");
+  }
+}
+    </script>
   
     
