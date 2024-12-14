@@ -1,0 +1,46 @@
+<style>
+.mainDiv{
+    width: 15cm;
+    height: 10cm;
+    background-color: #d5f9fd;
+    margin-top: 1cm;
+    margin-left: 9cm;
+    border-radius: 20px;
+    padding: 1.5cm;
+}
+</style>
+<%-include("../../views/partials/user/header")%>
+<h2 style="margin-top: 3cm;margin-left: 3cm;">Your Wallet</h2>
+<div class="mainDiv">
+<h4 style="margin-left:4cm;">Wallet Amount</h4>
+<h1 style="margin-left: 4cm;margin-top: 1cm;">Balance</h1>
+<h1 style="margin-left:4cm;color: #ff3368;font-size:34px;font-weight: bold;">₹ <%= wallet.balance%></h1>
+
+<p style="font-size: 12px;margin-top: 2cm;">"Secure your future, one transaction at a time—set up your wallet and take control of your digital journey."</p>
+</div>
+
+<div class="section-top-border" style="margin-left: 3cm;margin-right: 3cm;">
+    <h3 class="mb-30">Transactions</h3>
+    <div class="progress-table-wrap">
+        <div class="progress-table">
+            <div class="table-head">
+                <div class="serial">#</div>
+                <div class="country">Type</div>
+                <div class="visit">Amonut</div>
+                <div class="percentage">Description</div>
+            </div>
+           <% wallet.transactions.forEach(transaction=>{ %>
+            <div class="table-row">
+                <div class="serial">08</div>
+                <div class="country"><%=transaction.type %></div>
+                <div class="visit"><%=transaction.amount %></div>
+                <div class="percentage">
+                    <p><%=transaction.description %></p>
+                </div>
+            </div>
+            <%})%>
+        </div>
+    </div>
+</div>
+ 
+<%-include("../../views/partials/user/footer")%>

@@ -8,6 +8,7 @@ const Coupon = require('../../models/couponSchema')
 const razorpay = require('razorpay')
 const Wishlist = require('../../models/wishlist')
 const Product = require('../../models/prductschema')
+const Wallet=require('../../models/walletSchema')
 const crypto = require('crypto');
 
 
@@ -225,43 +226,169 @@ const loadOrderDetails = async (req, res) => {
 };
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const cancelOrder = async (req, res) => {
+//     const { orderId, productId } = req.params;
+//     const { cancellationReason } = req.body;
+
+//     try {
+//         const order = await orderModel.findById(orderId);
+//         if (!order) {
+//             return res.status(404).send('Order not found');
+//         }
+
+//         const product = order.products.find(p => p.productId.toString() === productId);
+
+//         const currentProduct=await productModel.findById(productId)
+//         if (!product) {
+//             return res.status(404).send('Product not found');
+//         }
+
+        
+//         product.status = 'Cancelled';
+//         currentProduct.stock+=product.quantity
+//         currentProduct.save();
+//         product.cancellationReason = cancellationReason;
+
+//         order.total -= product.discountedPrice;
+
+//         const allProductsCancelled = order.products.every((p) => p.status === "Cancelled");
+//         let refundAmount = product.discountedPrice * product.quantity;
+
+//         let wallet = await walletModel.findOne({ userId: order.userId });
+//         if (allProductsCancelled) {
+//             order.status = "Cancelled";
+//             if (order.couponDiscount > 0) {                
+//                 refundAmount -= order.couponDiscount;                 
+//                 order.total += order.couponDiscount;                 
+//             }
+//         }
+
+//         if (!wallet) {
+//             wallet = new walletModel({
+//                 userId: order.userId,
+//                 balance: refundAmount,
+//                 transactions: [
+//                     {
+//                         type: 'refund',
+//                         amount: refundAmount,
+//                         description: Refund for canceled product (${product.name}) in order ${orderId}
+//                     }
+//                 ]
+//             });
+//         } else {
+//             wallet.balance += refundAmount;
+//             wallet.transactions.push({
+//                 type: 'refund',
+//                 amount: refundAmount,
+//                 description: Refund for canceled product (${product.name}) in order ${orderId}
+//             });
+//         }
+
+//         await wallet.save(); 
+//         await order.save(); 
+
+//         res.redirect('/profile/order');
+//     } catch (error) {
+//         console.error('Error canceling order:', error);
+//         res.status(500).send('Error updating order status');
+//     }
+// };
+
+
+
+
+
+
+
+
+
+
+
+
 const cancelProduct = async (req, res) => {
     const { orderId, productId } = req.params;
 
     try {
+  
         const order = await Order.findById(orderId);
         if (!order) return res.status(404).send('Order not found');
 
+    
         const product = order.products.find(p => p.productId.toString() === productId);
         if (!product) return res.status(404).send('Product not found in the order');
 
+        const originalProduct = await Product.findById(productId);
         product.status = 'Cancelled';
+        originalProduct.stock += product.quantity;
+        await originalProduct.save();
 
-
-        let newSubtotal = 0;
-        let shipping = 50;
-
-
-        order.products.forEach(product => {
-            if (product.status !== 'Cancelled') {
-                newSubtotal += product.price * product.quantity;
-            }
-        });
-        const newTotal = shipping + newSubtotal;
-        if (newSubtotal !== order.subtotal) {
-            order.subtotal = newSubtotal;
-            order.total = newTotal;
-            await order.save();
+     
+        let refundAmount = product.price * product.quantity;
+        if (order.couponDiscount > 0 && order.products.every(p => p.status === 'Cancelled')) {
+            refundAmount -= order.couponDiscount;
         }
 
+   
+        let newSubtotal = 0;
+        order.products.forEach(p => {
+            if (p.status !== 'Cancelled') {
+                newSubtotal += p.price * p.quantity;
+            }
+        });
+        order.subtotal = newSubtotal;
+        order.total = newSubtotal + 50; 
+        if (order.products.every(p => p.status === 'Cancelled')) {
+            order.status = 'Cancelled';
+        }
 
+        let wallet = await Wallet.findOne({ userId: order.userId });
+        if (!wallet) {
+            wallet = new Wallet({
+                userId: order.userId,
+                balance: refundAmount,
+                transactions: [{
+                    type: 'refund',
+                    amount: refundAmount,
+                    description: `Refund for cancelled product (${product.name}) in order ${orderId}`
+                }]
+            });
+        } else {
+            wallet.balance += refundAmount;
+            wallet.transactions.push({
+                type: 'refund',
+                amount: refundAmount,
+                description: `Refund for cancelled product (${product.name}) in order ${orderId}`
+            });
+        }
 
-        res.status(200).send('Product cancelled successfully');
+        await wallet.save();
+        await order.save();
+
+       
+        res.redirect('/wallet');
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Error processing request');
+        console.error("Error cancelling product:", error);
+        res.status(500).send({ message: 'Error processing cancellation', error });
     }
 };
+
 
 const loadWishList = async (req, res) => {
     const id = req.session.user;
@@ -461,14 +588,14 @@ const createOrder = async (req, res) => {
         const order = await instance.orders.create(options);
 
         res.status(200).json({
-            success: true, // Make sure to include this
+            success: true, 
             orderId: order.id,
             amount: options.amount
         });
     } catch (error) {
         console.error('Error creating Razorpay order:', error);
         res.status(500).json({
-            success: false, // Explicitly set success to false
+            success: false, 
             error: 'Failed to create Razorpay order'
         });
     }
@@ -478,11 +605,10 @@ const verifyPayment = async (req, res) => {
     const { paymentResponse, orderData } = req.body;
     const userId = req.session?.user;
 
-
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = paymentResponse;
 
-    // Create a HMAC SHA256 hash
-    const shasum = crypto.createHmac('sha256', process.env.RAZOR_PAY_SECRET); // Use your Razorpay secret from .env
+    
+    const shasum = crypto.createHmac('sha256', process.env.RAZOR_PAY_SECRET); 
     shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
     const digest = shasum.digest('hex');
 
@@ -529,7 +655,6 @@ const verifyPayment = async (req, res) => {
                     message: "Cart not found or already empty."
                 });
             }
-            
             return res.status(200).json({
                 success: true,
                 orderId: savedOrder._id
@@ -551,6 +676,16 @@ const verifyPayment = async (req, res) => {
 };
 
 
+const loadWalletPage=async(req,res)=>{
+    const userId = req.session.user;
+    try {
+         const wallet=await Wallet.findOne({userId})
+        res.render('wallet',{wallet})
+    } catch (error) {
+        
+    }
+}
+
 module.exports = {
     loadCheckout,
     addAddressCheckout,
@@ -565,7 +700,8 @@ module.exports = {
     addWishlist,
     cancelProductWshlist,
     createOrder,
-    verifyPayment
+    verifyPayment,
+    loadWalletPage
 }
 
 
