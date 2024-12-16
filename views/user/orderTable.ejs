@@ -44,7 +44,11 @@
                 <div class="serial"><%=  count++ %></div>
                 <div class="percentage"> <img src="/uploads/<%= product.productId.images[0] %>" alt="flag" style="width: 1.5cm;"><%= product.name %></div>
                 <div class="percentage"><%= product.quantity%></div>
-                <div class="country"><%= product.price %></div>
+                <%if(product.offerPrice ){%>
+                    <div class="country"><%= product.offerPrice * product.quantity %></div>
+                    <%}else{%>
+                      <div class="country"><%= product.price * product.quantity %></div>
+                    <%}%>
                 <div class="country"><%= product.status %></div>
                 <% if(product.status==="Cancelled" ){%>
                     <div class="country"><th> <span>Cancelled</span></th></div>

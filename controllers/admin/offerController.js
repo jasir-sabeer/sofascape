@@ -22,7 +22,7 @@ const loadAddOffer=async(req,res)=>{
 
         
     } catch (error) {
-        console.error("Error i", error.message);
+        console.error("Error in", error.message);
         res.status(500).send("An error in load addOffer");
     }
 }
@@ -46,35 +46,41 @@ const addOffer = async (req, res) => {
             applicableToId: newobjectids,
             discountValue,
             expiryDate,
-       
         });
 
         await newOffer.save();
 
         if (applicableTo === 'Product') {
-        
+            // Handle direct product offers
             const products = await Product.find({ _id: { $in: newobjectids } });
             for (let product of products) {
                 const discountedPrice = product.regularprice - (product.regularprice * (discountValue / 100));
                 await Product.findByIdAndUpdate(
                     product._id,
-                    { offer: newOffer._id, discountPrice: discountedPrice },
+                    { 
+                        offer: newOffer._id, 
+                        discountPrice: discountedPrice,
+                        total: discountedPrice // Update total field if needed
+                    },
                     { new: true }
                 );
             }
         } else if (applicableTo === 'Category') {
-      
+            // Handle category-wide offers
             const products = await Product.find({ category: { $in: newobjectids } });
             for (let product of products) {
                 const discountedPrice = product.regularprice - (product.regularprice * (discountValue / 100));
                 await Product.findByIdAndUpdate(
                     product._id,
-                    { offer: newOffer._id, discountPrice: discountedPrice },
+                    { 
+                        offer: newOffer._id, 
+                        discountPrice: discountedPrice,
+                        total: discountedPrice // Update total field if needed
+                    },
                     { new: true }
                 );
             }
 
-     
             await Category.updateMany(
                 { _id: { $in: newobjectids } },
                 { offer: newOffer._id }
@@ -87,6 +93,7 @@ const addOffer = async (req, res) => {
         res.status(500).send('An error occurred while adding the offer');
     }
 };
+
 
 
 

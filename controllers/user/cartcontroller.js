@@ -26,24 +26,23 @@ const loadCartPage = async (req, res) => {
           let subtotal = 0;
           let productTotal
           cart.products.forEach(item => {
-            if(item.productId.discountPrice &&item.productId.discountPrice < item.productId.regularprice){
-             productTotal = item.quantity * item.productId.discountPrice; 
-            }else{
-             productTotal = item.quantity * item.productId.regularprice; 
-             } 
-
-            item.subtotal = productTotal; 
-            subtotal += productTotal; 
-          });
+            if (item.productId.discountPrice && item.productId.discountPrice < item.productId.regularprice) {
+                productTotal = item.quantity * item.productId.discountPrice;
+            } else {
+                productTotal = item.quantity * item.productId.regularprice;
+            }
+            item.subtotal = productTotal;
+            subtotal += productTotal;
+        });
       
           res.render('cart', { cartProducts: cart.products ,subtotal});
         } catch (error) {
           console.error('Error loading cart page:', error);
           res.redirect('/page-404');
         }
-    }
+};
 
-    const addCart = async (req, res) => {
+const addCart = async (req, res) => {
         const productId = req.params.id;
         const userId = req.session.user;
         const quantity = parseInt(req.body.qty, 10) || 1;
@@ -111,11 +110,11 @@ const loadCartPage = async (req, res) => {
             console.error("Error adding product to cart:", error);
             res.status(500).send("Internal server error");
         }
-    };
+};
     
     
 
-  const updateCartQuantity = async (req, res) => {
+const updateCartQuantity = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
         const userId = req.session.user;

@@ -13,6 +13,7 @@ const orderRouter=require('./routes/admin/orderRouter')
 const stockRouter=require('./routes/admin/stockRouter')
 const couponRouter=require('./routes/admin/couponRouter')
 const offerRouter=require('./routes/admin/offerRouter')
+const salesReportRouter=require('./routes/admin/salesReportRouter')
 
 //user routers
 const userRouter=require('./routes/user/userRouter')
@@ -64,6 +65,7 @@ app.use('/admin',orderRouter)
 app.use('/admin',stockRouter)
 app.use('/admin',couponRouter)
 app.use('/admin',offerRouter)
+app.use('/admin',salesReportRouter)
 
 
 app.use(methodOverride('_method'));

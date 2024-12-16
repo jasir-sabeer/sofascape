@@ -95,7 +95,11 @@
                 <tr>
                   <th colspan="2"><span><%= product.name %></span></th>
                   <th>x<%= product.quantity %></th>
-                  <th> <span>₹<%= product.price * product.quantity %></span></th>
+                  <%if(product.offerPrice ){%>
+                  <th> <span>₹<%= product.offerPrice * product.quantity %></span></th>
+                  <%}else{%>
+                    <th> <span>₹<%= product.price * product.quantity %></span></th>
+                  <%}%>
                 </tr>
                 <%})%>
                 <tr>
@@ -104,7 +108,12 @@
                 </tr>
                 <tr>
                   <th colspan="3">shipping</th>
+                  <% if(orders.total>50){%>
                   <th><span>₹<%= orders.shippingCost%></span></th>
+                  <%}else{%>
+                    <th><span>₹0</span></th>
+
+                  <%}%>
                 </tr>
                   <%if(orders.couponDiscountValue){%>
                   <tr>

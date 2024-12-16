@@ -167,7 +167,11 @@
                 <li>
                   <a  href="#"><%= product.productId.productname %>
                     <span class="middle">x<%=product.quantity%></span>
-                    <span class="last">₹<%= product.productId.regularprice * product.quantity %></span>
+                    <% if (product.productId.discountPrice && product.productId.discountPrice < product.productId.regularprice) { %>
+                    <span class="last">₹<%=  (product.productId.discountPrice * product.quantity).toFixed(0)  %></span>
+                    <%}else{%>
+                    <span class="last">₹<%=  (product.productId.regularprice * product.quantity).toFixed(0)  %></span>
+                     <%}%>
                   </a>
                 </li>
                 <%})%>
@@ -458,6 +462,7 @@ function submitOrder() {
         name: "<%= product.productId.productname %>",
         image: '<%= product.productId.images[0] %>',
         status: "Pending",
+        offerPrice:Number('<%= product.productId.discountPrice%>')
     });
     '<% }); %>';
 
@@ -597,9 +602,9 @@ document.getElementById('couponForm').addEventListener('submit', async (event) =
             console.log(data);
             
             document.getElementById("couponRow").style.display = "block";
-            discountValue.innerText = `(₹${data.discountAmount}`;
+            discountValue.innerText = `₹${data.discountAmount}`;
             document.getElementById("couponRow2").style.display = "block";
-            totalAfterDiscount.innerText = `₹${data.afterCoupon + 50}`;
+            totalAfterDiscount.innerText = `₹${data.afterCoupon + 45}`;
             Swal.fire({
                 title: 'Success!',
                 text: `Coupon applied! Discount: ${data.discountCode.discountValue}%`,

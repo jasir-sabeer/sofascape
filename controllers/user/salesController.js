@@ -20,10 +20,11 @@ const loadCheckout = async (req, res) => {
         const addresses = await Address.find({ user: user })
         const coupons = await Coupon.find({ isListed: true, isExpired: false })
         const cartProduct = await Cart.findOne({ userId: user }).populate("userId").populate("products.productId").exec()
+        
         let subtotal = 0;
         let productTotal;
         cartProduct.products.forEach(item => {
-            if (item.productId.discountPrice && item.productId.discountPrice < item.productId.regularprice) {
+            if (item.productId.discountPrice && item.productId. discountPrice < item.productId.regularprice) {
                 productTotal = item.quantity * item.productId.discountPrice;
             } else {
                 productTotal = item.quantity * item.productId.regularprice;
@@ -127,7 +128,8 @@ const saveOrder = async (req, res) => {
             name: item.name,
             price: item.price,
             image: item.image,
-            status: item.status
+            status: item.status,
+            offerPrice:item.offerPrice
         }));
 
         const newOrder = new Order({
@@ -227,110 +229,13 @@ const loadOrderDetails = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const cancelOrder = async (req, res) => {
-//     const { orderId, productId } = req.params;
-//     const { cancellationReason } = req.body;
-
-//     try {
-//         const order = await orderModel.findById(orderId);
-//         if (!order) {
-//             return res.status(404).send('Order not found');
-//         }
-
-//         const product = order.products.find(p => p.productId.toString() === productId);
-
-//         const currentProduct=await productModel.findById(productId)
-//         if (!product) {
-//             return res.status(404).send('Product not found');
-//         }
-
-        
-//         product.status = 'Cancelled';
-//         currentProduct.stock+=product.quantity
-//         currentProduct.save();
-//         product.cancellationReason = cancellationReason;
-
-//         order.total -= product.discountedPrice;
-
-//         const allProductsCancelled = order.products.every((p) => p.status === "Cancelled");
-//         let refundAmount = product.discountedPrice * product.quantity;
-
-//         let wallet = await walletModel.findOne({ userId: order.userId });
-//         if (allProductsCancelled) {
-//             order.status = "Cancelled";
-//             if (order.couponDiscount > 0) {                
-//                 refundAmount -= order.couponDiscount;                 
-//                 order.total += order.couponDiscount;                 
-//             }
-//         }
-
-//         if (!wallet) {
-//             wallet = new walletModel({
-//                 userId: order.userId,
-//                 balance: refundAmount,
-//                 transactions: [
-//                     {
-//                         type: 'refund',
-//                         amount: refundAmount,
-//                         description: Refund for canceled product (${product.name}) in order ${orderId}
-//                     }
-//                 ]
-//             });
-//         } else {
-//             wallet.balance += refundAmount;
-//             wallet.transactions.push({
-//                 type: 'refund',
-//                 amount: refundAmount,
-//                 description: Refund for canceled product (${product.name}) in order ${orderId}
-//             });
-//         }
-
-//         await wallet.save(); 
-//         await order.save(); 
-
-//         res.redirect('/profile/order');
-//     } catch (error) {
-//         console.error('Error canceling order:', error);
-//         res.status(500).send('Error updating order status');
-//     }
-// };
-
-
-
-
-
-
-
-
-
-
-
-
 const cancelProduct = async (req, res) => {
     const { orderId, productId } = req.params;
 
     try {
-  
         const order = await Order.findById(orderId);
         if (!order) return res.status(404).send('Order not found');
 
-    
         const product = order.products.find(p => p.productId.toString() === productId);
         if (!product) return res.status(404).send('Product not found in the order');
 
@@ -339,23 +244,28 @@ const cancelProduct = async (req, res) => {
         originalProduct.stock += product.quantity;
         await originalProduct.save();
 
-     
-        let refundAmount = product.price * product.quantity;
+        const priceToRefund = product.offerPrice || product.price;
+        let refundAmount = priceToRefund * product.quantity;
+
         if (order.couponDiscount > 0 && order.products.every(p => p.status === 'Cancelled')) {
             refundAmount -= order.couponDiscount;
         }
 
-   
-        let newSubtotal = 0;
-        order.products.forEach(p => {
+        let newSubtotal = order.products.reduce((sum, p) => {
             if (p.status !== 'Cancelled') {
-                newSubtotal += p.price * p.quantity;
+                return sum + (p.offerPrice || p.price) * p.quantity;
             }
-        });
+            return sum;
+        }, 0);
         order.subtotal = newSubtotal;
-        order.total = newSubtotal + 50; 
+
         if (order.products.every(p => p.status === 'Cancelled')) {
-            order.status = 'Cancelled';
+            order.shippingCost = 0; 
+            order.total = 0;      
+            order.status = 'Cancelled'; 
+        } else {
+            order.total -= priceToRefund * product.quantity; 
+            if (order.total < 0) order.total = 0;
         }
 
         let wallet = await Wallet.findOne({ userId: order.userId });
@@ -381,13 +291,18 @@ const cancelProduct = async (req, res) => {
         await wallet.save();
         await order.save();
 
-       
         res.redirect('/wallet');
     } catch (error) {
         console.error("Error cancelling product:", error);
         res.status(500).send({ message: 'Error processing cancellation', error });
     }
 };
+
+
+
+
+
+
 
 
 const loadWishList = async (req, res) => {
@@ -625,6 +540,7 @@ const verifyPayment = async (req, res) => {
                     name: item.name,
                     price: item.price,
                     image: item.image,
+                    offerPrice:item.offerPrice
                 })),
                 address: orderData.addressId,
                 subtotal: orderData.subtotal,
@@ -676,15 +592,23 @@ const verifyPayment = async (req, res) => {
 };
 
 
-const loadWalletPage=async(req,res)=>{
+const loadWalletPage = async (req, res) => {
     const userId = req.session.user;
     try {
-         const wallet=await Wallet.findOne({userId})
-        res.render('wallet',{wallet})
+        let wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+            wallet = {
+                balance: 0, 
+                transactions: [], 
+            };
+        }
+        res.render('wallet', { wallet });
     } catch (error) {
-        
+        console.error("Error loading wallet page:", error);
+        res.status(500).send('An error occurred while loading the wallet page.');
     }
-}
+};
+
 
 module.exports = {
     loadCheckout,

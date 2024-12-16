@@ -259,7 +259,7 @@
             <li><a href="/admin/inventoryManagement">inventory</a></li>
             <li><a href="/admin/couponManagement">Coupon</a></li>
             <li><a href="/admin/offerManagement">Offer</a></li>
-            <li><a href="#reports">Sales Reports</a></li>
+            <li><a href="/admin/salesReport">Sales Reports</a></li>
             <li><a href="#profile">Profile</a></li>
             <form action="/admin/logout" method="POST">
               <button type="submit" class="logoutbtn" style="font-size: 13.3px;">Logout</button>
@@ -301,7 +301,10 @@
                         <%}%>
                         <% if(product.status==='Delivered'){%>
                            <td style="color: rgb(19, 228, 19);">Delivered</td>
-                        <%}else{%>    
+                        <%}else if(product.status==='Cancelled'){%>   
+                            <td style="color: rgb(120, 10, 10);">Cancelled</td>
+
+                          <%}else{%>  
                         <td>
                             <select 
                             name="status" 
@@ -320,7 +323,7 @@
                         <% if(product.status==='Delivered'){%>
                             <td ><button class="dis" >Delivered</button></td>
                          <%}else if(product.status==='Cancelled'){%>   
-                            <td ><button class="edit-button" disabled>Cancelled</button></td>
+                            <td ><button class="dis" disabled>Cancelled</button></td>
                         <%}else{%>
                         <td><button onclick="cancelProduct('<%= order._id %>', '<%= product.productId._id %>')" class="edit-button" >Cancel</button></td>
 

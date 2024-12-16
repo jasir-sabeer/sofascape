@@ -37,7 +37,12 @@
           <div class="s_product_text">
             
             <h3><%=product.productname%></h3>
-            <h2>₹<%=product.regularprice%></h2>
+            <%if(product.discountPrice){%>
+              <h3 ><s style="color:brown;">₹<%=product.regularprice%></s></h3>
+            <h2>₹<%=product.discountPrice%></h2>
+            <%}else{%>
+              <h2>₹<%=product.regularprice%></h2>
+              <%}%>
             <ul class="list">
               <li>
                 <a class="active" href="#">
