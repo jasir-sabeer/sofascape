@@ -1,12 +1,12 @@
 const { name } = require("ejs");
 const User = require("../../models/userschema");
-const  Product=require('../../models/prductschema')
-const Category=require('../../models/categoryschema')
+const Product = require('../../models/prductschema')
+const Category = require('../../models/categoryschema')
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
-const Review= require('../../models/reviewSchema');
-const session=require('express-session')
+const Review = require('../../models/reviewSchema');
+const session = require('express-session')
 
 // Page not found handler
 const pagenotfound = async (req, res) => {
@@ -21,23 +21,23 @@ const pagenotfound = async (req, res) => {
 const loadhomepage = async (req, res) => {
 
     try {
-        
+
         if (req.session.passport && req.session.passport.user) {
-            req.session.user = req.session.passport.user; 
-        } 
-        
+            req.session.user = req.session.passport.user;
+        }
+
         return res.render("home", {
-            user: req.session.user, 
+            user: req.session.user,
         });
     } catch (error) {
-        console.log("Home page not found.", error); 
+        console.log("Home page not found.", error);
         res.status(500).send('Server error');
     }
 };
 
 const loadHomepage = (req, res) => {
     const user = req.session.passport ? req.session.passport.user : null;
-    res.render('home', { user }); 
+    res.render('home', { user });
 };
 
 
@@ -48,8 +48,8 @@ const loadproductpage = async (req, res) => {
         let filter = { isListed: true };
 
         if (category) {
-            filter.category = category; 
-        }    
+            filter.category = category;
+        }
         if (minPrice) {
             filter.regularprice = { ...filter.regularprice, $gte: Number(minPrice) };
         }
@@ -59,38 +59,38 @@ const loadproductpage = async (req, res) => {
 
         let sortOption = {};
         if (sort === "priceLowHigh") {
-            sortOption.regularprice = 1; 
+            sortOption.regularprice = 1;
         } else if (sort === "priceHighLow") {
-            sortOption.regularprice = -1; 
+            sortOption.regularprice = -1;
         } else if (sort === "newArrivals") {
-            sortOption._id = -1; 
+            sortOption._id = -1;
         } else if (sort === "nameAsc") {
-            sortOption.productname = 1; 
+            sortOption.productname = 1;
         } else if (sort === "nameDesc") {
-            sortOption.productname = -1; 
+            sortOption.productname = -1;
         }
 
-        const page = parseInt(req.query.page) || 1; 
-        const limit = parseInt(req.query.limit) || 6; 
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
         const skip = (page - 1) * limit;
 
-const totalProducts = await Product.countDocuments(filter);
-const products = await Product.find(filter)
-    .populate('offer')
-    .sort(sortOption)
-    .skip(skip)
-    .limit(limit);
-const categories = await Category.find({ isListed: true });
-const offerPrices = products.map(product => product.offer?.discountValue);
-console.log('Offer prices:', offerPrices);
+        const totalProducts = await Product.countDocuments(filter);
+        const products = await Product.find(filter)
+            .populate('offer')
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit);
+        const categories = await Category.find({ isListed: true });
+        const offerPrices = products.map(product => product.offer?.discountValue);
+        console.log('Offer prices:', offerPrices);
 
 
 
         const totalPages = Math.ceil(totalProducts / limit);
         const previousPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
-          console.log(products);
-          
+        console.log(products);
+
         res.render('shop', {
             categories,
             products,
@@ -112,7 +112,7 @@ console.log('Offer prices:', offerPrices);
 
 const loadloginpage = async (req, res) => {
     try {
-         res.render('login'); 
+        res.render('login');
     } catch (error) {
         console.error("Error loading login page:", error);
         res.redirect("/pagenotfound");
@@ -145,7 +145,7 @@ const loadotppage = async (req, res) => {
     try {
         const { otp } = req.body;
         if (otp === req.session.userOtp) {
-            
+
             const hashedPassword = await securePassword(req.session.userData.password);
             const newUser = new User({
                 name: req.session.userData.name,
@@ -153,10 +153,10 @@ const loadotppage = async (req, res) => {
                 email: req.session.userData.email,
                 password: hashedPassword,
             });
-       
+
             await newUser.save();
 
-            req.session.user=newUser._id
+            req.session.user = newUser._id
 
             res.json({ success: true, redirectUrl: "/homepage" });
         } else {
@@ -289,17 +289,17 @@ const login = async (req, res) => {
 };
 
 const loadsingleproductpage = async (req, res) => {
-    const productId=req.params.id
+    const productId = req.params.id
     const id = req.session.user
     try {
-        const product=await Product.findById(productId).populate('category')
-        const productCategory= product.category
+        const product = await Product.findById(productId).populate('category')
+        const productCategory = product.category
         const users = await User.findOne({ _id: id, isblocked: false });
-        const relatedProducts= await Product.find({category:productCategory})
-        const productReviews=await Review.find({productId}).populate('productId')
-        const totalReviews= await Review.countDocuments({productId})
+        const relatedProducts = await Product.find({ category: productCategory })
+        const productReviews = await Review.find({ productId }).populate('productId')
+        const totalReviews = await Review.countDocuments({ productId })
         const Ratings = await Review.aggregate([
-            { $match: { productId: product._id } }, 
+            { $match: { productId: product._id } },
             {
                 $group: {
                     _id: "$productId",
@@ -308,14 +308,14 @@ const loadsingleproductpage = async (req, res) => {
             }
         ]);
         console.log(Ratings);
-         let avg=0
-        if(Ratings.length>0){
-               avg=Ratings[0].averageRating.toFixed(2)
+        let avg = 0
+        if (Ratings.length > 0) {
+            avg = Ratings[0].averageRating.toFixed(2)
         }
-      
-        
-        
-        res.render("single-product",{product,relatedProducts,productReviews,users,avg,totalReviews})
+
+
+
+        res.render("single-product", { product, relatedProducts, productReviews, users, avg, totalReviews })
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');
@@ -323,50 +323,50 @@ const loadsingleproductpage = async (req, res) => {
 };
 
 const productReview = async (req, res) => {
-    const { name, email, number, comment ,rating} = req.body;
+    const { name, email, number, comment, rating } = req.body;
     console.log(req.body);
     const userId = req.session.user;
-  
-   
+
+
     if (!name || !comment) {
-      return res.status(400).json({ message: 'All fields are required' });
+        return res.status(400).json({ message: 'All fields are required' });
     }
 
-  
+
     const phoneRegex = /^[0-9]{10,15}$/;
     if (!phoneRegex.test(number)) {
-      return res.status(400).json({ message: 'Invalid phone number' });
+        return res.status(400).json({ message: 'Invalid phone number' });
     }
-  
-    try {
-         
-       const product = await Product.findById(req.params.id);
-      if (!product) return res.status(404).json({ message: 'Product not found' });
-  
-      const newReview = new Review({
-        userId:userId,
-        name:name,
-        email:email,
-        number:number,
-        comment:comment,
-        rating:rating,
-        productId:product._id
-      });
 
-    
-      await newReview.save();
-  
-      res.status(201).json(product);
+    try {
+
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        const newReview = new Review({
+            userId: userId,
+            name: name,
+            email: email,
+            number: number,
+            comment: comment,
+            rating: rating,
+            productId: product._id
+        });
+
+
+        await newReview.save();
+
+        res.status(201).json(product);
     } catch (error) {
         console.log(error);
-        
-      res.status(500).json({ message: 'Error adding review', error });
+
+        res.status(500).json({ message: 'Error adding review', error });
     }
-  };
+};
 
 
 
-  const loadForgetPass=async(req,res)=>{
+const loadForgetPass = async (req, res) => {
     try {
         res.render('forgetPassword')
     } catch (error) {
@@ -374,31 +374,31 @@ const productReview = async (req, res) => {
         res.redirect("/pagenotfound");
     }
 
-  }
+}
 
 
-  const forgetPassValid = async (req,res)=>{
+const forgetPassValid = async (req, res) => {
     try {
-        const {email}=req.body;
-       
-        
-        const findUser=await User.findOne({email:email})
+        const { email } = req.body;
 
-        if(findUser){
-          const otp= generateOtp();
-          const emailSent= await sendVerification(email,otp)
-          if(emailSent){
-            req.session.userOtp=otp;
-            req.session.email=email;
-            res.render('forgetPassOtp')
-            console.log('otp',otp);
-            
-          }else{
-            res.json({success:false,message:'failed to sent OTP  .please try again'})
-          }
-        }else{
-            res.render('forgetPassword',{
-                message:"user with this email does not exist"
+
+        const findUser = await User.findOne({ email: email })
+
+        if (findUser) {
+            const otp = generateOtp();
+            const emailSent = await sendVerification(email, otp)
+            if (emailSent) {
+                req.session.userOtp = otp;
+                req.session.email = email;
+                res.render('forgetPassOtp')
+                console.log('otp', otp);
+
+            } else {
+                res.json({ success: false, message: 'failed to sent OTP  .please try again' })
+            }
+        } else {
+            res.render('forgetPassword', {
+                message: "user with this email does not exist"
             })
         }
 
@@ -407,31 +407,31 @@ const productReview = async (req, res) => {
         console.log(error);
         res.status(500).json({ message: 'Error adding review', error });
     }
-  }
+}
 
 
-  const otpChecking=async(req,res)=>{
+const otpChecking = async (req, res) => {
     try {
-        const enteredOTP=req.body.otp;
-        if(enteredOTP=== req.session.userOtp){
-            res.json({success:true,redirectUrl:"/resetPassword"})
-        }else{
-            res.json({success:false,message:"Otp not Matching"})
+        const enteredOTP = req.body.otp;
+        if (enteredOTP === req.session.userOtp) {
+            res.json({ success: true, redirectUrl: "/resetPassword" })
+        } else {
+            res.json({ success: false, message: "Otp not Matching" })
         }
     } catch (error) {
-        res.status(500).json({success:false,message:" an errror occured plese try again"})
+        res.status(500).json({ success: false, message: " an errror occured plese try again" })
     }
-  }
+}
 
 
- 
 
-  const resendOTPF = async (req, res) => {
+
+const resendOTPF = async (req, res) => {
     try {
-        const email  = req.session.email;
+        const email = req.session.email;
 
-        
-        
+
+
         if (!email) {
             return res.status(400).json({ success: false, message: "Email not found in session" });
         }
@@ -452,19 +452,19 @@ const productReview = async (req, res) => {
     }
 };
 
-const loadResetPassword=async(req,res)=>{
+const loadResetPassword = async (req, res) => {
     try {
         res.render('resetPassword')
     } catch (error) {
         console.error("Signup error:", error);
         res.redirect("/pagenotfound");
     }
-  }
-  
+}
 
-  const setNewPassword = async (req, res) => {
+
+const setNewPassword = async (req, res) => {
     const email = req.session.email;
-     
+
     if (!email) {
         return res.render('resetPassword', { message: 'Session expired. Please log in again.' });
     }
@@ -472,29 +472,29 @@ const loadResetPassword=async(req,res)=>{
     try {
         const { password, confirmPassword } = req.body || {};
 
-    
+
         if (!password || !confirmPassword) {
             return res.render('resetPassword', { message: 'All fields are required.' });
         }
 
-    
-        const user = await User.findOne({email:email});
+
+        const user = await User.findOne({ email: email });
         if (!user) {
             return res.render('resetPassword', { message: 'User not found.' });
         }
 
-        
+
         if (password !== confirmPassword) {
             return res.render('resetPassword', { message: 'Passwords do not match.' });
         }
 
-        
+
         const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
         if (!password.match(passwordPattern)) {
             return res.render('resetPassword', { message: 'Password must be at least 8 characters long and include letters and numbers.' });
         }
 
-        
+
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
             user.password = hashedPassword;
@@ -504,7 +504,7 @@ const loadResetPassword=async(req,res)=>{
             return res.render('resetPassword', { message: 'Could not update password. Please try again.' });
         }
 
-    
+
         res.redirect('/homepage');
     } catch (error) {
         console.error('Error changing password:', error);
@@ -532,5 +532,5 @@ module.exports = {
     loadResetPassword,
     resendOTPF,
     setNewPassword
-   
+
 };

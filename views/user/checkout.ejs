@@ -2,7 +2,7 @@
 <%-include("../../views/partials/user/header")%>
 <style>
   .address-list{
-    background-color: bisque;
+    background-color: #ecfdff;
     padding: 1cm;
     margin-top: 1cm;
     float: left;
@@ -43,7 +43,7 @@
         <div class="col-lg-8">
           <div class="breadcrumb_iner">
             <div class="breadcrumb_iner_item">
-              <h2>Producta Checkout</h2>
+              <h2>Product Checkout</h2>
               <p>Home <span>-</span> Shop Single</p>
             </div>
           </div>
@@ -66,7 +66,10 @@
         <form id="couponForm">
           <input type="text" placeholder="Enter coupon code" id="coupuncode" name="coupuncode" />
           <button class="tp_btn" type="submit">Apply Coupon</button>
+
       </form>
+      <button style="margin-top: .5cm;" class="tp_btn" onclick="removeCoupon() ">Cancel Coupon</button>
+
              <div style="display: flex;">
            <%coupons.forEach(coupon=>{%>
           <div style="width: 5cm;height: 4cm;background-color: #ecfdff;margin-top: 1cm;margin-left: 1cm;padding-top: .5cm;">
@@ -179,7 +182,7 @@
               <ul class="list list_2">
                 <li>
                   <a href="#">Subtotal
-                    <span>₹<%=subtotal%></span>
+                    <span id="subtotal">₹<%=subtotal%></span>
                   </a>
                 </li>
                 <li>
@@ -189,7 +192,7 @@
                 </li>
                 <li>
                   <a href="#">Total
-                    <span>₹<%=subtotal + 50%></span>
+                    <span id="total">₹<%=subtotal + 50%></span>
                   </a>
                 </li>
                 <li id="couponRow" style="display: none;">
@@ -204,12 +207,21 @@
             
                
               <div class="payment_item">
-                <div class="radion_btn">
+                <% if(subtotal>1000){%>
+                <div class="radion_btn" >
+                  <input type="radio" id="f-option5" name="paymentMethod" value="CashOnDelivery" disabled />
+                  <label for="f-option5" style="color: rgb(107, 103, 103);">Cash On Delivery</label>
+                  <div class="check"></div>
+                  <p style="font-size: 12px;">Order above Rs 1000 should not be allowed for cash on delivery</p>
+
+                </div>
+                <%}else{%>
+                  <div class="radion_btn" >
                   <input type="radio" id="f-option5" name="paymentMethod" value="CashOnDelivery"  />
                   <label for="f-option5">Cash On Delivery</label>
                   <div class="check"></div>
                 </div>
-                
+                <%}%>
               </div>
               <div class="payment_item active">
                 <div class="radion_btn">
@@ -630,4 +642,27 @@ document.getElementById('couponForm').addEventListener('submit', async (event) =
         });
     }
 });
+//cancel coupon 
+function removeCoupon() {
+    
+    document.getElementById("couponRow").style.display = 'none';
+    document.getElementById("couponRow2").style.display = 'none';
+
+    
+    const subtotal = parseFloat(document.getElementById("subtotal").textContent.replace("₹", ""));
+    document.getElementById("total").textContent = "₹" + subtotal.toFixed(2); // No discount applied
+
+    
+    Swal.fire({
+        title: 'Success!',
+        text: 'Coupon removed. No discount applied.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            location.reload(); 
+        }
+    });
+}
+
 </script>

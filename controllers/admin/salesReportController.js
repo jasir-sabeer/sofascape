@@ -15,31 +15,31 @@ const loadSalesReportPage = async (req, res) => {
 
         orders.forEach(order => {
             const validProducts = order.products.filter(product => product.status !== "Cancelled");
-        
+
             if (validProducts.length === 0) {
-                return; 
+                return;
             }
-        
+
             const orderDate = order.createdAt.toISOString().split('T')[0];
-        
+
             const orderTotal = validProducts.reduce(
                 (sum, product) => sum + (product.price * product.quantity),
                 0
             );
-        
+
             const orderTotalWithShippingCost = orderTotal + order.shippingCost;
-            const discount = Number(order.couponDiscount) || 0; 
-        
-        
+            const discount = Number(order.couponDiscount) || 0;
+
+
             overallOrderCount++;
             overallTotalSales += orderTotalWithShippingCost;
             overallTotalDiscount += discount;
             overallNetSales += orderTotalWithShippingCost - discount;
-        
-            
+
+
             console.log('Processing orderDate:', orderDate, 'Discount:', discount);
-        
-            
+
+
             if (!dailyReport[orderDate]) {
                 dailyReport[orderDate] = {
                     totalOrders: 0,
@@ -48,16 +48,16 @@ const loadSalesReportPage = async (req, res) => {
                     netSales: 0
                 };
             }
-        
+
             dailyReport[orderDate].totalOrders++;
             dailyReport[orderDate].totalAmount += orderTotalWithShippingCost;
-            dailyReport[orderDate].totalDiscount += discount; 
+            dailyReport[orderDate].totalDiscount += discount;
             dailyReport[orderDate].netSales += orderTotalWithShippingCost - discount;
-        
+
             console.log('DailyReport Entry:', dailyReport[orderDate]);
         });
-        
-        
+
+
         const dailyReportArray = Object.keys(dailyReport).map(date => ({
             date,
             ...dailyReport[date]
@@ -83,7 +83,7 @@ const loadSalesReportPage = async (req, res) => {
 };
 
 
-const downloadPDF=async(req,res)=>{
+const downloadPDF = async (req, res) => {
     try {
         const { salesData } = req.body;
 
@@ -93,35 +93,35 @@ const downloadPDF=async(req,res)=>{
         res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
 
         doc.fontSize(16).text('Sales Report', { align: 'center' });
-        doc.moveDown(1); 
+        doc.moveDown(1);
 
         const tableHeaders = ['Date', 'Order Count', 'Total Sales', 'Discount', 'Net Sales'];
-        const tableWidths = [100, 80, 100, 100, 100]; 
+        const tableWidths = [100, 80, 100, 100, 100];
 
         let x = 50;
-        let y = doc.y; 
+        let y = doc.y;
 
-        y = 100; 
+        y = 100;
 
         doc.fontSize(12).font('Helvetica-Bold');
         tableHeaders.forEach((header, index) => {
             doc.text(header, x, y, { width: tableWidths[index], align: 'center' });
-            x += tableWidths[index]; 
-        });
-
-        x = 50; 
-        tableHeaders.forEach((_, index) => {
-            doc.rect(x, y - 10, tableWidths[index], 20).stroke(); 
             x += tableWidths[index];
         });
 
-        doc.moveDown(0.2); 
+        x = 50;
+        tableHeaders.forEach((_, index) => {
+            doc.rect(x, y - 10, tableWidths[index], 20).stroke();
+            x += tableWidths[index];
+        });
+
+        doc.moveDown(0.2);
         y = doc.y;
 
         doc.fontSize(10).font('Helvetica');
         salesData.forEach(item => {
-            x = 50; 
-            const rowY = y; 
+            x = 50;
+            const rowY = y;
 
             doc.text(item.date, x, rowY, { width: tableWidths[0], align: 'center' });
             x += tableWidths[0];
@@ -140,11 +140,11 @@ const downloadPDF=async(req,res)=>{
 
             x = 50;
             tableHeaders.forEach((_, index) => {
-                doc.rect(x, rowY - 5, tableWidths[index], 20).stroke(); 
+                doc.rect(x, rowY - 5, tableWidths[index], 20).stroke();
                 x += tableWidths[index];
             });
 
-            y = rowY + 20; 
+            y = rowY + 20;
         });
 
         doc.end();
@@ -156,7 +156,7 @@ const downloadPDF=async(req,res)=>{
 
 }
 
-const downloadExel=async(req,res)=>{
+const downloadExel = async (req, res) => {
     try {
         const { salesData } = req.body;
 
@@ -187,9 +187,8 @@ const downloadExel=async(req,res)=>{
 
 }
 
-const filter=async(req,res)=>{
+const filter = async (req, res) => {
     const { specificDay, quickRange, fromDate, toDate } = req.body;
-
     try {
         let query = {};
         const now = new Date();
@@ -279,10 +278,298 @@ const filter=async(req,res)=>{
 }
 
 
+
+
+
+
+
+
+const loadDashboard = async (req, res) => {
+    try {
+        const [bestProducts, bestCategories] = await Promise.all([
+            orderModel.aggregate(bestSellingProductsPipeline),
+            orderModel.aggregate(bestSellingCategoriesPipeline),
+        ]);
+        
+        res.render("dashboard",{bestProducts,bestCategories})
+    } catch (error) {
+        res.send(error)
+    }
+}
+
+const getSalesData = async (req, res) => {
+    const filter = req.query.filter || 'yearly'; 
+    const currentYear = new Date().getFullYear();
+    const pipeline = [];
+
+    try {
+        if (filter === 'yearly') {
+            const startYear = currentYear - 2; 
+            const years = [startYear, startYear + 1, startYear + 2];
+
+            pipeline.push(
+                {
+                    $match: {
+                        "products.status": { $nin: ['Cancelled', 'Returned'] }, 
+                    },
+                },
+                {
+                    $project: {
+                        year: { $year: "$createdAt" },
+                        totalPrice: {
+                            $sum: {
+                                $map: {
+                                    input: "$products",
+                                    as: "product",
+                                    in: {
+                                        $multiply: [
+                                            "$$product.quantity",
+                                            {
+                                                $cond: {
+                                                    if: { $gt: ["$$product.discountedPrice", 0] },
+                                                    then: "$$product.discountedPrice",
+                                                    else: "$$product.price",
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$year", 
+                        totalPrice: { $sum: "$totalPrice" },
+                    },
+                },
+                { $sort: { _id: 1 } } 
+            );
+        } else if (filter === 'monthly') {
+            pipeline.push(
+                {
+                    $match: {
+                        createdAt: {
+                            $gte: new Date(currentYear, 0, 1),
+                            $lt: new Date(currentYear + 1, 0, 1),
+                        },
+                        "products.status": { $nin: ['Cancelled', 'Returned'] },
+                    },
+                },
+                {
+                    $project: {
+                        month: { $month: "$createdAt" }, 
+                        totalPrice: {
+                            $sum: {
+                                $map: {
+                                    input: "$products",
+                                    as: "product",
+                                    in: {
+                                        $multiply: [
+                                            "$$product.quantity",
+                                            {
+                                                $cond: {
+                                                    if: { $gt: ["$$product.discountedPrice", 0] },
+                                                    then: "$$product.discountedPrice",
+                                                    else: "$$product.price",
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$month",
+                        totalPrice: { $sum: "$totalPrice" },
+                    },
+                },
+                { $sort: { _id: 1 } } 
+            );
+        } else if (filter === 'weekly') {
+            pipeline.push(
+                {
+                    $match: {
+                        "products.status": { $nin: ['Cancelled', 'Returned'] },
+                    },
+                },
+                {
+                    $project: {
+                        week: { $isoWeek: "$createdAt" },
+                        totalPrice: {
+                            $sum: {
+                                $map: {
+                                    input: "$products",
+                                    as: "product",
+                                    in: {
+                                        $multiply: [
+                                            "$$product.quantity",
+                                            {
+                                                $cond: {
+                                                    if: { $gt: ["$$product.discountedPrice", 0] },
+                                                    then: "$$product.discountedPrice",
+                                                    else: "$$product.price",
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$week",
+                        totalPrice: { $sum: "$totalPrice" },
+                    },
+                },
+                { $sort: { _id: 1 } } 
+            );
+        } else {
+            return res.status(400).send('Invalid filter type');
+        }
+
+        const orders = await orderModel.aggregate(pipeline);
+
+        const labels = [];
+        const totalPrices = [];
+
+        if (filter === 'yearly') {
+            const years = [currentYear - 2, currentYear - 1, currentYear];
+            const salesData = years.map((year) => {
+                const order = orders.find((order) => order._id === year);
+                return order ? order.totalPrice : 0; 
+            });
+
+            labels.push(...years);
+            totalPrices.push(...salesData);
+        } else if (filter === 'monthly') {
+            const months = [
+                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+            ];
+            const monthlyData = new Array(12).fill(0);
+
+            orders.forEach((order) => {
+                monthlyData[order._id - 1] = order.totalPrice;
+            });
+
+            labels.push(...months);
+            totalPrices.push(...monthlyData);
+        } else if (filter === 'weekly') {
+            orders.forEach((order) => {
+                labels.push(`Week ${order._id}`);
+                totalPrices.push(order.totalPrice);
+            });
+        }
+
+        res.json({ labels, totalPrices });
+    } catch (error) {
+        console.error('Error fetching sales data:', error);
+        res.status(500).send('Error fetching sales data.');
+    }
+};
+
+const bestSellingProductsPipeline = [
+    { $unwind: "$products" }, 
+    {
+        $match: {
+            "products.status": { $nin: ["Cancelled", "Returned"] }, 
+        },
+    },
+    {
+        $group: {
+            _id: "$products.productId", 
+            totalSold: { $sum: "$products.quantity" }, 
+        },
+    },
+    { $sort: { totalSold: -1 } }, 
+    { $limit: 10 }, 
+    {
+        $lookup: {
+            from: "products", 
+            localField: "_id", 
+            foreignField: "_id", 
+            as: "productDetails", 
+        },
+    },
+    { $unwind: "$productDetails" }, 
+    {
+        $project: {
+            _id: 1, 
+            totalSold: 1, 
+            name: "$productDetails.productname", 
+            price: "$productDetails.regularprice", 
+            discountPrice: "$productDetails.discountPrice", 
+            isListed: "$productDetails.isListed", 
+        },
+    },
+];
+
+
+const bestSellingCategoriesPipeline = [
+    { $unwind: { path: "$products", preserveNullAndEmptyArrays: true } },
+    {
+        $match: {
+            $and: [
+                { "products.status": { $exists: true } },
+                { "products.status": { $nin: ["Cancelled", "Returned"] } },
+            ],
+        },
+    },
+    {
+        $lookup: {
+            from: "products", 
+            localField: "products.productId",
+            foreignField: "_id",
+            as: "productDetails",
+        },
+    },
+    { $unwind: { path: "$productDetails", preserveNullAndEmptyArrays: true } },
+    {
+        $lookup: {
+            from: "categories", 
+            localField: "productDetails.category",
+            foreignField: "_id",
+            as: "categoryDetails",
+        },
+    },
+    { $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true } },
+    {
+        $match: {
+            "categoryDetails.name": { $exists: true, $ne: null },
+        },
+    },
+    {
+        $group: {
+            _id: "$categoryDetails.name", 
+            totalSold: { $sum: "$products.quantity" },
+        },
+    },
+    { $sort: { totalSold: -1 } },
+    { $limit: 10 },
+    {
+        $project: {
+            categoryName: "$_id",
+            totalSold: 1,
+        },
+    },
+];
+
+
+
 module.exports = {
     loadSalesReportPage,
     downloadPDF,
     downloadExel,
-    filter
-    
+    filter,
+    loadDashboard,
+    getSalesData
+   
+
 }

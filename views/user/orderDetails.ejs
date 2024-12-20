@@ -78,10 +78,15 @@
                 <tr>
                   <th colspan="2"><span><%= product.name %></span></th>
                   <th>x<%= product.quantity %></th>
+                  <% if(product.status==='Cancelled'){%>
+                    <th> <span>Cancelled</span></th>
+
+                  <%}else{%>
                   <%if(product.offerPrice ){%>
                     <th> <span>₹<%= product.offerPrice * product.quantity %></span></th>
                     <%}else{%>
                       <th> <span>₹<%= product.price * product.quantity %></span></th>
+                    <%}%>
                     <%}%>
                   
                 </tr>

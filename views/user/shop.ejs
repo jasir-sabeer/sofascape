@@ -117,9 +117,7 @@
                                 </div>
                             </div>
                             <% }) %>
-                    
                     </div>
-                    
                         <div class="col-lg-12">
                             <div class="pageination">
                                 <nav id="pagination" aria-label="Page navigation" class="paginationdiv">
@@ -356,14 +354,15 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     <script src="js/custom.js"></script>
     <script>
         
-        async function addToCart(productId) {
+    async function addToCart(productId) {
   try {
     const response = await fetch(`/cart/add/${productId}`, {
       method: "POST",
     });
 
     if (response.ok) {
-      toastr.success("Product added to cart!", "Success");
+        const successMessage=await response.text();
+      toastr.success(`${successMessage}`, "Success");
     } else {
       const errorMessage = await response.text();
       
@@ -387,7 +386,8 @@ async function addToWishlist(productId) {
     });
 
     if (response.ok) {
-      toastr.success("Product added to wishlist!", "Success");
+        const successMessage= await response.text();
+      toastr.success(`${successMessage}`, "Success");
     } else {
       const errorMessage = await response.text();
       

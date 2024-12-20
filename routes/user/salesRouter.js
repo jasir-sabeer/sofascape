@@ -18,6 +18,9 @@ router.delete('/wishlist/cancel/:productId', salesController.cancelProductWshlis
 router.post('/create-order',salesController.createOrder)
 router.post('/verify-payment',salesController.verifyPayment)
 router.get('/wallet',userAuth.userLogin,salesController.loadWalletPage)
+router.get('/downloadInvoice/:id',salesController.downloadInvoice)
+
+
     
    
 

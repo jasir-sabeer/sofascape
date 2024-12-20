@@ -1,126 +1,157 @@
 <style>
-    .section-top-border{
+    .section-top-border {
         margin: 2cm;
     }
-    .last{
-        margin-left:15cm;
+
+    .last {
+        margin-left: 15cm;
         margin-top: 2cm;
     }
-    .lastdate{
-        margin-left:15cm;
-    
+
+    .lastdate {
+        margin-left: 15cm;
+
     }
-    #viwemore{
+
+    #viwemore {
         margin-left: 25cm;
     }
-    #btn{
-    margin-left: 27cm;
-   
-  }
-   
-</style>
-<%-include("../../views/partials/user/header")%>
 
-<div class="section-top-border">
-    <h2 class="mb-30">Your Orders</h2>
-    <% if(orders.length>0){%>
-    <% orders.forEach(order => { %>
-    <h5 class="country">OrderId :<%= order._id%></h5>
-    <div class="progress-table-wrap " id="table">
-        <div class="progress-table">
-            <div class="table-head">
-                <div class="serial">#</div>
-                <div class="percentage">Products</div>
-                <div class="percentage">quantity</div>
-                <div class="country">Price</div>
-                <div class="country">Status</div>
-                <div class="country">Cancel</div>
+    #btn {
+        margin-left: 27cm;
 
-
-            </div>
-            <% let count=1%>
-            <% order.products.forEach(product => { %>
-            <div class="table-row">
-                <div class="serial"><%=  count++ %></div>
-                <div class="percentage"> <img src="/uploads/<%= product.productId.images[0] %>" alt="flag" style="width: 1.5cm;"><%= product.name %></div>
-                <div class="percentage"><%= product.quantity%></div>
-                <%if(product.offerPrice ){%>
-                    <div class="country"><%= product.offerPrice * product.quantity %></div>
-                    <%}else{%>
-                      <div class="country"><%= product.price * product.quantity %></div>
-                    <%}%>
-                <div class="country"><%= product.status %></div>
-                <% if(product.status==="Cancelled" ){%>
-                    <div class="country"><th> <span>Cancelled</span></th></div>
-                <%}else{%>
-                    <div class="country"><button onclick="cancelProduct('<%= order._id %>', '<%= product.productId._id %>')" class="genric-btn danger-border circle"> Cancel</button></div>
-                <%}%>
-            </div>
-            <% }); %>
-            <p class="last">Total Amount:<%= order.total %></p>
-            <% if(order.paymentMethod=='COD'){%>
-            <p class="lastdate">payment Method:Cash on Delivery</p>
-            <%}else{%>
-            <p class="lastdate">payment Method:<%=order.paymentMethod%></p>
-            <%}%>
-
-            <div id="viwemore" class="country"><a href="/orderDetails/<%= order._id %>" class="genric-btn success-border circle">View More</a></div>
-           
-        </div>
-    </div>
-    <% }); %>
-    <%}else{%>
-        <div>
-            <p colspan="4" style="margin-left: 9cm;font-size: 18px;">Your Orders is empty....! Please add products </p><br>
-                 <a href="/products" class="genric-btn primary e-large" style="margin-left: 12cm;">SHOP NOW</a>
-        </div>
-      <%}%>  
-   
-</div>
-<a href="/homepage" id="btn" class="genric-btn default circle">Back To Home</a>
-
-
-
-
-
-
-
-<%-include("../../views/partials/user/footer")%>
-<script>
-async function cancelProduct(orderId, productId) {
-
-    
-    try {
-        const result = await Swal.fire({
-            title: "Are you sure you want to cancel the product?",
-            showCancelButton: true,
-            confirmButtonColor: '#000',
-            cancelButtonColor: '#000',
-            confirmButtonText: "OK",
-        });
-
-        if (result.isConfirmed) {
-            await fetch(`/cancelOrder/${orderId}/${productId}`, { // Added `await` here if you want to wait for the response
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('Failed to cancel the product');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred');
-            }); 
-        }      
-    } catch (error) {
-        console.log('Error in cancel product:', error);
     }
-}
+</style>
+<%-include("../partials/user/header")%>
 
-</script>
+    <div class="section-top-border">
+        <h2 class="mb-30">Your Orders</h2>
+        <% if(orders.length>0){%>
+            <% orders.forEach(order=> { %>
+                <h5 class="country">OrderId :<%= order._id%>
+                </h5>
+                <div class="progress-table-wrap " id="table">
+                    <div class="progress-table">
+                        <div class="table-head">
+                            <div class="serial">#</div>
+                            <div class="percentage">Products</div>
+                            <div class="percentage">quantity</div>
+                            <div class="country">Price</div>
+                            <div class="country">Status</div>
+                            <div class="country">Cancel</div>
+
+
+                        </div>
+                        <% let count=1%>
+                            <% order.products.forEach(product=> { %>
+                                <div class="table-row">
+                                    <div class="serial">
+                                        <%= count++ %>
+                                    </div>
+                                    <div class="percentage"> <img src="/uploads/<%= product.productId.images[0] %>"
+                                            alt="flag" style="width: 1.5cm;">
+                                        <%= product.name %>
+                                    </div>
+                                    <div class="percentage">
+                                        <%= product.quantity%>
+                                    </div>
+                                    <%if(product.offerPrice ){%>
+                                        <div class="country">
+                                            <%= product.offerPrice * product.quantity %>
+                                        </div>
+                                        <%}else{%>
+                                            <div class="country">
+                                                <%= product.price * product.quantity %>
+                                            </div>
+                                            <%}%>
+                                                <div class="country">
+                                                    <%= product.status %>
+                                                </div>
+                                                <% if(product.status==="Cancelled" ){%>
+                                                    <div class="country">
+                                                        <th> <span>Cancelled</span></th>
+                                                    </div>
+                                                    <%}else{%>
+                                                        <div class="country"><button
+                                                                onclick="cancelProduct('<%= order._id %>', '<%= product.productId._id %>')"
+                                                                class="genric-btn danger-border circle"> Cancel</button>
+                                                        </div>
+                                                        <%}%>
+                                </div>
+                                <% }); %>
+                                      <%if(order.finalDiscountAmount){%>
+                                    <p class="last">Total Amount:<%= order.finalDiscountAmount %></p>
+                                    <%}else{%>
+                                        <p class="last">Total Amount:<%= order.total %></p>
+                                    <%}%>
+                                    <% if(order.paymentMethod=='COD' ){%>
+                                        <p class="lastdate">payment Method:Cash on Delivery</p>
+                                        <%}else{%>
+                                            <p class="lastdate">payment Method:<%=order.paymentMethod%>
+                                            </p>
+                                            <%}%>
+
+                                                <div id="viwemore" class="country"><a
+                                                        href="/orderDetails/<%= order._id %>"
+                                                        class="genric-btn success-border circle">View More</a></div>
+
+                    </div>
+                </div>
+                <% }); %>
+                    <%}else{%>
+                        <div>
+                            <p colspan="4" style="margin-left: 9cm;font-size: 18px;">Your Orders is empty....! Please
+                                add products </p><br>
+                            <a href="/products" class="genric-btn primary e-large" style="margin-left: 12cm;">SHOP
+                                NOW</a>
+                        </div>
+                        <%}%>
+
+    </div>
+    <a href="/homepage" id="btn" class="genric-btn default circle">Back To Home</a>
+
+
+
+
+
+
+
+    <%- include("../../views/partials/user/footer") %>
+    <script>
+            async function cancelProduct(orderId, productId) {
+
+
+                try {
+                    const result = await Swal.fire({
+                        title: "Are you sure you want to cancel the product?",
+                        showCancelButton: true,
+                        confirmButtonColor: '#000',
+                        cancelButtonColor: '#000',
+                        confirmButtonText: "OK",
+                    });
+
+                    if (result.isConfirmed) {
+                        await fetch(`/cancelOrder/${orderId}/${productId}`, { // Added `await` here if you want to wait for the response
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    location.reload();
+                                } else {
+                                    alert('Failed to cancel the product');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred');
+                            });
+                    }
+                } catch (error) {
+                    console.log('Error in cancel product:', error);
+                }
+            }
+
+        </script>

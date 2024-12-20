@@ -135,6 +135,10 @@
                     <th scope="col">₹<%= orders.total%></th>
                   </tr>
                   <%}%>
+                  <tr>
+                    <th scope="col"><a id="downloadInvoice" href="/downloadInvoice/<%= orders._id %>" class="genric-btn danger circle arrow"  style="margin-left: 18cm;">Download Invoice</a></th>
+
+                  </tr>
               </tfoot>
             </table>
           </div>
@@ -145,5 +149,21 @@
   </section>
   <!--================ confirmation part end =================-->
   <%-include("../../views/partials/user/footer")%>
+
+  <script>
+
+   
+
+document.querySelectorAll('downloadInvoice').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    const downloadLink = e.currentTarget;
+    downloadLink.textContent = 'Downloading...';
+    setTimeout(() => {
+      downloadLink.textContent = 'Download Invoice';
+    }, 3000); // Reset the text after 3 seconds
+  });
+});
+
+  </script>
 
   

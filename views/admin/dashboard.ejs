@@ -95,13 +95,148 @@
   .special-color{
             background-color:#555 ;
         }
+        section {
+    margin-top: 20px;
+    padding: 10px;
+}
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+@media (max-width: 768px) {
+    .overview-cards {
+        flex-direction: column;
+    }
+    .card {
+        margin-bottom: 10px;
+    }
+}
+.filter-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .filter-section label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .filter-section select {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .filter-section select:focus {
+            border-color: #007bff;
+        }
+
+        .charts-section {
+            display: flex;
+            height: auto;
+            max-width: 1000px;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: auto;
+            height: 400px
+        }
+
+        #salesChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+
+        .chart-container h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+        }
+
+
+
+
+        .best-selling-section {
+            margin: 30px 0;
+        }
+
+        .best-selling-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            background: #e7e4e4;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            margin: 10px 0;
+            font-size: 20px;
+            color: #007bff;
+        }
+
+        .card p {
+            font-size: 14px;
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .card p strong {
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .best-selling-list {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .card {
+                max-width: 90%;
+            }
+        }
+
 
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    <h2 style="margin-left: .5cm; margin-top: 19.920px;">Admin Dashboard</h2>
+    <h2 style="margin-left: .5cm; margin-top: 19.920px;"><b>SOFA</b>SCAPE</h2>
     <nav>
       <ul>
         <li><a href="/admin/dashboard" style="margin-top:19px;" class="special-color">Home</a></li>
@@ -123,16 +258,124 @@
   
     <main class="content">
       <header>
-        <h1>Welcome, Admin</h1>
+        <h1>Dashboard</h1>
         <p>Overview of recent activities</p>
       </header>
-      <section class="overview-cards">
-        <div class="card">Users: 200</div>
-        <div class="card">Products: 120</div>
-        <div class="card">Orders: 45</div>
-        <div class="card">Revenue: $2,500</div>
-      </section>
+      <section class="filter-section">
+        <label for="filter">Filter:</label>
+        <select id="filter" onchange="updateSalesChart()">
+            <option value="yearly">yearly</option>
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+        </select>
+    </section>
+    <section class="charts-section">
+      <div class="chart-container">
+          <h3>Sales Chart</h3>
+          <canvas id="salesChart"></canvas>
+      </div>
+  </section>
+
+
+  <section class="best-selling-section">
+      <h2> Best Selling Products</h2>
+      <div class="best-selling-list">
+        <% bestProducts.forEach(bestProduct => { %>
+          <div class="card">
+              <h3><%= bestProduct.name %></h3>
+              <p><strong>Total Sold:</strong> <%= bestProduct.totalSold %></p>
+              <p><strong>Price:</strong> ₹ <%= bestProduct.price %></p>
+          </div>
+          <% }) %>
+          
+          
+      </div>
+  </section>
+  <section class="best-selling-section">
+    <h2> Best Selling Categories</h2>
+    <div class="best-selling-list">
+      <% bestCategories.forEach(category => { %>
+        <div class="card">
+            <h3><%= category.categoryName %></h3> <!-- Use the projected "categoryName" -->
+            <p><strong>Total Sold:</strong> <%= category.totalSold %></p>
+        </div>
+      <% }) %>
+      
+    </div>
+</section>
+
     </main>
   
 </body>
 </html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("filter").value = "yearly";
+            updateSalesChart();
+        });
+
+        let salesChart;
+
+        async function updateSalesChart() {
+            const filter = document.getElementById("filter").value;
+
+            try {
+                const response = await fetch(`/admin/sales-data?filter=${filter}`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    const labels = result.labels;
+                    const data = result.totalPrices;
+
+                    if (salesChart) {
+                        salesChart.destroy();
+                    }
+
+                    const ctx = document.getElementById("salesChart").getContext("2d");
+
+                    salesChart = new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Total Sales (₹)",
+                                data: data,
+                                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                                borderColor: "rgba(54, 162, 235, 1)",
+                                borderWidth: 1,
+                                fill: true,
+                            }],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: "Total Sales (₹)",
+                                    },
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: filter === "yearly" ? "Years" : filter === "monthly" ? "Months" : "Weeks",
+                                    },
+                                },
+                            },
+                        },
+                    });
+                } else {
+                    console.error("Error:", result.error);
+                }
+            } catch (error) {
+                console.error("Error loading chart data:", error);
+            }
+        }
+        document.getElementById("filter").addEventListener("change", updateSalesChart);
+
+</script>
+
+

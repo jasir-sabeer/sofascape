@@ -1,26 +1,26 @@
-const Offer=require('../../models/offerSchema')
-const Product=require('../../models/prductschema')
-const Category=require('../../models/categoryschema')
+const Offer = require('../../models/offerSchema')
+const Product = require('../../models/prductschema')
+const Category = require('../../models/categoryschema')
 const mongoose = require('mongoose')
 
-const loadOfferManagement=async(req,res)=>{
-        try {
+const loadOfferManagement = async (req, res) => {
+    try {
 
-            const offers=await Offer.find()
-            res.render('offerManagement',{offers})
-        } catch (error) {
-            console.error("Error i", error.message);
+        const offers = await Offer.find()
+        res.render('offerManagement', { offers })
+    } catch (error) {
+        console.error("Error i", error.message);
         res.status(500).send("An error in load offer managemet");
-        }
+    }
 }
 
-const loadAddOffer=async(req,res)=>{
+const loadAddOffer = async (req, res) => {
     try {
-        const products = await Product.find(); 
-        const categories = await Category.find(); 
+        const products = await Product.find();
+        const categories = await Category.find();
         res.render('addOffer', { products, categories });
 
-        
+
     } catch (error) {
         console.error("Error in", error.message);
         res.status(500).send("An error in load addOffer");
@@ -57,8 +57,8 @@ const addOffer = async (req, res) => {
                 const discountedPrice = product.regularprice - (product.regularprice * (discountValue / 100));
                 await Product.findByIdAndUpdate(
                     product._id,
-                    { 
-                        offer: newOffer._id, 
+                    {
+                        offer: newOffer._id,
                         discountPrice: discountedPrice,
                         total: discountedPrice // Update total field if needed
                     },
@@ -72,8 +72,8 @@ const addOffer = async (req, res) => {
                 const discountedPrice = product.regularprice - (product.regularprice * (discountValue / 100));
                 await Product.findByIdAndUpdate(
                     product._id,
-                    { 
-                        offer: newOffer._id, 
+                    {
+                        offer: newOffer._id,
                         discountPrice: discountedPrice,
                         total: discountedPrice // Update total field if needed
                     },
@@ -104,14 +104,14 @@ const removeOffer = async (req, res) => {
     try {
         const offerId = req.params.id;
 
-    
+
         const deletedOffer = await Offer.findByIdAndDelete(offerId);
 
         if (!deletedOffer) {
             return res.status(404).json({ success: false, message: 'Offer not found' });
         }
 
-    
+
         const productsWithOffer = await Product.find({ offer: offerId });
 
         for (const product of productsWithOffer) {
@@ -119,13 +119,13 @@ const removeOffer = async (req, res) => {
                 product._id,
                 {
                     $unset: { offer: "" },
-                    discountPrice: product.regularprice, 
+                    discountPrice: product.regularprice,
                 },
                 { new: true }
             );
         }
 
-        
+
         await Category.updateMany(
             { offer: offerId },
             { $unset: { offer: "" } }
@@ -145,4 +145,3 @@ module.exports = {
     addOffer,
     removeOffer
 }
-    

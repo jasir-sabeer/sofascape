@@ -257,14 +257,13 @@
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            console.log(data.newPrice);
+            
             priceElement.textContent = `₹${data.newPrice}`;
         } else {
             
             Swal.fire({
-                title: "Error!",
+                title: "Message!",
                 text: data.message,
-                icon: "error",
                 confirmButtonText: "Okay",
             });
         }

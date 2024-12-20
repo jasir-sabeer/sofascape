@@ -14,8 +14,8 @@ const pageerror = async (req, res) => {
 }
 
 const loadadminLogin = (req, res) => {
-   
-    console.log("admin check",req.session.adminlogin)
+
+    console.log("admin check", req.session.adminlogin)
     if (req.session.adminlogin) {
         return res.redirect('/admin/dashboard');
     }
@@ -31,25 +31,25 @@ const login = async (req, res) => {
         const { email, password } = req.body;
         console.log(req.body);
 
-        const existAdmin = await Admin.findOne({ email: email }); 
+        const existAdmin = await Admin.findOne({ email: email });
 
         if (!existAdmin) {
             console.log("Admin not found");
             return res.render("adminLogin", { message: "admin not found" });
         }
 
-        console.log(password); 
-        console.log(existAdmin.password); 
- 
+        console.log(password);
+        console.log(existAdmin.password);
 
 
-        if(existAdmin.password===password){
-            req.session.adminlogin=true
+
+        if (existAdmin.password === password) {
+            req.session.adminlogin = true
             res.redirect("/admin/dashboard");
-        }else{
+        } else {
             return res.render("adminLogin", { message: "Incorrect password" })
         }
-    
+
 
     } catch (error) {
         console.error("Login error:", error);
@@ -59,25 +59,17 @@ const login = async (req, res) => {
 
 
 
-const loadDashboard = async (req, res) => {
-
-    try {
-        res.render("dashboard");
-    } catch (error) {
-        res.redirect('/pageerror');
-    }
-}
 
 const loaduserManagement = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; 
-        const limit = parseInt(req.query.limit) || 4; 
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 4;
         const skip = (page - 1) * limit;
 
-        const [totalUsers,users] = await Promise.all([
+        const [totalUsers, users] = await Promise.all([
             User.countDocuments(),
-            User.find({}).skip(skip).sort({_id:-1}).limit(limit),
-           
+            User.find({}).skip(skip).sort({ _id: -1 }).limit(limit),
+
         ]);
 
         const totalPages = Math.ceil(totalUsers / limit);
@@ -128,14 +120,14 @@ const unblockUser = async (req, res) => {
 
 const loadCategory = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; 
-        const limit = parseInt(req.query.limit) || 3; 
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 3;
         const skip = (page - 1) * limit;
 
         const [totalCategories, categories] = await Promise.all([
             Category.countDocuments(),
-            Category.find({}).skip(skip).sort({_id:-1}).limit(limit),
-           
+            Category.find({}).skip(skip).sort({ _id: -1 }).limit(limit),
+
         ]);
 
         const totalPages = Math.ceil(totalCategories / limit);
@@ -148,7 +140,7 @@ const loadCategory = async (req, res) => {
             totalPages,
             previousPage,
             nextPage,
-            err:req.flash('err')
+            err: req.flash('err')
         });
 
     } catch (error) {
@@ -161,15 +153,15 @@ const addCategory = async (req, res) => {
     try {
         const { name, variant } = req.body;
         const formattedName = name.trim().toLowerCase();
-        const formattedVariant=variant.trim().toLowerCase();
+        const formattedVariant = variant.trim().toLowerCase();
 
-        const existingCategory = await Category.findOne({ name: { $regex: `^${formattedName}$`, $options: 'i'},variant:{$regex:`^${formattedVariant}$`,$options:'i'}});
+        const existingCategory = await Category.findOne({ name: { $regex: `^${formattedName}$`, $options: 'i' }, variant: { $regex: `^${formattedVariant}$`, $options: 'i' } });
         if (existingCategory) {
             console.log('Category already exists');
             return res.status(400).json({ error: 'This category name already exists' });
         }
 
-        const newCategory = new Category({ name: formattedName, variant:formattedVariant, isListed: true });
+        const newCategory = new Category({ name: formattedName, variant: formattedVariant, isListed: true });
         await newCategory.save();
         res.status(200).json({ message: 'Category added successfully' });
     } catch (error) {
@@ -184,13 +176,13 @@ const editCategory = async (req, res) => {
     try {
         const { id, name, variant } = req.body;
         const formattedName = name.trim().toLowerCase();
-        const formattedVariant=variant.trim().toLowerCase();
+        const formattedVariant = variant.trim().toLowerCase();
 
-        
+
         const existingCategory = await Category.findOne({
             name: { $regex: `^${formattedName}$`, $options: 'i' },
             _id: { $ne: id },
-            variant:{$regex:`^${formattedVariant}$`,$options:'i'}
+            variant: { $regex: `^${formattedVariant}$`, $options: 'i' }
         });
 
         if (existingCategory) {
@@ -224,14 +216,14 @@ const toggleCategoryStatus = async (req, res) => {
 
 const loadProduct = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; 
-        const limit = parseInt(req.query.limit) || 3; 
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 3;
         const skip = (page - 1) * limit;
 
         const [totalProducts, products, categories] = await Promise.all([
             Product.countDocuments(),
-            Product.find({}).populate('category').sort({ _id: -1  }).skip(skip).limit(limit),
-            Category.find({isListed:true})
+            Product.find({}).populate('category').sort({ _id: -1 }).skip(skip).limit(limit),
+            Category.find({ isListed: true })
         ]);
 
         const totalPages = Math.ceil(totalProducts / limit);
@@ -253,15 +245,15 @@ const loadProduct = async (req, res) => {
     }
 };
 
-const loadAddProduct=async(req,res)=>{
+const loadAddProduct = async (req, res) => {
 
-try {
-    const categories=await Category.find({isListed:true})
-    res.render('addProduct',{categories})
-} catch (error) {
-    console.error("Error in product management:", error.message);
-    res.status(500).send("An error occurred while fetching products .");
-}
+    try {
+        const categories = await Category.find({ isListed: true })
+        res.render('addProduct', { categories })
+    } catch (error) {
+        console.error("Error in product management:", error.message);
+        res.status(500).send("An error occurred while fetching products .");
+    }
 }
 
 
@@ -272,15 +264,15 @@ const addProduct = async (req, res) => {
         const { productname, description, regularprice, category, stock } = req.body;
         const images = req.files;
 
-        
+
         if (!productname || !regularprice || !category || !description || !stock) {
             console.error("Validation failed: Missing fields");
-        
-            return 
+
+            return
         }
 
-       
-    
+
+
         if (!images || images.length < 1) {
             console.error("Validation failed: No images uploaded");
             return
@@ -298,12 +290,12 @@ const addProduct = async (req, res) => {
             productname,
             description,
             regularprice,
-            category: categoryDoc._id,  
+            category: categoryDoc._id,
             stock,
             images: imagePaths
         });
 
-        
+
         await newProduct.save();
         res.redirect("/admin/productManagement");
     } catch (error) {
@@ -314,46 +306,46 @@ const addProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { productname, description, regularprice, category, stock } = req.body;
-      const images = req.files; 
-      console.log('images ',images)
-  
-      if (!productname || !description || !regularprice || !category || !stock) {
-        return res.status(400).send("All fields are required");
-      }
-  
-      if (regularprice <= 0) {
-        return res.status(400).send({ message: 'Invalid price  value' });
-      }
-  
-      const product = await Product.findById(id);
-      if (!product) {
-        return res.status(404).send("Product not found");
-      }
-  
-      let updatedImages = product.images || [];
-      if (images && images.length > 0) {
-        const newImagePaths = images.map(file => file.path);
-        updatedImages = [...updatedImages, ...newImagePaths];
-      }
-  
-      await Product.findByIdAndUpdate(id, {
-        productname,
-        images: updatedImages,
-        regularprice,
-        description,
-        category,
-        stock
-      });
-  
-      res.redirect("/admin/productManagement");
+        const { id } = req.params;
+        const { productname, description, regularprice, category, stock } = req.body;
+        const images = req.files;
+        console.log('images ', images)
+
+        if (!productname || !description || !regularprice || !category || !stock) {
+            return res.status(400).send("All fields are required");
+        }
+
+        if (regularprice <= 0) {
+            return res.status(400).send({ message: 'Invalid price  value' });
+        }
+
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).send("Product not found");
+        }
+
+        let updatedImages = product.images || [];
+        if (images && images.length > 0) {
+            const newImagePaths = images.map(file => file.path);
+            updatedImages = [...updatedImages, ...newImagePaths];
+        }
+
+        await Product.findByIdAndUpdate(id, {
+            productname,
+            images: updatedImages,
+            regularprice,
+            description,
+            category,
+            stock
+        });
+
+        res.redirect("/admin/productManagement");
     } catch (error) {
-      console.error("Error updating product: ", error.message);
-      res.status(500).send("Error updating product: " + error.message);
+        console.error("Error updating product: ", error.message);
+        res.status(500).send("Error updating product: " + error.message);
     }
-  };
-  const toggleProductStatus = async (req, res) => {
+};
+const toggleProductStatus = async (req, res) => {
     const productId = req.params.id;
     try {
         const product = await Product.findById(productId);
@@ -368,21 +360,20 @@ const editProduct = async (req, res) => {
 
 
 const logout = async (req, res) => {
-    req.session.admin = false; 
+    req.session.admin = false;
 
-    
+
     req.session.destroy(err => {
         if (err) {
             return res.status(500).send('Could not log out.');
         }
-        res.redirect('/admin/adminLogin'); 
+        res.redirect('/admin/adminLogin');
     })
 }
 
 module.exports = {
     loadadminLogin,
     login,
-    loadDashboard,
     pageerror,
     loaduserManagement,
     blockUser,

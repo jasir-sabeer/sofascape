@@ -35,6 +35,18 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    usedCoupons: [
+        {
+            couponId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'coupon'
+            },
+            usageCount: {
+                type: Number,
+                default: 0
+            }
+        }
+    ]
     
 },{timestamps:true});
 
