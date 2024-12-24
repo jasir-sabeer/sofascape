@@ -259,6 +259,7 @@
         if (data.success) {
             
             priceElement.textContent = `₹${data.newPrice}`;
+            window.location.reload()
         } else {
             
             Swal.fire({

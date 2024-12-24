@@ -119,14 +119,10 @@ const addCart = async (req, res) => {
     }
 };
 
-
-
-
 const updateCartQuantity = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
         const userId = req.session.user;
-        console.log("quantity",quantity);
         
 
         if (!productId || quantity == null) {
@@ -142,8 +138,6 @@ const updateCartQuantity = async (req, res) => {
                 message: 'Quantity must be at least 1.',
             });
         }
-       
-      
 
         if (!userId) {
             return res.status(401).json({
@@ -226,7 +220,7 @@ const updateCartQuantity = async (req, res) => {
 
         await cart.save();
 
-
+   
         res.json({
             success: true,
             message: 'Cart quantity updated successfully.',

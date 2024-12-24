@@ -51,7 +51,6 @@ const addOffer = async (req, res) => {
         await newOffer.save();
 
         if (applicableTo === 'Product') {
-            // Handle direct product offers
             const products = await Product.find({ _id: { $in: newobjectids } });
             for (let product of products) {
                 const discountedPrice = product.regularprice - (product.regularprice * (discountValue / 100));
@@ -60,13 +59,12 @@ const addOffer = async (req, res) => {
                     {
                         offer: newOffer._id,
                         discountPrice: discountedPrice,
-                        total: discountedPrice // Update total field if needed
+                        total: discountedPrice 
                     },
                     { new: true }
                 );
             }
         } else if (applicableTo === 'Category') {
-            // Handle category-wide offers
             const products = await Product.find({ category: { $in: newobjectids } });
             for (let product of products) {
                 const discountedPrice = product.regularprice - (product.regularprice * (discountValue / 100));

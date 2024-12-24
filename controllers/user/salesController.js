@@ -20,14 +20,14 @@ const loadCheckout = async (req, res) => {
     const userId = req.session.user;
 
     try {
-        
+
         const user = await User.findById(userId).populate('usedCoupons.couponId');
 
         if (!user) {
             return res.status(401).send("User not found or not logged in");
         }
 
-        
+
         const cartProduct = await Cart.findOne({ userId }).populate("products.productId").exec();
 
         if (!cartProduct || cartProduct.products.length === 0) {
@@ -47,22 +47,22 @@ const loadCheckout = async (req, res) => {
             subtotal += productTotal;
         });
 
-        
+
         const usedCouponIds = user.usedCoupons.map(used => used.couponId._id.toString());
         const coupons = await Coupon.find({
             isListed: true,
             isExpired: false,
-            _id: { $nin: usedCouponIds } 
+            _id: { $nin: usedCouponIds }
         });
 
-        
+
         const shipping = 50;
         const total = subtotal + shipping;
 
 
         const addresses = await Address.find({ user: userId });
 
-    
+
         res.render("checkout", { addresses, cartProduct: cartProduct.products, subtotal, total, coupons });
 
     } catch (error) {
@@ -128,50 +128,46 @@ const editAddressCheckout = async (req, res) => {
     }
 }
 
-
 const saveOrder = async (req, res) => {
+    const userId = req.session.user;
+    const { addressId, cartItems, subtotal, shippingCost, total, paymentMethod, couponDiscountValue, finalDiscountAmount, paymentStatus } = req.body;
 
-    const { addressId, cartItems, subtotal, shippingCost, total, paymentMethod, couponDiscountValue, finalDiscountAmount } = req.body;
-    const userId = req.session?.user;
-
-    if (!userId) {
-        return res.status(401).json({
-            success: false,
-            message: 'User not logged in or session expired.'
-        });
+    
+    if (isNaN(total) || total <= 0) {
+        return res.status(400).json({ error: 'Invalid total amount.' });
     }
 
+    const validPaymentMethods = ['CashOnDelivery', 'razorpay'];
+    if (!validPaymentMethods.includes(paymentMethod)) {
+        return res.status(400).json({ error: 'Invalid payment method.' });
+    }
+
+    const orderProducts = cartItems.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        status: item.status,
+    }));
+
+    const finalPaymentStatus = paymentStatus ;
+
+    const newOrder = new Order({
+        userId,
+        products: orderProducts,
+        address: addressId,
+        total: total,
+        subtotal: subtotal,
+        shippingCost: shippingCost,
+        paymentMethod: paymentMethod,
+        createdAt: new Date(),
+        paymentStatus: finalPaymentStatus,
+        couponDiscountValue: couponDiscountValue,
+        finalDiscountAmount: finalDiscountAmount,
+    });
+
     try {
-        if (!Array.isArray(cartItems)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid cart data.'
-            });
-        }
-
-        const orderProducts = cartItems.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            name: item.name,
-            price: item.price,
-            image: item.image,
-            status: item.status,
-            offerPrice: item.offerPrice
-        }));
-
-        const newOrder = new Order({
-            userId,
-            products: orderProducts,
-            address: addressId,
-            total: total,
-            subtotal: subtotal,
-            shippingCost: shippingCost,
-            paymentMethod: paymentMethod,
-            createdAt: new Date(),
-            couponDiscountValue: couponDiscountValue,
-            finalDiscountAmount: finalDiscountAmount
-        });
-
         const savedOrder = await newOrder.save();
 
         const cartClearResult = await Cart.findOneAndUpdate(
@@ -184,22 +180,20 @@ const saveOrder = async (req, res) => {
             console.warn('Cart not found or already empty.');
             return res.status(404).json({
                 success: false,
-                message: "Cart not found or already empty."
+                message: 'Cart not found or already empty.',
             });
         }
 
         return res.status(200).json({
             success: true,
-            orderId: savedOrder._id
+            orderId: savedOrder._id,
+            message:'success'
+        
         });
 
     } catch (error) {
-        console.error('Error during order processing:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Error adding order',
-            error: error.message
-        });
+        console.error('Error saving order:', error);
+        res.status(500).json({ error: 'Failed to place order' });
     }
 };
 
@@ -265,18 +259,13 @@ const cancelProduct = async (req, res) => {
         const product = order.products.find(p => p.productId.toString() === productId);
         if (!product) return res.status(404).send('Product not found in the order');
 
+        // Cancel the product and update the stock
         const originalProduct = await Product.findById(productId);
         product.status = 'Cancelled';
         originalProduct.stock += product.quantity;
         await originalProduct.save();
 
-        const priceToRefund = product.offerPrice || product.price;
-        let refundAmount = priceToRefund * product.quantity;
-
-        if (order.couponDiscount > 0 && order.products.every(p => p.status === 'Cancelled')) {
-            refundAmount -= order.couponDiscount;
-        }
-
+        // Recalculate order subtotal
         let newSubtotal = order.products.reduce((sum, p) => {
             if (p.status !== 'Cancelled') {
                 return sum + (p.offerPrice || p.price) * p.quantity;
@@ -285,36 +274,50 @@ const cancelProduct = async (req, res) => {
         }, 0);
         order.subtotal = newSubtotal;
 
+        // If all products are canceled, update order status
         if (order.products.every(p => p.status === 'Cancelled')) {
             order.shippingCost = 0;
             order.total = 0;
             order.status = 'Cancelled';
         } else {
+            const priceToRefund = product.offerPrice || product.price;
             order.total -= priceToRefund * product.quantity;
             if (order.total < 0) order.total = 0;
         }
 
-        let wallet = await Wallet.findOne({ userId: order.userId });
-        if (!wallet) {
-            wallet = new Wallet({
-                userId: order.userId,
-                balance: refundAmount,
-                transactions: [{
+        // Only process wallet refund if the payment is completed
+        if (order.paymentStatus === 'Completed') {
+            const priceToRefund = product.offerPrice || product.price;
+            let refundAmount = priceToRefund * product.quantity;
+
+            // Apply coupon discount if all products are canceled
+            if (order.couponDiscount > 0 && order.products.every(p => p.status === 'Cancelled')) {
+                refundAmount -= order.couponDiscount;
+            }
+
+            let wallet = await Wallet.findOne({ userId: order.userId });
+            if (!wallet) {
+                wallet = new Wallet({
+                    userId: order.userId,
+                    balance: refundAmount,
+                    transactions: [{
+                        type: 'refund',
+                        amount: refundAmount,
+                        description: `Refund for cancelled product (${product.name}) in order ${orderId}`
+                    }]
+                });
+            } else {
+                wallet.balance += refundAmount;
+                wallet.transactions.push({
                     type: 'refund',
                     amount: refundAmount,
                     description: `Refund for cancelled product (${product.name}) in order ${orderId}`
-                }]
-            });
-        } else {
-            wallet.balance += refundAmount;
-            wallet.transactions.push({
-                type: 'refund',
-                amount: refundAmount,
-                description: `Refund for cancelled product (${product.name}) in order ${orderId}`
-            });
+                });
+            }
+
+            await wallet.save();
         }
 
-        await wallet.save();
         await order.save();
 
         res.redirect('/wallet');
@@ -323,6 +326,7 @@ const cancelProduct = async (req, res) => {
         res.status(500).send({ message: 'Error processing cancellation', error });
     }
 };
+
 
 
 
@@ -360,7 +364,7 @@ const discountCoupon = async (req, res) => {
     const userId = req.session.user;
 
     try {
-        
+
         const discountCode = await Coupon.findOne({
             code: coupuncode,
             isListed: true,
@@ -372,14 +376,14 @@ const discountCoupon = async (req, res) => {
             return res.status(404).json({ message: 'Coupon not found' });
         }
 
-        
+
         const currentDate = new Date();
         if (discountCode.expiryDate < currentDate) {
             console.log('Coupon has expired.');
             return res.status(400).json({ message: 'Coupon has expired' });
         }
 
-        
+
         const user = await User.findById(userId);
         const userCoupon = user.usedCoupons.find(c => c.couponId.equals(discountCode._id));
 
@@ -388,7 +392,7 @@ const discountCoupon = async (req, res) => {
             return res.status(400).json({ message: 'Coupon usage limit reached.' });
         }
 
-        
+
         const cart = await Cart.findOne({ userId }).populate('products.productId').exec();
         let subtotal = 0;
 
@@ -408,7 +412,7 @@ const discountCoupon = async (req, res) => {
         console.log('Subtotal:', subtotal);
         console.log('Total after applying coupon:', afterCoupon);
 
-        
+
         if (userCoupon) {
             userCoupon.usageCount += 1;
         } else {
@@ -442,7 +446,7 @@ const addWishlist = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        
+
         let wishlist = await Wishlist.findOne({ userId });
 
         if (wishlist && wishlist.products && wishlist.products.length > 0) {
@@ -452,7 +456,7 @@ const addWishlist = async (req, res) => {
                 }
             }
         }
-        
+
 
         if (!wishlist) {
             wishlist = await Wishlist.create({
@@ -472,7 +476,7 @@ const addWishlist = async (req, res) => {
             return res.status(201).send('product added in wishlist');
         }
 
-    
+
 
 
         wishlist.products.push({
@@ -570,86 +574,31 @@ const createOrder = async (req, res) => {
     }
 };
 
-const verifyPayment = async (req, res) => {
-    const { paymentResponse, orderData } = req.body;
-    const userId = req.session?.user;
-
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = paymentResponse;
 
 
-    const shasum = crypto.createHmac('sha256', process.env.RAZOR_PAY_SECRET);
-    shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
-    const digest = shasum.digest('hex');
+const paymentFailer = async (req, res) => {
+    const { orderId, paymentStatus } = req.body;
 
-    if (digest === razorpay_signature) {
-        try {
-
-            const newOrder = new Order({
-                userId: req.session?.user,
-                razorpayOrderId: razorpay_order_id,
-                razorpayPaymentId: razorpay_payment_id,
-                products: orderData.cartItems.map(item => ({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    name: item.name,
-                    price: item.price,
-                    image: item.image,
-                    offerPrice: item.offerPrice
-                })),
-                address: orderData.addressId,
-                subtotal: orderData.subtotal,
-                shippingCost: orderData.shippingCost,
-                total: orderData.total,
-                paymentMethod: "Razorpay",
-                couponDiscountValue: orderData.couponDiscountValue,
-                finalDiscountAmount: orderData.finalDiscountAmount,
-                paymentStatus: "Completed",
-                status: "Pending",
-                createdAt: new Date(),
-            });
-
-
-            const savedOrder = await newOrder.save();
-
-            console.log("Order saved successfully:", savedOrder);
-            const cartClearResult = await Cart.findOneAndUpdate(
-                { userId },
-                { products: [] },
-                { new: true }
-            );
-
-            if (!cartClearResult) {
-                console.warn('Cart not found or already empty.');
-                return res.status(404).json({
-                    success: false,
-                    message: "Cart not found or already empty."
-                });
-            }
-            return res.status(200).json({
-                success: true,
-                orderId: savedOrder._id
-
-            });
-        } catch (error) {
-            console.error("Error saving order:", error);
-            return res.status(500).json({
-                success: false,
-                message: "Payment verified but failed to save order details."
-            });
+    try {
+        const order = await orderModel.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
         }
-    } else {
-        return res.status(400).json({
-            success: false,
-            message: "InvalidPpayment signature."
-        });
-    }
-};
 
+        order.paymentStatus = paymentStatus;
+        await order.save();
+
+        res.status(200).json({ message: 'Payment status updated successfully' });
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        res.status(500).json({ error: 'Failed to update payment status' });
+    }
+}
 
 const loadWalletPage = async (req, res) => {
     const userId = req.session.user;
-    const page = parseInt(req.query.page) || 1; 
-    const pageSize = 5; 
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 5;
 
     try {
 
@@ -663,11 +612,11 @@ const loadWalletPage = async (req, res) => {
             });
         }
 
-    
+
         const totalTransactions = wallet.transactions.length;
         const totalPages = Math.ceil(totalTransactions / pageSize);
 
- 
+
         if (page < 1 || page > totalPages) {
             return res.status(400).send('Invalid page number.');
         }
@@ -677,7 +626,7 @@ const loadWalletPage = async (req, res) => {
             .sort((a, b) => b.date - a.date)
             .slice((page - 1) * pageSize, page * pageSize);
 
-   
+
         res.render('wallet', {
             wallet: {
                 balance: wallet.balance,
@@ -694,46 +643,110 @@ const loadWalletPage = async (req, res) => {
 
 
 
-const downloadInvoice =async (req, res) => {
+const downloadInvoice = async (req, res) => {
     const { orderId } = req.params;
-     console.log('bbbbbbbbb',orderId);
-     
-    const order = {
-      id: orderId,
-      date: '2024-12-20',
-      customerName: 'John Doe',
-      items: [
-        { name: 'Product 1', quantity: 2, price: 50 },
-        { name: 'Product 2', quantity: 1, price: 100 },
-      ],
-      total: 200,
-    };
-  
+    console.log('bbbbbbbbb', orderId);
+
+    const order = await Order.findById(orderId).populate('userId');
+
+    if (!order) {
+        return res.status(404).send('Order not found');
+    }
+
     const doc = new PDFDocument();
-  
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
-  
-    // Stream the PDF to the response
+
     doc.pipe(res);
-  
-    // Add content to the PDF
-    doc.fontSize(20).text(`Invoice #${order.id}`, { align: 'center' });
+
+    doc.fontSize(20).text(`SOFASCAPE`, { align: 'center' });
     doc.moveDown();
-    doc.fontSize(14).text(`Date: ${order.date}`);
-    doc.text(`Customer: ${order.customerName}`);
+    doc.fontSize(14).text(`order ${orderId}`);
+    doc.fontSize(14).text(`Date: ${order.createdAt.toLocaleDateString('en-US')}`);
+    doc.text(`Customer: ${order.userId.name}`);
     doc.moveDown();
-  
+
     doc.text('Items:', { underline: true });
-    order.items.forEach((item) => {
-      doc.text(`${item.name} (x${item.quantity}) - ₹${item.price}`);
+    order.products.forEach((item) => {
+        doc.text(`${item.name} (x${item.quantity}) - ₹${item.price}`);
     });
-  
     doc.moveDown();
     doc.fontSize(16).text(`Total: ₹${order.total}`, { bold: true });
-  
+
     doc.end();
-  };
+};
+
+
+
+const retryPayment = async (req, res) => {
+    const orderId = req.params.id; 
+    console.log('Retry Payment for Order ID:', orderId);
+  
+    try {
+        const reOrder = await Order.findById(orderId).populate("address");
+        if (!reOrder) {
+            return res.status(400).json({ error: "Order not found" });
+        }
+
+        const finalAmount = reOrder.finalDiscountAmount
+            ? parseFloat(reOrder.finalDiscountAmount)
+            : parseFloat(reOrder.total);
+
+        const options = {
+            amount: finalAmount * 100, 
+            currency: "INR",
+            receipt: `order_receipt_${orderId}`,
+            payment_capture: 1
+        };
+
+        const order = await instance.orders.create(options);
+
+        res.status(200).json({
+            success: true,
+            orderId: order.id,
+            amount: options.amount,
+            orderData: reOrder, // Include this if needed
+        });
+    } catch (error) {
+        console.error('Error creating Razorpay order:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create Razorpay order'
+        });
+    }
+};
+
+
+const paymentSuccess = async (req, res) => {
+    const {orderId } = req.body;
+
+    try {
+      const order = await Order.findById(orderId)
+     
+      
+        if (!order) {
+            return res.status(400).json({ success: false, message: "Order not found" });
+        }
+
+
+        order.paymentStatus = "Completed"
+     
+        await order.save();
+
+
+        return res.status(200).json({
+            success: true,
+            orderId: order._id,
+            message:'success'
+        
+        });
+
+    } catch (error) {
+        console.error("Error in payment success:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
   
 
 module.exports = {
@@ -750,10 +763,12 @@ module.exports = {
     addWishlist,
     cancelProductWshlist,
     createOrder,
-    verifyPayment,
     loadWalletPage,
-    downloadInvoice
-  
+    downloadInvoice,
+    paymentFailer,
+    retryPayment,
+    paymentSuccess
+
 }
 
 

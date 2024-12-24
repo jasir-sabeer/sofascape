@@ -16,9 +16,11 @@ router.post('/discount',salesController.discountCoupon)
 router.post('/wishlist/add/:id',salesController.addWishlist)
 router.delete('/wishlist/cancel/:productId', salesController.cancelProductWshlist);
 router.post('/create-order',salesController.createOrder)
-router.post('/verify-payment',salesController.verifyPayment)
+router.post("/checkout",salesController.paymentFailer)
 router.get('/wallet',userAuth.userLogin,salesController.loadWalletPage)
-router.get('/downloadInvoice/:id',salesController.downloadInvoice)
+router.get('/downloadInvoice/:orderId',salesController.downloadInvoice)
+router.post('/razorpay/retry/:id',salesController.retryPayment)
+router.post('/payment-sucsess',salesController.paymentSuccess)
 
 
     

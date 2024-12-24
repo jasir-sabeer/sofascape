@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const Review = require('../../models/reviewSchema');
 const session = require('express-session')
+const Order=require('../../models/orderSchema')
 
 // Page not found handler
 const pagenotfound = async (req, res) => {
@@ -19,21 +20,25 @@ const pagenotfound = async (req, res) => {
 
 // Load home page
 const loadhomepage = async (req, res) => {
-
     try {
-
         if (req.session.passport && req.session.passport.user) {
             req.session.user = req.session.passport.user;
         }
 
+        const topSellingData = await getBestSellingProducts();
+        const productId = topSellingData.map(data => data._id);  
+        const topSellingProducts = await Product.find({ _id: { $in: productId } }).limit(8);
+
         return res.render("home", {
             user: req.session.user,
+            topSellingProducts,
         });
     } catch (error) {
         console.log("Home page not found.", error);
         res.status(500).send('Server error');
     }
 };
+
 
 const loadHomepage = (req, res) => {
     const user = req.session.passport ? req.session.passport.user : null;
@@ -511,6 +516,101 @@ const setNewPassword = async (req, res) => {
         return res.render('resetPassword', { message: 'An error occurred. Please try again later.' });
     }
 };
+
+
+
+const getBestSellingProducts = async () => {
+    const pipeline = [
+        { $unwind: "$products" },
+        {
+            $match: {
+                "products.status": { $nin: ["Cancelled", "Returned"] },
+            },
+        },
+        {
+            $group: {
+                _id: "$products.productId",
+                totalSold: { $sum: "$products.quantity" },
+            },
+        },
+        { $sort: { totalSold: -1 } },
+        { $limit: 10 },
+        {
+            $lookup: {
+                from: "products",
+                localField: "_id",
+                foreignField: "_id",
+                as: "productDetails",
+            },
+        },
+        { $unwind: "$productDetails" },
+        {
+            $project: {
+                _id: 1,
+                totalSold: 1,
+                name: "$productDetails.productname",
+                price: "$productDetails.regularprice",
+                discountPrice: "$productDetails.discountPrice",
+                isListed: "$productDetails.isListed",
+                images: "$productDetails.images",
+            },
+        },
+    ];
+
+    
+    const topSellingData = await Order.aggregate(pipeline);  
+    return topSellingData;
+};
+
+
+const bestSellingCategories = [
+    { $unwind: { path: "$products", preserveNullAndEmptyArrays: true } },
+    {
+        $match: {
+            $and: [
+                { "products.status": { $exists: true } },
+                { "products.status": { $nin: ["Cancelled", "Returned"] } },
+            ],
+        },
+    },
+    {
+        $lookup: {
+            from: "products",
+            localField: "products.productId",
+            foreignField: "_id",
+            as: "productDetails",
+        },
+    },
+    { $unwind: { path: "$productDetails", preserveNullAndEmptyArrays: true } },
+    {
+        $lookup: {
+            from: "categories",
+            localField: "productDetails.category",
+            foreignField: "_id",
+            as: "categoryDetails",
+        },
+    },
+    { $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true } },
+    {
+        $match: {
+            "categoryDetails.name": { $exists: true, $ne: null },
+        },
+    },
+    {
+        $group: {
+            _id: "$categoryDetails.name",
+            totalSold: { $sum: "$products.quantity" },
+        },
+    },
+    { $sort: { totalSold: -1 } },
+    { $limit: 10 },
+    {
+        $project: {
+            categoryName: "$_id",
+            totalSold: 1,
+        },
+    },
+];
 
 
 module.exports = {

@@ -22,7 +22,7 @@
 
     }
 </style>
-<%-include("../partials/user/header")%>
+<%- include("../../views/partials/user/header") %>
 
     <div class="section-top-border">
         <h2 class="mb-30">Your Orders</h2>
@@ -77,25 +77,43 @@
                                                                 class="genric-btn danger-border circle"> Cancel</button>
                                                         </div>
                                                         <%}%>
+
+
                                 </div>
                                 <% }); %>
-                                      <%if(order.finalDiscountAmount){%>
-                                    <p class="last">Total Amount:<%= order.finalDiscountAmount %></p>
-                                    <%}else{%>
-                                        <p class="last">Total Amount:<%= order.total %></p>
-                                    <%}%>
-                                    <% if(order.paymentMethod=='COD' ){%>
-                                        <p class="lastdate">payment Method:Cash on Delivery</p>
+                                    <%if(order.finalDiscountAmount){%>
+                                        <p class="last">Total Amount:<%= order.finalDiscountAmount %>
+                                        </p>
                                         <%}else{%>
-                                            <p class="lastdate">payment Method:<%=order.paymentMethod%>
+                                            <p class="last">Total Amount:<%= order.total %>
                                             </p>
                                             <%}%>
+                                                <% if(order.paymentMethod=='COD' ){%>
+                                                    <p class="lastdate">payment Method:Cash on Delivery</p>
+                                                    <%}else{%>
+                                                        <p class="lastdate">payment Method:<%=order.paymentMethod%>
+                                                        </p>
+                                                        <%}%>
+                                                            <% if(order.paymentStatus==='Failed' ){%>
+                                                                <div id="viwemore" class="country">
+                                                                    <button class="genric-btn warning circle" id="retryPaymentBtn" type="submit"  data-order-id="<%= order._id%>">Retry
+                                                                        Payment</button>
+                                                                </div>
+                                                                <div id="viwemore" class="country"
+                                                                    style="margin-top: .5cm;"><a
+                                                                        href="/orderDetails/<%= order._id %>"
+                                                                        class="genric-btn success-border circle">View
+                                                                        More</a></div>
+                                                                <%}else{%>
+                                                                    <div id="viwemore" class="country"
+                                                                        style="margin-top: .5cm;"><a
+                                                                            href="/orderDetails/<%= order._id %>"
+                                                                            class="genric-btn success-border circle">View
+                                                                            More</a></div>
 
-                                                <div id="viwemore" class="country"><a
-                                                        href="/orderDetails/<%= order._id %>"
-                                                        class="genric-btn success-border circle">View More</a></div>
-
+                                                                    <%}%>
                     </div>
+
                 </div>
                 <% }); %>
                     <%}else{%>
@@ -117,7 +135,7 @@
 
 
     <%- include("../../views/partials/user/footer") %>
-    <script>
+        <script>
             async function cancelProduct(orderId, productId) {
 
 
@@ -131,8 +149,8 @@
                     });
 
                     if (result.isConfirmed) {
-                        await fetch(`/cancelOrder/${orderId}/${productId}`, { // Added `await` here if you want to wait for the response
-                            method: 'POST',
+                        await fetch(`/cancelOrder/${orderId}/${productId}`, {
+                                                        method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
@@ -155,3 +173,103 @@
             }
 
         </script>
+
+        <script>
+    document.getElementById("retryPaymentBtn").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    const orderId = e.target.getAttribute('data-order-id');
+    if (!orderId) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Invalid Order ID. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    fetch(`/razorpay/retry/${orderId}`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to create Razorpay order');
+        }
+       
+       
+
+
+
+        const razorpayOptions = {
+            key: 'rzp_test_PK79kuFlXvgTpG',
+            amount: data.amount,
+            
+            currency: 'INR',
+            name: 'Sofascape',
+            description: 'Order Payment',
+            order_id: data.orderId,
+            handler: function (response) {
+                            if (orderId) {
+                                fetch("/payment-sucsess", {
+                                    method: "POST",
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        orderId: orderId
+                                    })
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            window.location.href =  `/thankyou?orderId=${data.orderId}`;
+                                        } else {
+                                            alert('Payment verification failed');
+                                            window.location.href = '/orderTable';
+                                        }
+                                    })
+                                    .catch(error => console.error('Error verifying payment:', error));
+                            }
+                        },
+            prefill: {
+                name:  'John Doe', // Example dynamic value
+                email:  'john.doe@example.com',
+                contact:   '9999999999'
+            },
+            modal: {
+                ondismiss: function () {
+                    handlePaymentFailure(data.orderData, 'Failed');
+                }
+            }
+        };
+
+        const razorpay = new Razorpay(razorpayOptions);
+        console.log("this is from razorpy  order",razorpayOptions);
+        razorpay.open();
+    })
+ 
+    
+    .catch(error => {
+        console.error('Error in Razorpay integration:', error.message);
+        Swal.fire({
+            title: 'Error!',
+            text: 'Failed to initialize Razorpay. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+});
+
+
+
+ </script>
+ <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
