@@ -37,8 +37,9 @@
           <div class="s_product_text">
             
             <h3><%=product.productname%></h3>
-            <%if(product.discountPrice){%>
+            <%if(product.discountPrice && product.discountPrice < product.regularprice){%>
               <h3 ><s style="color:brown;">₹<%=product.regularprice%></s></h3>
+              <h4 style="color: black;"><%= product.discountPrice/ product.regularprice*100 %> %offer</h4>
             <h2>₹<%=product.discountPrice%></h2>
             <%}else{%>
               <h2>₹<%=product.regularprice%></h2>

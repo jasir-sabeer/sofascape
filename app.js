@@ -6,7 +6,8 @@ const passport=require("./config/passport")
 require("dotenv").config();
 const db=require("./config/db");
 const nocache = require("nocache");
-
+//schma
+const Cart=require('./models/cartSchema')
 //admin routers
 const adminRouter=require('./routes/admin/adminRouter')
 const orderRouter=require('./routes/admin/orderRouter')
@@ -75,6 +76,17 @@ app.use((err, req, res, next) => {
     console.error(err.stack); 
     res.status(err.status || 500).render('page-404')
 });
+
+app.use(async (req, res, next) => {
+    res.locals.cartCount = 0; 
+    if (req.session.user && req.session.user._id) {
+        const userId = req.session.user._id;
+        const cart = await Cart.findOne({ userId });
+        res.locals.cartCount = cart ? cart.items.length : 0;
+    }
+    next();
+});
+
 
 app.listen(3000,()=>{
     console.log("server running")

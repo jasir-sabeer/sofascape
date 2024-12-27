@@ -193,7 +193,7 @@
                   <h5>Subtotal</h5>
                 </td>
                 <td>
-                  <h5>₹<%=subtotal%></h5>
+                  <h5 id="subtotal"><%= subtotal %></h5>
                 </td>
               </tr>
         
@@ -221,18 +221,19 @@
   <%-include("../partials/user/footer")%>
  <!---update Quantity---->
  <script>
-  function updateQuantity(action, productId) {
-    
-    const input = document.querySelector(`input[data-product-id="${productId}"]`); 
-    const priceElement = document.querySelector(`#price-${productId}`); 
-    let currentQty = parseInt(input.value);
+ function updateQuantity(action, productId) {
+    const input = document.querySelector(`input[data-product-id="${productId}"]`);
+    const priceElement = document.querySelector(`#price-${productId}`);
+    const subTotalElement = document.getElementById('subtotal');
 
-    if (isNaN(currentQty)) {
-        currentQty = 1; 
+    if (!input || !priceElement || !subTotalElement) {
+        console.error('Required DOM elements not found.');
+        return;
     }
 
-    
-    if (action === 'increase' && currentQty<10) {
+    let currentQty = parseInt(input.value) || 1;
+
+    if (action === 'increase' && currentQty < 11) {
         currentQty++;
     } else if (action === 'decrease' && currentQty > 1) {
         currentQty--;
@@ -240,46 +241,30 @@
 
     input.value = currentQty;
 
-    
-    const data = {
-        productId: productId,
-        quantity: currentQty
-    };
+    const data = { productId, quantity: currentQty };
 
-    
     fetch('/updateCart', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            
-            priceElement.textContent = `₹${data.newPrice}`;
-            window.location.reload()
-        } else {
-            
-            Swal.fire({
-                title: "Message!",
-                text: data.message,
-                confirmButtonText: "Okay",
-            });
-        }
-    })
-    .catch(error => {
-        console.log(error)
-        Swal.fire({
-            title: "Server Error!",
-            text: "Something went wrong while updating the cart. Please try again later.",
-            icon: "error",
-            confirmButtonText: "Okay",
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                priceElement.textContent = `₹${data.newPrice}`;
+                subTotalElement.textContent = `₹${data.newSubtotal}`;
+            } else {
+                console.log(data.message,);
+                
+                Swal.fire({ title: "Message!", text: data.message, confirmButtonText: "Okay" });
+                input.value = currentQty - 1;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({ title: "Error!", text: "Failed to update cart. Try again later.", icon: "error", confirmButtonText: "Okay" });
         });
-    });
 }
-
 
 function cancelProduct(productId) {
     fetch(`/cart/cancel/${productId}`, { 

@@ -101,16 +101,26 @@
                   <th><span>₹<%= orders.shippingCost%></span></th>
                  
               </tr>
+              <%if(orders.couponDiscountValue){%>
+                <tr>
+                <th colspan="3">Coupon Discount</th>
+                <th><span>- ₹<%= orders.couponDiscountValue%></span></th>
+              </tr>
+              <%}%>
        </tbody>
               
               <tfoot>
-                <tr>
-                  <th scope="00col" colspan="3">Total</th>
-        
-                  <th scope="col">₹<%= orders.total%></th>
-           
-                </tr>
-              </tfoot>
+                <%if(orders.finalDiscountAmount){%>
+                  <tr>
+                    <th scope="00col" colspan="3">Total</th>
+                    <th scope="col">₹<%= orders.finalDiscountAmount%></th>
+                  </tr>
+                  <%}else{%>
+                    <tr>
+                      <th scope="00col" colspan="3">Total</th>
+                      <th scope="col">₹<%= orders.total%></th>
+                    </tr>
+                    <%}%>   </tfoot>
             </table>
           </div>
         </div>

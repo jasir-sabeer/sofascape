@@ -461,65 +461,68 @@
       });
 
       function submitOrder() {
-        const selectedAddressElement = document.querySelector('input[name="selectedAddress"]:checked');
-        const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
+    const selectedAddressElement = document.querySelector('input[name="selectedAddress"]:checked');
+    const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
 
-        if (!selectedAddressElement) {
-          Swal.fire({
+    if (!selectedAddressElement) {
+        Swal.fire({
             title: 'Error!',
             text: 'Please select an address.',
             icon: 'error',
             confirmButtonText: 'OK'
-          });
-          return;
-        }
+        });
+        return;
+    }
 
-        if (!paymentMethodElement) {
-          Swal.fire({
+    if (!paymentMethodElement) {
+        Swal.fire({
             title: 'Error!',
             text: 'Please select a payment method.',
             icon: 'error',
             confirmButtonText: 'OK'
-          });
-          return;
-        }
-
-        const selectedAddress = selectedAddressElement.value;
-        const paymentMethod = paymentMethodElement.value;
-        const couponDiscountElement = document.getElementById("discountValue");
-        const couponDiscountValue = couponDiscountElement ? couponDiscountElement.innerText : "0";
-        const finalDiscountElement = document.getElementById("totalAfterDiscount");
-        const finalDiscountAmount = finalDiscountElement ? finalDiscountElement.innerText : "0";
-
-        const cartItems = [];
-        '<% cartProduct.forEach(function(product) { %>';
-        cartItems.push({
-          productId: "<%= product.productId._id %>",
-          quantity: '<%= product.quantity %>',
-          price: Number('<%= product.productId.discountPrice || product.productId.regularprice %>'),
-          name: "<%= product.productId.productname %>",
-          image: '<%= product.productId.images[0] %>',
-          status: "Pending",
         });
-        '<% }); %>';
+        return;
+    }
 
-        const orderData = {
-          addressId: selectedAddress,
-          cartItems: cartItems,
-          subtotal: '<%= subtotal %>',
-          shippingCost: 50,
-          total: '<%= total %>',
-          paymentMethod: paymentMethod,
-          couponDiscountValue: Number(couponDiscountValue.replace(/[^0-9.-]+/g, "")),
-          finalDiscountAmount: Number(finalDiscountAmount.replace(/[^0-9.-]+/g, ""))
-        };
+    const selectedAddress = selectedAddressElement.value;
+    const paymentMethod = paymentMethodElement.value;
+    const couponCodeElement = document.getElementById("coupuncode"); 
+    const couponCode = couponCodeElement ? couponCodeElement.value : null; 
+    const couponDiscountElement = document.getElementById("discountValue");
+    const couponDiscountValue = couponDiscountElement ? couponDiscountElement.innerText : "0";
+    const finalDiscountElement = document.getElementById("totalAfterDiscount");
+    const finalDiscountAmount = finalDiscountElement ? finalDiscountElement.innerText : "0";
 
-        if (paymentMethod === "razorpay") {
-          createRazorpayOrder(orderData);
-        } else if (paymentMethod === "CashOnDelivery") {
-          submitOrderToBackend(orderData);
-        }
-      }
+    const cartItems = [];
+    '<% cartProduct.forEach(function(product) { %>';
+    cartItems.push({
+        productId: "<%= product.productId._id %>",
+        quantity: '<%= product.quantity %>',
+        price: Number('<%= product.productId.discountPrice || product.productId.regularprice %>'),
+        name: "<%= product.productId.productname %>",
+        image: '<%= product.productId.images[0] %>',
+        status: "Pending",
+    });
+    '<% }); %>';
+
+    const orderData = {
+        addressId: selectedAddress,
+        cartItems: cartItems,
+        subtotal: '<%= subtotal %>',
+        shippingCost: 50,
+        total: '<%= total %>',
+        paymentMethod: paymentMethod,
+        couponCode: couponCode, 
+        couponDiscountValue: Number(couponDiscountValue.replace(/[^0-9.-]+/g, "")),
+        finalDiscountAmount: Number(finalDiscountAmount.replace(/[^0-9.-]+/g, ""))
+    };
+
+    if (paymentMethod === "razorpay") {
+        createRazorpayOrder(orderData);
+    } else if (paymentMethod === "CashOnDelivery") {
+        submitOrderToBackend(orderData);
+    }
+}
 
       function submitOrderToBackend(orderData) {
         fetch('/checkout', {
@@ -727,7 +730,7 @@
 
 
         const subtotal = parseFloat(document.getElementById("subtotal").textContent.replace("₹", ""));
-        document.getElementById("total").textContent = "₹" + subtotal.toFixed(2); // No discount applied
+        document.getElementById("total").textContent = "₹" + subtotal.toFixed(2); 
 
 
         Swal.fire({

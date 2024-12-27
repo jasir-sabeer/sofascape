@@ -23,6 +23,8 @@ const loadCartPage = async (req, res) => {
         if (!cart) {
             return res.render('cart', { cartProducts: [] });
         }
+
+
         let subtotal = 0;
         let productTotal
         cart.products.forEach(item => {
@@ -34,6 +36,7 @@ const loadCartPage = async (req, res) => {
             item.subtotal = productTotal;
             subtotal += productTotal;
         });
+       
 
         res.render('cart', { cartProducts: cart.products, subtotal });
     } catch (error) {
@@ -109,8 +112,7 @@ const addCart = async (req, res) => {
         }
 
         await cart.save();
-        product.stock -= quantity;
-        await product.save();
+        
 
         return res.status(200).send('product added in cart');
     } catch (error) {
@@ -123,117 +125,67 @@ const updateCartQuantity = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
         const userId = req.session.user;
-        
 
         if (!productId || quantity == null) {
-            return res.status(400).json({
-                success: false,
-                message: 'Product ID and quantity are required.',
-            });
-        }
-
-        if (quantity < 1) {
-            return res.status(400).json({
-                success: false,
-                message: 'Quantity must be at least 1.',
-            });
+            return res.status(400).json({ success: false, message: 'Product ID and quantity are required.' });
         }
 
         if (!userId) {
-            return res.status(401).json({
-                success: false,
-                message: 'User is not logged in.',
-            });
+            return res.status(401).json({ success: false, message: 'User is not logged in.' });
         }
 
         const cart = await Cart.findOne({ userId }).populate('products.productId');
         if (!cart) {
-            return res.status(404).json({
-                success: false,
-                message: 'Cart not found.',
-            });
+            return res.status(404).json({ success: false, message: 'Cart not found.' });
         }
 
-        const productIndex = cart.products.findIndex(
-            item => item.productId._id.toString() === productId.toString()
-        );
-
+        const productIndex = cart.products.findIndex(item => item.productId._id.toString() === productId.toString());
         if (productIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'Product not found in cart.',
-            });
+            return res.status(404).json({ success: false, message: 'Product not found in cart.' });
         }
 
         const product = cart.products[productIndex].productId;
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: 'Product data unavailable.',
-            });
-        }
-
-
         const availableStock = product.stock;
-        const currentQuantity = cart.products[productIndex].quantity;
-        const quantityDifference = quantity - currentQuantity;
 
-        if ( quantity >= 10) {
+        if (quantity > availableStock) {
             return res.status(400).json({
                 success: false,
-                message: 'You can only increase the quantity by up to 10 units at a time.',
+                message: `Only ${availableStock} units are available for this product.`,
             });
         }
 
-        if (quantity > availableStock + currentQuantity) {
+        if (quantity ===11) {
             return res.status(400).json({
                 success: false,
-                message: `Only ${availableStock + currentQuantity} units available for this product.`,
+                message: 'You cannot add more than 10 units of a single product to the cart.',
             });
         }
-
 
         cart.products[productIndex].quantity = quantity;
-        const discountPrice = parseFloat(product.discountPrice) || 0;
-        const regularPrice = parseFloat(product.regularprice) || 0;
-        const applicablePrice = discountPrice > 0 && discountPrice < regularPrice
-            ? discountPrice
-            : regularPrice;
 
-        const updatedPrice = applicablePrice * quantity;
-
-
-        const newStock = availableStock - quantityDifference;
-        const stockUpdateResult = await Product.findByIdAndUpdate(
-            productId,
-            { stock: newStock },
-            { new: true }
-        );
-
-        if (!stockUpdateResult) {
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to update product stock.',
-            });
-        }
-
+        let subtotal = 0;
+        cart.products.forEach(item => {
+            const applicablePrice = item.productId.discountPrice || item.productId.regularprice;
+            const productTotal = item.quantity * applicablePrice;
+            item.subtotal = productTotal;
+            subtotal += productTotal;
+        });
 
         await cart.save();
 
-   
         res.json({
             success: true,
             message: 'Cart quantity updated successfully.',
-            newPrice: updatedPrice,
+            newPrice: cart.products[productIndex].subtotal,
+            newSubtotal: subtotal,
         });
     } catch (error) {
         console.error('Error updating cart quantity:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error occurred while updating cart quantity.',
-        });
+        res.status(500).json({ success: false, message: 'Server error occurred while updating cart quantity.' });
     }
 };
+
+
 
 
 const cancelProduct = async (req, res) => {
