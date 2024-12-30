@@ -32,7 +32,12 @@ const orderSchema = new mongoose.Schema({
             type: String,
             enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled','Returned'],
             default: 'Pending'
-        }
+        },
+        returnReason: {
+            type: String,
+            required: false
+
+        },
     }
     ],
     address: {
@@ -58,12 +63,12 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled','Returned'],
         default: 'Pending'
     },
     paymentMethod: {
         type: String,
-        enum: ['CashOnDelivery', 'razorpay', 'Wallet'],
+        enum: ['CashOnDelivery', 'razorpay', 'wallet'],
         default: "CashOnDelivery"
     },
     shippingCost: {

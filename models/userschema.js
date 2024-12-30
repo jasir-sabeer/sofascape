@@ -35,6 +35,15 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    referralCode: {
+        type: String,
+        unique: true
+    },
+    referredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        default: null
+    },
     usedCoupons: [
         {
             couponId: {

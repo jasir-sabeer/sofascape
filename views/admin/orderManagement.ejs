@@ -323,7 +323,10 @@
                                             <%}else if(product.status==='Cancelled' ){%>
                                                 <td style="color: rgb(120, 10, 10);">Cancelled</td>
 
-                                                <%}else{%>
+                                                <%}else if(product.status==='Returned' ){%>
+                                                    <td style="color: rgb(64, 6, 131);">Returned</td>
+
+                                                 <%}else{%>   
                                                     <td>
                                                         <select name="status"
                                                             onchange="updateStatus('<%- order._id %>', '<%- product.productId._id %>', this.value)">
@@ -347,6 +350,8 @@
                                                             <td><button class="dis">Delivered</button></td>
                                                             <%}else if(product.status==='Cancelled' ){%>
                                                                 <td><button class="dis" disabled>Cancelled</button></td>
+                                                                <%}else if(product.status==='Returned' ){%>
+                                                                    <td><button class="dis" disabled>Returned</button></td>
                                                                 <%}else{%>
                                                                     <td><button
                                                                             onclick="cancelProduct('<%= order._id %>', '<%= product.productId._id %>')"
@@ -364,7 +369,7 @@
                     <li class="page-item">
                         <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous"
                             style="text-decoration: none;">
-                            << /a>
+                            << 
                     </li>
                     <% } %>
 

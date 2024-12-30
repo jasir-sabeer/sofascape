@@ -52,6 +52,10 @@
                                 <input type="password" class="form-control" id="confirmpassword" name="confirmpassword" placeholder="Confirm Password">
                                 <div id="error5" class="errormessage" aria-live="assertive"></div>
                             </div>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="text" class="form-control" id="referralCodeInput" name="referralCodeInput" placeholder="Referral Code (optional)">
+                                <div id="error6" class="errormessage" aria-live="assertive"></div>
+                            </div>
                             <% if(locals.message && message.length>0){%>
                                 <div class="alert alert-danger text-center" >
                                  <%=message%>

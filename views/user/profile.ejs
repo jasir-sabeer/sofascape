@@ -24,7 +24,7 @@
         }
 
         .profile-section, .address-section {
-            background-color: #fff;
+            background-color: #ecfdff;
             border-radius: 8px;
             padding: 30px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -222,11 +222,19 @@
             </form>
             
         </div>
+       
 
         <div class="profile-info">
             <h3>General Information</h3>
             <p><strong>Username:</strong> <%= users.name %></p>
             <p><strong>Email:</strong> <%= users.email %></p>
+
+            <div style="width: 9cm;height: 3cm;background-color: #fa2162fa;margin-left: 6cm;border-radius: 10px;padding: .5cm;">
+                <p style="font-size: 10px;margin-left: .5cm;color: #fff;">Invete Your Friends with Referral code. Earn 50 Rs</p>
+                <h2 style="color: #fff;margin-left: 2cm;"> <%= users.referralCode %></h2>
+                <p style="font-size: 10px;margin-left: 2cm;color: #fff;">Share this code to your Friend</p>
+
+            </div>
             <a href="/orderTable">
                 <button id="change-password-button" class="genric-btn danger circle arrow">Orders</button>
             </a>

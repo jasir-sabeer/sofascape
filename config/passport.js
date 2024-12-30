@@ -20,7 +20,9 @@ passport.use(
           let newUser = new User({
             name: profile.displayName,
             email: profile.emails[0].value,
-            googleid: profile.id
+            googleid: profile.id,
+            referralCode:Math.random().toString(36).substr(2, 8).toUpperCase()
+
           });
           
           await newUser.save();

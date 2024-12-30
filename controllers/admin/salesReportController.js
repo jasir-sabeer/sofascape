@@ -489,7 +489,7 @@ const bestSellingProductsPipeline = [
         },
     },
     { $sort: { totalSold: -1 } }, 
-    { $limit: 10 }, 
+    { $limit: 5}, 
     {
         $lookup: {
             from: "products", 
@@ -552,7 +552,7 @@ const bestSellingCategoriesPipeline = [
         },
     },
     { $sort: { totalSold: -1 } },
-    { $limit: 10 },
+    { $limit:5 },
     {
         $project: {
             categoryName: "$_id",

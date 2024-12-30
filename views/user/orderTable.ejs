@@ -71,10 +71,19 @@
                                                     <div class="country">
                                                         <th> <span>Cancelled</span></th>
                                                     </div>
-                                                    <%}else{%>
+                                                    <%}else if(product.status==="Delivered"){%>
+                                                        <div class="country"><button
+                                                            onclick="rturnProduct('<%= order._id %>', '<%= product.productId._id %>')"
+                                                            class="genric-btn danger-border circle"> Return</button>
+                                                    </div>
+                                                        <%}else if(product.status==="Returned"){%>
+                                                            <div class="country">
+                                                                <p>Returned</p>
+                                                            </div>
+                                                        <%}else{%>
                                                         <div class="country"><button
                                                                 onclick="cancelProduct('<%= order._id %>', '<%= product.productId._id %>')"
-                                                                class="genric-btn danger-border circle"> Cancel</button>
+                                                                class="genric-btn warning-border circle"> Cancel</button>
                                                         </div>
                                                         <%}%>
 
@@ -88,12 +97,9 @@
                                             <p class="last">Total Amount:<%= order.total %>
                                             </p>
                                             <%}%>
-                                                <% if(order.paymentMethod=='COD' ){%>
-                                                    <p class="lastdate">payment Method:Cash on Delivery</p>
-                                                    <%}else{%>
-                                                        <p class="lastdate">payment Method:<%=order.paymentMethod%>
-                                                        </p>
-                                                        <%}%>
+                                               
+                                                        <p class="lastdate">payment Method:<%=order.paymentMethod%></p>
+                                                       
                                                             <% if(order.paymentStatus==='Failed' ){%>
                                                                 <div id="viwemore" class="country">
                                                                     <button class="genric-btn warning circle" id="retryPaymentBtn" type="submit"  data-order-id="<%= order._id%>">Retry
@@ -136,9 +142,8 @@
 
     <%- include("../../views/partials/user/footer") %>
         <script>
+            //cancel product
             async function cancelProduct(orderId, productId) {
-
-
                 try {
                     const result = await Swal.fire({
                         title: "Are you sure you want to cancel the product?",
@@ -175,8 +180,9 @@
         </script>
 
         <script>
-    document.getElementById("retryPaymentBtn").addEventListener("click", function (e) {
-    e.preventDefault();
+            //retry Payment
+       document.getElementById("retryPaymentBtn").addEventListener("click", function (e) {
+       e.preventDefault();
 
     const orderId = e.target.getAttribute('data-order-id');
     if (!orderId) {
@@ -241,7 +247,7 @@
                             }
                         },
             prefill: {
-                name:  'John Doe', // Example dynamic value
+                name:  'John Doe', 
                 email:  'john.doe@example.com',
                 contact:   '9999999999'
             },
@@ -273,3 +279,43 @@
 
  </script>
  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+ <!-- Retunr product-->>
+ <script>
+    async function rturnProduct(orderId, productId) {
+    try {
+        const result = await Swal.fire({
+            title: "Are you sure you want to return the product?",
+            input: "text", // Input type for collecting return reason
+            inputPlaceholder: "Enter the reason for return",
+            showCancelButton: true,
+            confirmButtonColor: '#000',
+            cancelButtonColor: '#000',
+            confirmButtonText: "OK",
+        });
+
+        if (result.isConfirmed && result.value) {
+            const returnReason = result.value;
+
+            const response = await fetch(`/rturnProduct/${orderId}/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ returnReason }), 
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to return the product');
+            }
+        } else if (!result.value) {
+            Swal.fire('Error', 'Return reason is required', 'error');
+        }
+    } catch (error) {
+        console.error('Error in return product:', error);
+        alert('An error occurred');
+    }
+}
+
+ </script>
