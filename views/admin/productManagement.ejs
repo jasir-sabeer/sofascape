@@ -570,7 +570,7 @@ input[type="file"] {
             </select>
     
             <label for="productStock">Stock:</label>
-            <input type="number" id="editProductStock" name="stock" required />
+            <input type="number" id="editProductStock" name="stock" min="0" required />
             <input type="text" id="productId" hidden>
             <label for="productImage" class="file-upload-label">Update Images:</label>
             <input type="file" id="editProductImage" name="images" accept="image/*" multiple />

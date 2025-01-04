@@ -552,7 +552,7 @@ const bestSellingCategoriesPipeline = [
         },
     },
     { $sort: { totalSold: -1 } },
-    { $limit:5 },
+    { $limit: 5 },
     {
         $project: {
             categoryName: "$_id",

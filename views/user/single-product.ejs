@@ -1,5 +1,162 @@
-<%-include("../../views/partials/user/header")%>
+<!doctype html>
+<html lang="eng">
 
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>SOFASCAPE</title>
+    <link rel="icon" href="/img/favicon.png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <!-- animate CSS -->
+    <link rel="stylesheet" href="/css/animate.css">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="/css/owl.carousel.min.css">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" href="/css/all.css">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" href="/css/flaticon.css">
+    <link rel="stylesheet" href="/css/themify-icons.css">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" href="/css/magnific-popup.css">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" href="/css/slick.css">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+#imageZoom {
+    width: 100%; /* Full width */
+    max-width: 400px; 
+    height: auto; 
+    position: relative;
+    overflow: hidden;
+    margin: 20px auto; 
+    padding: 10px; 
+    text-align: center; /* Center the image inside */
+}
+
+#imageZoom img {
+    max-width: 100%; /* Make sure image doesn't exceed container width */
+    height: auto; /* Maintain aspect ratio */
+    display: inline-block; /* Keep it centered */
+}
+
+
+
+#main-image {
+    width: 100%;
+    height: auto; 
+    object-fit: contain; 
+    display: block; 
+    margin: 0 auto; 
+}
+
+#imageZoom::after {
+    display: var(--display);
+    content: "";
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    background-image: var(--url);
+    background-size: 200%; 
+    background-position: var(--zoom-x) var(--zoom-y);
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none; 
+    transition: opacity 0.3s; 
+}
+.errormessage{
+    color: red;
+}
+
+</style>
+</head>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<body>
+    <!--::header part start::-->
+    <header class="main_menu home_menu">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+                        <a class="navbar-brand" href="/homepage"><b>SOFA</b>SCAPE </a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="menu_icon"><i class="fas fa-bars"></i></span>
+                        </button>
+
+                        <div class="collapse navbar-collapse main-menu-item" id="navbarSupportedContent">
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/homepage">Home</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link " href="/products">
+                                        Shop
+                                    </a>
+                                    
+                                </li>
+                                <!-- <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown_3"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        pages
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown_2">
+                                        <a class="dropdown-item" href="tracking.html">tracking</a>
+                                        <a class="dropdown-item" href="checkout.html">product checkout</a>
+                                        <a class="dropdown-item" href="cart.html">shopping cart</a>
+                                        <a class="dropdown-item" href="confirmation.html">confirmation</a>
+                                        <a class="dropdown-item" href="elements.html">elements</a>
+                                    </div>
+                                </li> -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown_2"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        More
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown_2">
+                                        <a class="dropdown-item" href="/wallet"> Wallet</a>
+                                        <a class="dropdown-item" href="/orderTable">Orders</a>
+                                    </div>
+                                </li>
+                                
+                                <!-- <li class="nav-item">
+                                    <a class="nav-link" href="contact.html">Contact</a>
+                                </li> -->
+                               
+                            </ul>
+                        </div>
+                        <div class="hearer_icon d-flex">
+                            <a href="/profile"><i class="fa-solid fa-user"></i></a>
+                            <a href="/wishlist"><i class="ti-heart"></i></a>
+                            <a style="margin-left: .8cm;"  href="/cartPage"><img src="/img/cart.svg"></a> <span class="badge" style="background-color: red;height: .4cm;border-radius: 50%;"><%= cartCount %></span> <!-- Display the cart count dynamically -->
+                               
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="search_input" id="search_input_box">
+            <div class="container ">
+              
+            </div>
+        </div>
+    </header>
+    <!-- Header part end-->
 
   <!--================Single Product Area =================-->
   <div class="product_image_area section_padding">
@@ -39,7 +196,7 @@
             <h3><%=product.productname%></h3>
             <%if(product.discountPrice && product.discountPrice < product.regularprice){%>
               <h3 ><s style="color:brown;">₹<%=product.regularprice%></s></h3>
-              <h4 style="color: black;"><%= product.discountPrice/ product.regularprice*100 %> %offer</h4>
+              <h4 style="color: black;"><%=100- (product.discountPrice/ product.regularprice*100) %> %offer</h4>
             <h2>₹<%=product.discountPrice%></h2>
             <%}else{%>
               <h2>₹<%=product.regularprice%></h2>
@@ -82,10 +239,12 @@
                     <input class="input-number" type="text" value="1" min="0" id="qty" max="10">
                     <span class="number-increment"> <i class="ti-plus"></i></span>
                   </div> -->
-                  <a onclick="addToCart('<%= product._id %>')" href="/cartPage" class="genric-btn primary circle">add to cart</a>
+                  <a  onclick="addToCart('<%= product._id %>')" href="/cartPage" class="genric-btn primary e-large">add to cart</a>
     
                   <% } %>
-                   <a  href=""  class="like_us"> <i class="ti-heart"></i> </a>
+                  <a style="cursor: pointer;font-size: 25px;"
+                                        onclick="addToWishlist('<%= product._id %>')"
+                                        ><i class="ti-heart" style="margin-left: 4cm;"></i></a>
             </div>
           </div>
         </div>
@@ -414,4 +573,32 @@ async function addToCart(productId) {
     toastr.error("An unexpected error occurred.", "Error");
   }
 }
+
+async function addToWishlist(productId) {
+    console.log('pppppppppppp',productId);
+    
+  try {
+    const response = await fetch(`/wishlist/add/${productId}`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+
+    });
+
+    if (response.ok) {
+        const successMessage= await response.text();
+      toastr.success(`${successMessage}`, "Success");
+    } else {
+      const errorMessage = await response.text();
+      
+      toastr.error(`Failed to add to wishlist: ${errorMessage}`, "Error");
+    }
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    
+    toastr.error("An unexpected error occurred.", "Error");
+  }
+}
+
+
+fun
 </script>

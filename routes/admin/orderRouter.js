@@ -6,6 +6,7 @@ const adminAuth=require('../../middlewares/adminAuth');
 router.get('/orderManagement',adminAuth.adminlogin,orderController.loadOrderManagement)
 router.post('/update-product-status/:orderId/:productId/:status',orderController.changeStatus)
 router.post('/cancelOrder/:orderId/:productId', orderController.cancelProduct);
+router.get('/viewMore/:orderId/:productId',orderController.orderDetails)
 
 
 

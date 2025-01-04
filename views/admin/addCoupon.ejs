@@ -46,11 +46,6 @@
                 <input type="date" id="expiryDate" name="expiryDate" class="form-control">
             </div>
 
-            <div class="mb-3">
-                <label for="limit" class="form-label">Limit of user</label>
-                <div id="error6" class="errormessage" aria-live="assertive"></div>
-                <input type="number" id="limit" name="limit" class="form-control" placeholder="Enter a limit">
-            </div>
 
             <button type="submit" class="btn btn-primary w-100">Add Coupon</button>
         </form>
@@ -66,7 +61,6 @@ const error2 = document.getElementById('error2');
 const error3 = document.getElementById('error3');
 const error4 = document.getElementById('error4');
 const error5 = document.getElementById('error5');
-const error6 = document.getElementById('error6');
 
 addCouponForm.addEventListener("submit", (e) => {
   couponCodeValidateChecking();
@@ -74,15 +68,14 @@ addCouponForm.addEventListener("submit", (e) => {
   MinPurchaseValidateChecking();
   startDateValidateChecking();
   expiryDateValidateChecking();
-  limitValidateChecking();
+  
 
   if (
     error1.classList.contains("show-error") || 
     error2.classList.contains("show-error") || 
     error3.classList.contains("show-error") || 
     error4.classList.contains("show-error") || 
-    error5.classList.contains("show-error") ||
-    error6.classList.contains("show-error") 
+    error5.classList.contains("show-error") 
   ) {
     e.preventDefault();  
   }
@@ -185,20 +178,7 @@ function expiryDateValidateChecking() {
     }
 }
 
-function  limitValidateChecking() {
-  const limitInput = document.getElementById('limit').value.trim();
-  const maxLimit=10;
-  if (limitInput === "") {
-    error6.textContent = "plese add   limit";
-    error6.classList.add("show-error");
-  } else if(limitInput > maxLimit){
-    error6.textContent = "please enter lessthan 10 ";
-    error6.classList.add("show-error");
-  }else{
-    error6.textContent = "";
-    error6.classList.remove("show-error");
-  }
-}
+
 
 
 

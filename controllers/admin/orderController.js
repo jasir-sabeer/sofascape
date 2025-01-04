@@ -87,10 +87,30 @@ const cancelProduct = async (req, res) => {
     }
 }
 
+const orderDetails = async(req,res)=>{
+    const { orderId, productId } = req.params;
+    try {
+        const order = await Order.findById(orderId).populate('address');
+        if (!order) return res.status(404).send('Order not found');
+
+        const product = order.products.find(p => p.productId.toString() === productId);
+        if (!product) return res.status(404).send('Product not found in the order');
+     
+        res.render('orderDetailsPage',{order,product})
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error processing request');
+        
+        
+    }
+}
+
 
 
 module.exports = {
     loadOrderManagement,
     changeStatus,
-    cancelProduct
+    cancelProduct,
+    orderDetails
 }

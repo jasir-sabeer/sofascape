@@ -9,10 +9,11 @@ const Review = require('../../models/reviewSchema');
 const session = require('express-session')
 const Order=require('../../models/orderSchema')
 const Wallet=require('../../models/walletSchema')
+const Cart=require('../../models/cartSchema')
 
-// Page not found 
 const pagenotfound = async (req, res) => {
     try {
+        
         res.render("page-404");
     } catch (error) {
         res.redirect('/pagenotfound');
@@ -30,9 +31,16 @@ const loadhomepage = async (req, res) => {
         const productId = topSellingData.map(data => data._id);  
         const topSellingProducts = await Product.find({ _id: { $in: productId } }).limit(8);
 
+        const cart = await Cart.findOne({ userId: req.session.user });  
+        let cartCount = 0;
+        if (cart && cart.products) {
+            cartCount = cart.products.length; 
+        }
+
         return res.render("home", {
             user: req.session.user,
             topSellingProducts,
+            cartCount,  
         });
     } catch (error) {
         console.log("Home page not found.", error);
@@ -76,6 +84,13 @@ const loadproductpage = async (req, res) => {
             sortOption.productname = -1;
         }
 
+        const cart = await Cart.findOne({ userId: req.session.user });  
+
+        let cartCount = 0;
+        if (cart && cart.products) {
+            cartCount = cart.products.length; 
+        }
+
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 6;
         const skip = (page - 1) * limit;
@@ -104,6 +119,7 @@ const loadproductpage = async (req, res) => {
             totalPages,
             previousPage,
             nextPage,
+            cartCount
         });
 
     } catch (error) {
@@ -172,7 +188,7 @@ const loadotppage = async (req, res) => {
                         userId: savedUser._id,
                         balance: 50,
                         transactions: [
-                            {
+                            { 
                                 type: 'credit',
                                 amount: 50,
                                 description: `Referral bonus for using code ${referralCodeInput}`,
@@ -381,10 +397,16 @@ const loadsingleproductpage = async (req, res) => {
         if (Ratings.length > 0) {
             avg = Ratings[0].averageRating.toFixed(2)
         }
+        const cart = await Cart.findOne({ userId:id });  
+        let cartCount = 0;
+        if (cart && cart.products) {
+            cartCount = cart.products.length; 
+        }else{
+            cartCount=0
+        }
 
 
-
-        res.render("single-product", { product, relatedProducts, productReviews, users, avg, totalReviews })
+        res.render("single-product", { product, relatedProducts, productReviews, users, avg, totalReviews,cartCount })
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');

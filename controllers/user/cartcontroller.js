@@ -8,26 +8,25 @@ const Coupon = require('../../models/couponSchema')
 
 const loadCartPage = async (req, res) => {
     const id = req.session.user;
-    try {
 
+    try {
         const users = await User.findOne({ _id: id, isblocked: false });
 
-
         if (!users) {
-            res.status(404).render('login')
+            return res.status(404).render('login');
         }
-
 
         const userId = req.session.user;
-        const cart = await Cart.findOne({ userId }).populate('products.productId').exec()
+        const cart = await Cart.findOne({ userId }).populate('products.productId').exec();
+        console.log('Cart:', cart);
+
         if (!cart) {
-            return res.render('cart', { cartProducts: [] });
+            return res.render('cart', { cartProducts: [], subtotal: 0, cartCount: 0 });
         }
 
-
         let subtotal = 0;
-        let productTotal
-        cart.products.forEach(item => {
+        let productTotal = 0;
+        cart.products.forEach((item) => {
             if (item.productId.discountPrice && item.productId.discountPrice < item.productId.regularprice) {
                 productTotal = item.quantity * item.productId.discountPrice;
             } else {
@@ -36,14 +35,20 @@ const loadCartPage = async (req, res) => {
             item.subtotal = productTotal;
             subtotal += productTotal;
         });
-       
 
-        res.render('cart', { cartProducts: cart.products, subtotal });
+        let cartCount = 0;
+        if (cart && cart.products) {
+            cartCount = cart.products.length; 
+        }
+        
+
+        res.render('cart', { cartProducts: cart.products, subtotal, cartCount });
     } catch (error) {
         console.error('Error loading cart page:', error);
         res.redirect('/page-404');
     }
 };
+
 
 const addCart = async (req, res) => {
     const productId = req.params.id;
@@ -112,6 +117,7 @@ const addCart = async (req, res) => {
         }
 
         await cart.save();
+
         
 
         return res.status(200).send('product added in cart');

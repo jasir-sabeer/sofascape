@@ -506,6 +506,7 @@
                 <li><a href="/admin/couponManagement">Coupon</a></li>
                 <li><a href="/admin/offerManagement">Offer</a></li>
                 <li><a href="/admin/salesReport" class="special-color">Sales Reports</a></li>
+                <li><a href="#profile">Profile</a></li>
                 <form action="/admin/logout" method="POST">
                     <button type="submit" class="logoutbtn">Logout</button>
                 </form>
@@ -534,6 +535,7 @@
                     <option value="">Select</option>
                     <option value="1week">Last Week</option>
                     <option value="1month">Last Month</option>
+                    <option value="1day">Last day</option>
                 </select>
             </div>
 
@@ -744,11 +746,11 @@ document.getElementById('downloadPDFBtn').addEventListener('click', function () 
 
 // capture data
 function captureTableData() {
-    const rows = document.querySelectorAll('#salesReportBody tr'); // Adjusted selector
+    const rows = document.querySelectorAll('#salesReportBody tr'); 
     const data = [];
     rows.forEach(row => {
         const columns = row.querySelectorAll('td');
-        if (columns.length === 5) { // Ensure all required columns are processed
+        if (columns.length === 5) { 
             const rowData = {
                 date: columns[0].textContent.trim(),
                 orderCount: columns[1].textContent.trim(),

@@ -57,6 +57,10 @@ const orderSchema = new mongoose.Schema({
         type:Number,
         required:false,
     },
+    couponDiscountPercentage:{
+        type:Number,
+        required:false,
+    },
     finalDiscountAmount:{
         type:Number,
         required:false,

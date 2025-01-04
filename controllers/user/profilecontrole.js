@@ -4,7 +4,7 @@ const User = require("../../models/userschema");
 const Address = require('../../models/addressschema')
 const Order = require('../../models/orderSchema')
 const bcrypt = require('bcrypt');
-
+const Cart =require('../../models/cartSchema')
 
 const loadprofile = async (req, res) => {
     const id = req.session.user
@@ -21,13 +21,19 @@ const loadprofile = async (req, res) => {
 
         const productCounts = orders.map(order => {
             const totalProducts = order.products.reduce((count, product) => {
-                return count + product.quantity; // Sum up the quantities of products in the order
+                return count + product.quantity;
             }, 0);
             return { orderId: order._id, totalProducts };
         });
 
+        const cart = await Cart.findOne({ userId: req.session.user });  
+               let cartCount = 0;
+               if (cart && cart.products) {
+                   cartCount = cart.products.length; 
+               }
 
-        res.render("profile", { users, addresses, orders, productCounts })
+
+        res.render("profile", { users, addresses, orders, productCounts,cartCount })
     } catch (error) {
         res.send(error)
     }

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    margin: 0;
+    color: #444;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.order-summary,
+.customer-info,
+.items {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fafafa;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.items-table th,
+.items-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.items-table th {
+    background-color: #f4f4f4;
+    color: #555;
+}
+
+.totals {
+    margin-top: 10px;
+}
+
+.totals p {
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Order Details</h1>
+        </header>
+        <main class="main-content">
+            <section class="order-summary">
+                <h2>Order Summary</h2>
+                <p><strong>Order ID:</strong> <%= order.id %></p>
+                <p><strong>Date:</strong> <%= order.createdAt %></p>
+                <p><strong>Status:</strong> <%= product.status %></p>
+                <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+            </section>
+            <section class="customer-info">
+                <h2>Customer Information</h2>
+                <p><strong>Name:</strong> <%= order.address.firstName %> <%= order.address.lastName %></p>
+                <p><strong>Email:</strong> <%= order.address.email %></p>
+                <p><strong>Phone:</strong> <%= order.address.phoneNumber %></p>
+            </section>
+            <section class="items">
+                <h2>Items</h2>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            <tr>
+                                <td><%= product.name %></td>
+                                <td><%= product.quantity %></td>
+                                <td>₹<%= product.price %></td>
+                                <td>₹<%= (product.quantity * product.price) %></td>
+                            </tr>
+                    </tbody>
+                </table>
+                <div class="totals">
+                    
+                    <% if(order.couponDiscountValue){%>
+                        <p><strong>Subtotal:</strong> ₹<%= order.subtotal %></p>
+                        <p><strong>Shipping Cost:</strong>₹<%= order.shippingCost %></p>
+                        <p><strong>Discount Value:</strong> ₹<%= order.couponDiscountValue %></p>
+                        <p><strong>Total:</strong> ₹<%= order.finalDiscountAmount %></p>
+
+                    <%}else{%> 
+                        <p><strong>Subtotal:</strong> ₹<%= order.subtotal %></p>
+                        <p><strong>Shipping Cost:</strong>₹<%= order.shippingCost %></p>
+                        <p><strong>Total:</strong> ₹<%= order.total %></p>
+                    <%}%>   
+                </div>
+            </section>
+        </main>
+        <footer class="footer">
+            <p></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -271,7 +271,6 @@
                 <li><a href="/admin/couponManagement">Coupon</a></li>
                 <li><a href="/admin/offerManagement">Offer</a></li>
                 <li><a href="/admin/salesReport">Sales Reports</a></li>
-                <li><a href="#profile">Profile</a></li>
                 <form action="/admin/logout" method="POST">
                     <button type="submit" class="logoutbtn" style="font-size: 13.3px;">Logout</button>
                 </form>
@@ -296,6 +295,7 @@
                     <th>Order Status</th>
                     <th>Date</th>
                     <th>Cancel</th>
+                    <th>View More</th>
                 </tr>
             </thead>
             <% orders.forEach(order=> { %>
@@ -358,6 +358,11 @@
                                                                             class="edit-button">Cancel</button></td>
 
                                                                     <%}%>
+                                                                    <td><button style="background-color: rgb(210, 181, 17);">
+                                                                        <a style="text-decoration: none;color: #ddd;font-size: 11px;" href="/admin/viewMore/<%= order._id %>/<%= product.productId._id %>">View More</a>
+                                                                    </button>
+                                                                    </td>
+
                         </tr>
                         <%})%>
                 </tbody>
@@ -463,6 +468,8 @@
         }
     }
 
+    
+    
 
     //serch
 

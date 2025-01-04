@@ -25,7 +25,7 @@ const loadAddCoupon = async (req, res) => {
 
 
 const addCoupons = async (req, res) => {
-    const { code, discountValue, minPurchase, startDate, expiryDate, limit } = req.body;
+    const { code, discountValue, minPurchase, startDate, expiryDate } = req.body;
 
     console.log(code);
     try {
@@ -36,7 +36,6 @@ const addCoupons = async (req, res) => {
             minPurchase,
             startDate,
             expiryDate,
-            userLimit: limit
 
         })
 

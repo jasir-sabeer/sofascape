@@ -73,7 +73,7 @@ const addOffer = async (req, res) => {
                     {
                         offer: newOffer._id,
                         discountPrice: discountedPrice,
-                        total: discountedPrice // Update total field if needed
+                        total: discountedPrice 
                     },
                     { new: true }
                 );

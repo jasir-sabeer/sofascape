@@ -464,7 +464,6 @@ input[type="file"] {
                 <tr>
                   <th>Coupon Code</th>
                   <th>Discount</th>
-                  <th>limit</th>
                   <th>Expiry Date</th>
                   <th>Status</th>
                   <th>Action</th>
@@ -482,10 +481,7 @@ input[type="file"] {
                     <td>
                       <%= coupon.discountValue %> %
                     </td>
-                    <td>
-                      <%= coupon.userLimit %>
-
-                    </td>
+                    
               
                     <td>
                       <%= new Date(coupon.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %>

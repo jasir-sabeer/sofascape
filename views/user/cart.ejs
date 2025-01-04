@@ -1,89 +1,199 @@
 
-<style>
-  .input-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.input-number {
-  width: 50px;
-  text-align: center;
-  border: 1px solid #ccc;
-  height: 30px;
-}
+<!doctype html>
+<html lang="eng">
 
-.btn {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f1f1f1;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>SOFASCAPE</title>
+    <link rel="icon" href="/img/favicon.png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <!-- animate CSS -->
+    <link rel="stylesheet" href="/css/animate.css">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="/css/owl.carousel.min.css">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" href="/css/all.css">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" href="/css/flaticon.css">
+    <link rel="stylesheet" href="/css/themify-icons.css">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" href="/css/magnific-popup.css">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" href="/css/slick.css">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
 
-.product_count {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px; /* Small gap between elements */
-}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+      .input-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .input-number {
+      width: 50px;
+      text-align: center;
+      border: 1px solid #ccc;
+      height: 30px;
+    }
+    
+    .btn {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f1f1f1;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+    
+    .product_count {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px; /* Small gap between elements */
+    }
+    
+    .product_count .btn-decrease, 
+    .product_count .btn-increase {
+      background-color: #fff; /* Blue color */
+      color: #000; /* White text */
+      border: none; /* No border */
+      padding: 8px 12px; /* Add padding for better visibility */
+      font-size: 18px; /* Larger font size for buttons */
+      font-weight: bold;
+      border-radius: 5px; /* Slightly rounded corners */
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    
+    .product_count .btn-decrease:hover, 
+    .product_count .btn-increase:hover {
+      background-color: #fff; /* Darker blue on hover */
+      transform: scale(1.1); /* Slight zoom effect */
+    }
+    
+    .product_count .input-text {
+      width: 60px; /* Compact width */
+      height: 40px; /* Uniform height */
+      text-align: center; /* Center-align the text */
+      font-size: 16px; /* Adjusted font size */
+      border: 1px solid #ccc; /* Light border */
+      border-radius: 5px; /* Rounded corners */
+      outline: none; /* No outline on focus */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .product_count .input-text:focus {
+      border-color: #fff; /* Blue border on focus */
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); /* Blue shadow on focus */
+    }
+    
+    @media (max-width: 768px) {
+      .product_count {
+        flex-direction: column; /* Stack buttons and input vertically */
+        gap: 10px; /* Increase spacing for smaller screens */
+      }
+    
+      .product_count .btn-decrease, 
+      .product_count .btn-increase, 
+      .product_count .input-text {
+        width: 100%; /* Full width for smaller screens */
+      }
+    }
+    
+    
+    </style>
+</head>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-.product_count .btn-decrease, 
-.product_count .btn-increase {
-  background-color: #fff; /* Blue color */
-  color: #000; /* White text */
-  border: none; /* No border */
-  padding: 8px 12px; /* Add padding for better visibility */
-  font-size: 18px; /* Larger font size for buttons */
-  font-weight: bold;
-  border-radius: 5px; /* Slightly rounded corners */
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
 
-.product_count .btn-decrease:hover, 
-.product_count .btn-increase:hover {
-  background-color: #fff; /* Darker blue on hover */
-  transform: scale(1.1); /* Slight zoom effect */
-}
+<body>
+    <!--::header part start::-->
+    <header class="main_menu home_menu">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+                        <a class="navbar-brand" href="/homepage"><b>SOFA</b>SCAPE </a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="menu_icon"><i class="fas fa-bars"></i></span>
+                        </button>
 
-.product_count .input-text {
-  width: 60px; /* Compact width */
-  height: 40px; /* Uniform height */
-  text-align: center; /* Center-align the text */
-  font-size: 16px; /* Adjusted font size */
-  border: 1px solid #ccc; /* Light border */
-  border-radius: 5px; /* Rounded corners */
-  outline: none; /* No outline on focus */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.product_count .input-text:focus {
-  border-color: #fff; /* Blue border on focus */
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); /* Blue shadow on focus */
-}
-
-@media (max-width: 768px) {
-  .product_count {
-    flex-direction: column; /* Stack buttons and input vertically */
-    gap: 10px; /* Increase spacing for smaller screens */
-  }
-
-  .product_count .btn-decrease, 
-  .product_count .btn-increase, 
-  .product_count .input-text {
-    width: 100%; /* Full width for smaller screens */
-  }
-}
-
-
-</style>
-<%-include("../partials/user/header")%>
-  <!--================Home Banner Area =================-->
+                        <div class="collapse navbar-collapse main-menu-item" id="navbarSupportedContent">
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/homepage">Home</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link " href="/products">
+                                        Shop
+                                    </a>
+                                    
+                                </li>
+                                <!-- <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown_3"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        pages
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown_2">
+                                        <a class="dropdown-item" href="tracking.html">tracking</a>
+                                        <a class="dropdown-item" href="checkout.html">product checkout</a>
+                                        <a class="dropdown-item" href="cart.html">shopping cart</a>
+                                        <a class="dropdown-item" href="confirmation.html">confirmation</a>
+                                        <a class="dropdown-item" href="elements.html">elements</a>
+                                    </div>
+                                </li> -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown_2"
+                                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        More
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown_2">
+                                        <a class="dropdown-item" href="/wallet"> Wallet</a>
+                                        <a class="dropdown-item" href="/orderTable">Orders</a>
+                                    </div>
+                                </li>
+                                
+                                <!-- <li class="nav-item">
+                                    <a class="nav-link" href="contact.html">Contact</a>
+                                </li> -->
+                               
+                            </ul>
+                        </div>
+                        <div class="hearer_icon d-flex">
+                            <a href="/profile"><i class="fa-solid fa-user"></i></a>
+                            <a href="/wishlist"><i class="ti-heart"></i></a>
+                            <a style="margin-left: .8cm;"  href="/cartPage"><img src="/img/cart.svg"></a> <span class="badge" style="background-color: red;height: .4cm;border-radius: 50%;"><%=cartCount%></span> 
+                               
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="search_input" id="search_input_box">
+            <div class="container ">
+              
+            </div>
+        </div>
+    </header>
+    <!-- Header part end-->  <!--================Home Banner Area =================-->
   <!-- breadcrumb start-->
   <section class="breadcrumb breadcrumb_bg">
     <div class="container">
