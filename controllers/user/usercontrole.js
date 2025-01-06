@@ -49,9 +49,37 @@ const loadhomepage = async (req, res) => {
 };
 
 
-const loadHomepage = (req, res) => {
-    const user = req.session.passport ? req.session.passport.user : null;
-    res.render('home', { user });
+const loadHomepage= async  (req, res) => {
+    // const user = req.session.passport ? req.session.passport.user : null;
+    
+    // res.render('home', { user });
+
+    try {
+        if (req.session.passport && req.session.passport.user) {
+            req.session.user = req.session.passport.user;
+        }
+
+        const topSellingData = await getBestSellingProducts();
+        const productId = topSellingData.map(data => data._id);  
+        const topSellingProducts = await Product.find({ _id: { $in: productId } }).limit(8);
+
+        const cart = await Cart.findOne({ userId: req.session.user });  
+        let cartCount = 0;
+        if (cart && cart.products) {
+            cartCount = cart.products.length; 
+        }
+
+        return res.render("home", {
+            user: req.session.user,
+            topSellingProducts,
+            cartCount,  
+        });
+    } catch (error) {
+        console.log("Home page not found.", error);
+        res.status(500).send('Server error');
+    }
+
+
 };
 
 
