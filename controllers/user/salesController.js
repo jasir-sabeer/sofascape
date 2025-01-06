@@ -312,92 +312,84 @@ const cancelProduct = async (req, res) => {
         if (!product) return res.status(404).send('Product not found in the order');
 
         const originalProduct = await Product.findById(productId);
-        product.status = 'Cancelled'; 
+        product.status = 'Cancelled';
         originalProduct.stock += product.quantity;
         await originalProduct.save();
 
-       
-        let newSubtotal = order.products.reduce((sum, p) => {
+        let refundAmount = 0;
+        const productPrice = product.offerPrice || product.price;
+        const productRefundAmount = productPrice * product.quantity;
+
+        // Calculate new subtotal after cancellation
+        const newSubtotal = order.products.reduce((sum, p) => {
             if (p.status !== 'Cancelled') {
-                console.log('newwwwwwwwww',p.offerPrice);
-                console.log('newwwwwwwwww',p.price);
                 return sum + (p.offerPrice || p.price) * p.quantity;
             }
             return sum;
         }, 0);
 
-        order.subtotal=newSubtotal;
-        order.total=newSubtotal+50;
+        order.subtotal = newSubtotal;
+        order.total = newSubtotal + 50; // Assuming a fixed shipping cost of 50
 
-        const currentDate = new Date();
-        const coupon = await Coupon.findOne({
-            code: order.couponCode,
-            isExpired: false,
-            isListed: true,
-            startDate: { $lte: currentDate },
-            expiryDate: { $gte: currentDate }
-        });
-        
+        let isCouponRemoved = false;
+        let totalDiscount = 0;
 
-        let couponDiscount = 0;
-        if (coupon) {
-            console.log('Coupon found:', coupon.code);
-        
-            if (order.paymentStatus === 'Completed' || newSubtotal >= coupon.minPurchase) {
-                couponDiscount = newSubtotal * (coupon.discountValue / 100);
-                order.couponDiscountValue = couponDiscount;
-                console.log('Coupon discount applied:', couponDiscount);
-            } else {
-                console.log('Subtotal does not meet the minimum purchase requirement for the coupon');
-                order.couponDiscountValue = 0;
+        if (order.couponCode && order.couponDiscountValue > 0) {
+            const coupon = await Coupon.findOne({
+                code: order.couponCode,
+                isExpired: false,
+                isListed: true,
+                startDate: { $lte: new Date() },
+                expiryDate: { $gte: new Date() }
+            });
+
+            if (coupon) {
+                const couponPercentage = (order.couponDiscountValue / order.subtotal) * 100; // Coupon percentage
+
+                if (newSubtotal < coupon.minPurchase) {
+                    // Subtotal fell below minimum purchase, remove entire coupon discount
+                    console.log('Subtotal fell below minimum purchase. Removing full coupon discount.');
+                    refundAmount += productRefundAmount - order.couponDiscountValue; // Full discount removed
+                    order.couponDiscountValue = 0; // Remove coupon from order
+                    order.total = newSubtotal + 50; // Adjust total after coupon removal
+                } else {
+                    // Apply coupon discount proportionally to the canceled product's refund
+                    console.log('Subtotal is above minimum purchase. Adjusting refund by coupon percentage.');
+
+                    // Calculate proportional discount for the canceled product
+                    const cancelingProductDiscount = (productRefundAmount * couponPercentage) / 100;
+                    refundAmount += productRefundAmount - cancelingProductDiscount;
+
+                    // Adjust coupon discount value for other active products proportionally
+                    const activeProducts = order.products.filter(p => p.status !== 'Cancelled');
+                    activeProducts.forEach(p => {
+                        const productValue = (p.offerPrice || p.price) * p.quantity;
+                        const proportionalDiscount = (productValue * couponPercentage) / 100;
+                        order.couponDiscountValue -= proportionalDiscount; // Deduct proportional discount from coupon
+                    });
+
+                    // Reset coupon discount value if fully removed
+                    if (order.couponDiscountValue < 0) order.couponDiscountValue = 0;
+                    order.total = newSubtotal + 50 + order.couponDiscountValue; // Adjust total after coupon updates
+                }
             }
         } else {
-            console.log('No valid coupon found or applicable');
-            order.couponDiscountValue = 0;
+            refundAmount += productRefundAmount; // No coupon, refund full amount
         }
-        
 
+        order.total -= productRefundAmount; // Adjust the total after removing product
 
-        let refundAmount = 0;
-        const isLastProduct = order.products.every(p => p.status === 'Cancelled'); 
-        
+        const isLastProduct = order.products.every(p => p.status === 'Cancelled');
         if (isLastProduct) {
-            refundAmount += (product.offerPrice || product.price) * product.quantity;
-        
-            if (order.couponDiscountPercentage) {
-                const discountPercentage = order.couponDiscountPercentage / 100;
-                refundAmount -= refundAmount * discountPercentage; 
-            }
-        
-            refundAmount += order.shippingCost; 
-            order.shippingCost = 0; 
-            order.finalDiscountAmount = 0; 
-            order.total = 0; 
+            refundAmount += order.shippingCost; // Refund shipping cost for the last product
+            order.shippingCost = 0;
+            order.total = 0;
             order.status = 'Cancelled';
         } else {
-            const productPrice = product.offerPrice || product.price;
-            let productRefundAmount = productPrice * product.quantity;
-            
-        
-            if (order.couponDiscountPercentage) {
-                const discountPercentage = order.couponDiscountPercentage / 100;
-                productRefundAmount -= productRefundAmount * discountPercentage; 
-            }
-
-            console.log('productRefundAmount',productRefundAmount);
-
-        
-            refundAmount += productRefundAmount;
-            order.total -= productRefundAmount;
-            order.finalDiscountAmount -= productRefundAmount;
-
-            
-            console.log('Refund Amount',refundAmount);
-            console.log('Order Total', order.total );
-
-            if (order.total < 0) order.total = 0; 
+            if (order.total < 0) order.total = 0; // Ensure total does not go negative
         }
-        
+
+        // Refund handling
         if (order.paymentStatus === 'Completed') {
             let wallet = await Wallet.findOne({ userId: order.userId });
             if (!wallet) {
@@ -422,10 +414,9 @@ const cancelProduct = async (req, res) => {
                     }`
                 });
             }
-        
+
             await wallet.save();
         }
-        
 
         await order.save();
 
@@ -435,6 +426,8 @@ const cancelProduct = async (req, res) => {
         res.status(500).send({ message: 'Error processing cancellation', error });
     }
 };
+
+
 
 
 const loadWishList = async (req, res) => {
