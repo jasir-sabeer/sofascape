@@ -264,6 +264,7 @@
         <script>
             //cancel product
             async function cancelProduct(orderId, productId) {
+                
                 try {
                     const result = await Swal.fire({
                         title: "Are you sure you want to cancel the product?",
@@ -284,6 +285,8 @@
                                 if (response.ok) {
                                     location.reload();
                                 } else {
+                                    console.log(response);
+                                    
                                     alert('Failed to cancel the product');
                                 }
                             })
