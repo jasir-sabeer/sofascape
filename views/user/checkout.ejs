@@ -51,6 +51,7 @@
   
       .errormessage {
         font-size: 10px;
+        color: red;
       }
   
       #savebtn {
@@ -211,6 +212,7 @@
           <div class="col-lg-8">
             <div class="col-md-12 form-group">
               <% addresses.forEach((address, index)=> { %>
+                <div>
                 <label class="address-list" for="default-radio-<%= index %>" id="addressList<%= index %>">
                   <input type="radio" name="selectedAddress" id="default-radio-<%= index %>" value="<%= address._id %>"
                     style="display: none;"> 
@@ -238,7 +240,7 @@
                     </div>
                   </div>
                 </label>
-
+               </div>
                 <% }); %>
 
 
@@ -376,11 +378,7 @@
                   <div class="check"></div>
                 </div>
               </div>
-              <div class="creat_account">
-                <input type="checkbox" id="f-option4" name="selector" />
-                <label for="f-option4">I’ve read and accept the </label>
-                <a href="#">terms & conditions*</a>
-              </div>
+             
               <a class="btn_3" onclick="submitOrder()">Place Order</a>
             </div>
 

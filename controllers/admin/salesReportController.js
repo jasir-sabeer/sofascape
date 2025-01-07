@@ -2,86 +2,111 @@ const orderModel = require("../../models/orderSchema")
 const PDFDocument = require('pdfkit');
 const XLSX = require('xlsx');
 
-
 const loadSalesReportPage = async (req, res) => {
+    const { specificDay, quickRange, fromDate, toDate } = req.body;
     try {
-        const orders = await orderModel.find().populate("userId").populate("products.productId");
+        let query = {};
+        const now = new Date();
 
-        let dailyReport = {};
-        let overallOrderCount = 0;
-        let overallTotalSales = 0;
-        let overallTotalDiscount = 0;
-        let overallNetSales = 0;
+        // Apply filters
+        if (specificDay) {
+            const startOfDay = new Date(specificDay);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(specificDay);
+            endOfDay.setHours(23, 59, 59, 999);
+            query.createdAt = { $gte: startOfDay, $lte: endOfDay };
+        }
 
-        orders.forEach(order => {
-            const validProducts = order.products.filter(product => product.status !== "Cancelled");
+        if (quickRange === '1day') {
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            query.createdAt = { $gte: yesterday, $lte: now };
+        } else if (quickRange === '1week') {
+            const lastWeek = new Date(now);
+            lastWeek.setDate(now.getDate() - 7);
+            query.createdAt = { $gte: lastWeek, $lte: now };
+        } else if (quickRange === '1month') {
+            const lastMonth = new Date(now);
+            lastMonth.setMonth(now.getMonth() - 1);
+            query.createdAt = { $gte: lastMonth, $lte: now };
+        }
 
-            if (validProducts.length === 0) {
-                return;
-            }
+        if (fromDate && toDate) {
+            const startDate = new Date(fromDate);
+            const endDate = new Date(toDate);
+            query.createdAt = { $gte: startDate, $lte: endDate };
+        }
 
-            const orderDate = order.createdAt.toISOString().split('T')[0];
+        // Generate the report using MongoDB aggregation
+        const dailyReport = await orderModel.aggregate([
+            { $match: query },
+            { $unwind: "$products" },
+            {
+                $group: {
+                    _id: {
+                        date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                        orderId: "$_id"
+                    },
+                    totalProductsPrice: {
+                        $sum: { $multiply: ["$products.price", "$products.quantity"] }
+                    },
+                    shippingCost: { $first: "$shippingCost" },
+                    total: { $first: "$total" }
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id.date",
+                    totalOrders: { $sum: 1 },
+                    totalAmount: {
+                        $sum: { $add: ["$totalProductsPrice", "$shippingCost"] }
+                    },
+                    totalDiscount: {
+                        $sum: {
+                            $subtract: [
+                                { $add: ["$totalProductsPrice", "$shippingCost"] },
+                                "$total"
+                            ]
+                        }
+                    },
+                    netSales: {
+                        $sum: "$total"
+                    }
+                }
+            },
+            { $sort: { _id: -1 } }
+        ]);
 
-            const orderTotal = validProducts.reduce(
-                (sum, product) => sum + (product.price * product.quantity),
-                0
-            );
+        // Ensure overall values are calculated based on filtered `dailyReport`
+        const overallOrderCount = dailyReport.reduce((sum, report) => sum + report.totalOrders, 0);
+        const overallTotalSales = dailyReport.reduce((sum, report) => sum + report.totalAmount, 0);
+        const overallTotalDiscount = dailyReport.reduce((sum, report) => sum + report.totalDiscount, 0);
+        const overallNetSales = dailyReport.reduce((sum, report) => sum + report.netSales, 0);
 
-            const orderTotalWithShippingCost = orderTotal + order.shippingCost;
-            const discount = Number(order.couponDiscount) || 0;
-
-
-            overallOrderCount++;
-            overallTotalSales += orderTotalWithShippingCost;
-            overallTotalDiscount += discount;
-            overallNetSales += orderTotalWithShippingCost - discount;
-
-
-            console.log('Processing orderDate:', orderDate, 'Discount:', discount);
-
-
-            if (!dailyReport[orderDate]) {
-                dailyReport[orderDate] = {
-                    totalOrders: 0,
-                    totalAmount: 0,
-                    totalDiscount: 0,
-                    netSales: 0
-                };
-            }
-
-            dailyReport[orderDate].totalOrders++;
-            dailyReport[orderDate].totalAmount += orderTotalWithShippingCost;
-            dailyReport[orderDate].totalDiscount += discount;
-            dailyReport[orderDate].netSales += orderTotalWithShippingCost - discount;
-
-            console.log('DailyReport Entry:', dailyReport[orderDate]);
-        });
-
-
-        const dailyReportArray = Object.keys(dailyReport).map(date => ({
-            date,
-            ...dailyReport[date]
+        // Format the report for rendering
+        const formattedReport = dailyReport.map(report => ({
+            ...report,
+            date: new Date(report._id).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            })
         }));
 
-        const formatNumber = (number) => {
-            return number.toLocaleString();
-        };
-
+        // Render the page with the filtered report
         res.render("salesReportManagement", {
-            dailyReport: dailyReportArray,
+            dailyReport: formattedReport,
             overallOrderCount,
             overallTotalSales,
             overallTotalDiscount,
             overallNetSales,
-            formatNumber
+            formatNumber: (number) => number.toLocaleString()
         });
-
     } catch (error) {
-        console.error("Error loading sales report:", error);
+        console.error("Error fetching sales report:", error);
         res.status(500).send("Internal Server Error");
     }
 };
-
 
 const downloadPDF = async (req, res) => {
     try {
@@ -276,10 +301,6 @@ const filter = async (req, res) => {
     }
 
 }
-
-
-
-
 
 
 
