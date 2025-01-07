@@ -150,8 +150,6 @@ const saveOrder = async (req, res) => {
         couponPercentage
     } = req.body;
 
-    
-
     if (isNaN(total) || total <= 0) {
         return res.status(400).json({ message: 'Invalid total amount.' });
     }
@@ -176,6 +174,18 @@ const saveOrder = async (req, res) => {
             status: item.status,
         }));
 
+        for (const item of cartItems) {
+            const product = await Product.findById(item.productId);
+            if (!product) {
+                return res.status(404).json({ message: `Product with ID ${item.productId} not found.` });
+            }
+            if (product.stock < item.quantity) {
+                return res.status(400).json({ message: `Insufficient stock for product ${product.name}.` });
+            }
+            product.stock -= item.quantity;
+            await product.save();
+        }
+
         if (paymentMethod === "wallet") {
             wallet.balance -= realTotal;
             wallet.transactions.push({
@@ -199,7 +209,7 @@ const saveOrder = async (req, res) => {
             couponCode: couponCode || null,
             couponDiscountValue: couponDiscountValue || 0,
             finalDiscountAmount: finalDiscountAmount || 0,
-            couponDiscountPercentage:couponPercentage||0
+            couponDiscountPercentage: couponPercentage || 0
         });
 
         const savedOrder = await newOrder.save();
@@ -239,6 +249,7 @@ const saveOrder = async (req, res) => {
         return res.status(500).json({ message: 'Failed to place order. Please try again later.' });
     }
 };
+
 
 
 
@@ -416,7 +427,6 @@ const cancelProduct = async (req, res) => {
         res.status(500).send({ message: 'Error processing cancellation', error });
     }
 };
-
 
 
 
@@ -884,35 +894,28 @@ const rturnProduct = async (req, res) => {
     const { returnReason } = req.body;
 
     try {
-        // Find the order and validate
         const order = await Order.findById(orderId).populate('couponCode');
         if (!order) return res.status(404).send('Order not found');
 
-        // Find the product to return
         const product = order.products.find(p => p.productId.toString() === productId);
         if (!product) return res.status(404).send('Product not found in the order');
 
-        // Mark the product as returned and save the return reason
         product.status = 'Returned';
         product.returnReason = returnReason;
 
-        // Update product stock in the inventory
         const originalProduct = await Product.findById(productId);
         originalProduct.stock += product.quantity;
         await originalProduct.save();
 
-        // Recalculate subtotal excluding returned products
         let newSubtotal = order.products.reduce((sum, p) => {
-            if (p.status !== 'Returned') { // Ensure returned products are not counted
+            if (p.status !== 'Returned') { 
                 return sum + (p.offerPrice || p.price) * p.quantity;
             }
             return sum;
         }, 0);
 
-        // Update the order subtotal
         order.subtotal = newSubtotal;
 
-        // Handle coupon logic
         const currentDate = new Date();
         const coupon = await Coupon.findOne({
             code: order.couponCode,
@@ -930,17 +933,15 @@ const rturnProduct = async (req, res) => {
 
             const discountPercentage = coupon.discountValue / 100;
 
-            // Calculate the discount for the returned product
             returnedProductDiscount = (product.offerPrice || product.price) * product.quantity * discountPercentage;
 
-            // Recalculate coupon discount based on new subtotal (remaining products)
             couponDiscount = newSubtotal * discountPercentage;
             order.couponDiscountValue = couponDiscount;
 
             console.log(`Returned Product Discount: ${returnedProductDiscount}`);
             console.log(`Updated Coupon Discount: ${couponDiscount}`);
         } else {
-            order.couponDiscountValue = 0; // Reset if no coupon
+            order.couponDiscountValue = 0; 
         }
 
         order.total = newSubtotal - order.couponDiscountValue; 
@@ -958,11 +959,10 @@ const rturnProduct = async (req, res) => {
         const isLastProduct = order.products.every(p => p.status === 'Returned');
 
         if (isLastProduct) {
-            order.total = 0; // Set total to 0 when all products are returned
-            order.status = 'Returned'; // Mark the order as returned
+            order.total = 0; 
+            order.status = 'Returned'; 
         }
 
-        // Handle refund if payment is completed
         if (order.paymentStatus === 'Completed') {
             let wallet = await Wallet.findOne({ userId: order.userId });
             if (!wallet) {
@@ -987,10 +987,8 @@ const rturnProduct = async (req, res) => {
             await wallet.save();
         }
 
-        // Save the updated order
         await order.save();
 
-        // Redirect to wallet page for further processing
         res.redirect('/wallet');
     } catch (error) {
         console.error("Error processing return:", error);
