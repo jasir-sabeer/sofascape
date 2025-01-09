@@ -8,7 +8,6 @@ const loadSalesReportPage = async (req, res) => {
         let query = {};
         const now = new Date();
 
-        // Apply filters
         if (specificDay) {
             const startOfDay = new Date(specificDay);
             startOfDay.setHours(0, 0, 0, 0);
@@ -37,7 +36,6 @@ const loadSalesReportPage = async (req, res) => {
             query.createdAt = { $gte: startDate, $lte: endDate };
         }
 
-        // Generate the report using MongoDB aggregation
         const dailyReport = await orderModel.aggregate([
             { $match: query },
             { $unwind: "$products" },
@@ -77,13 +75,11 @@ const loadSalesReportPage = async (req, res) => {
             { $sort: { _id: -1 } }
         ]);
 
-        // Ensure overall values are calculated based on filtered `dailyReport`
         const overallOrderCount = dailyReport.reduce((sum, report) => sum + report.totalOrders, 0);
         const overallTotalSales = dailyReport.reduce((sum, report) => sum + report.totalAmount, 0);
         const overallTotalDiscount = dailyReport.reduce((sum, report) => sum + report.totalDiscount, 0);
         const overallNetSales = dailyReport.reduce((sum, report) => sum + report.netSales, 0);
 
-        // Format the report for rendering
         const formattedReport = dailyReport.map(report => ({
             ...report,
             date: new Date(report._id).toLocaleDateString("en-US", {
@@ -93,7 +89,6 @@ const loadSalesReportPage = async (req, res) => {
             })
         }));
 
-        // Render the page with the filtered report
         res.render("salesReportManagement", {
             dailyReport: formattedReport,
             overallOrderCount,
@@ -107,6 +102,7 @@ const loadSalesReportPage = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
 
 const downloadPDF = async (req, res) => {
     try {
