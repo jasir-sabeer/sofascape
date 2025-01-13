@@ -134,6 +134,14 @@ const editAddressCheckout = async (req, res) => {
     }
 }
 
+function generateOrderId(prefix = "ORD") {
+    const timestamp = Date.now().toString(36); 
+    const randomString = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const orderId = `${prefix}-${timestamp}-${randomString}`;
+    return orderId;
+  }
+  
+
 const saveOrder = async (req, res) => {
     const userId = req.session.user;
     const {
@@ -209,7 +217,8 @@ const saveOrder = async (req, res) => {
             couponCode: couponCode || null,
             couponDiscountValue: couponDiscountValue || 0,
             finalDiscountAmount: finalDiscountAmount || 0,
-            couponDiscountPercentage: couponPercentage || 0
+            couponDiscountPercentage: couponPercentage || 0,
+            orderId: generateOrderId(prefix = "ORD")
         });
 
         const savedOrder = await newOrder.save();
@@ -249,8 +258,6 @@ const saveOrder = async (req, res) => {
         return res.status(500).json({ message: 'Failed to place order. Please try again later.' });
     }
 };
-
-
 
 
 const loadThankyou = async (req, res) => {
@@ -400,7 +407,7 @@ const cancelProduct = async (req, res) => {
                     transactions: [{
                         type: 'refund',
                         amount: refundAmount,
-                        description: `Refund for cancelled product (${product.name}) in order ${orderId} ${
+                        description: `Refund for cancelled product (${product.name}) in order ${order.orderId} ${
                             isLastProduct ? 'including shipping cost' : ''
                         }`
                     }]
@@ -410,7 +417,7 @@ const cancelProduct = async (req, res) => {
                 wallet.transactions.push({
                     type: 'refund',
                     amount: refundAmount,
-                    description: `Refund for cancelled product (${product.name}) in order ${orderId} ${
+                    description: `Refund for cancelled product (${product.name}) in order ${order.orderId} ${
                         isLastProduct ? 'including shipping cost' : ''
                     }`
                 });
@@ -427,7 +434,6 @@ const cancelProduct = async (req, res) => {
         res.status(500).send({ message: 'Error processing cancellation', error });
     }
 };
-
 
 
 const loadWishList = async (req, res) => {
@@ -472,6 +478,7 @@ const discountCoupon = async (req, res) => {
     const userId = req.session.user;
 
     try {
+
         const discountCode = await Coupon.findOne({
             code: coupuncode,
             isListed: true,
@@ -480,8 +487,10 @@ const discountCoupon = async (req, res) => {
 
         if (!discountCode) {
             console.log('No matching coupon found.');
-            return res.status(404).json({ message: 'Coupon not found' });
+            return res.status(404).json({ message: 'Please Enter a Valied code' });
         }
+
+      
 
         const currentDate = new Date();
         if (discountCode.expiryDate < currentDate) {
@@ -532,8 +541,6 @@ const discountCoupon = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
-
-
 
 const addWishlist = async (req, res) => {
     const productId = req.params.id;
@@ -972,7 +979,7 @@ const rturnProduct = async (req, res) => {
                     transactions: [{
                         type: 'refund',
                         amount: refundAmount,
-                        description: `Refund for returned product (${product.name}) in order ${orderId}, Reason: ${returnReason}`
+                        description: `Refund for returned product (${product.name}) in order ${order.orderId}, Reason: ${returnReason}`
                     }]
                 });
             } else {
@@ -980,7 +987,7 @@ const rturnProduct = async (req, res) => {
                 wallet.transactions.push({
                     type: 'refund',
                     amount: refundAmount,
-                    description: `Refund for returned product (${product.name}) in order ${orderId}, Reason: ${returnReason}`
+                    description: `Refund for returned product (${product.name}) in order ${order.orderId}, Reason: ${returnReason}`
                 });
             }
 

@@ -86,8 +86,22 @@ const loadHomepage= async  (req, res) => {
 
 const loadproductpage = async (req, res) => {
     try {
-        const { category, sort, minPrice, maxPrice } = req.query;
+        const { category, sort, minPrice, maxPrice,search = '' } = req.query;
+
         let filter = { isListed: true };
+
+        if (search) {
+            const searchFilter = {
+                $or: [
+                    { productname: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } },
+                ],
+            };
+        
+            filter = { $and: [filter, searchFilter] };
+        }
+        
+        
 
         if (category) {
             filter.category = category;
@@ -144,10 +158,15 @@ const loadproductpage = async (req, res) => {
             categories,
             products,
             currentPage: page,
+            selectedCategory: category,
+            sortOption: sort,
             totalPages,
             previousPage,
             nextPage,
-            cartCount
+            cartCount,
+            searchQuery:search,
+            minPrice,
+            maxPrice
         });
 
     } catch (error) {

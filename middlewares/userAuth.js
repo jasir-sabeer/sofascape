@@ -25,10 +25,20 @@ async function userLogin(req, res, next) {
 }
 
 
+function isActive(req,res,next){
+    console.log('console',req.session.user);
+    
+    if(!req.session.user){
+        next()
+    }else{
+        return res.redirect('/')
+    }
+}
 
 
 
 module.exports={
-    userLogin
+    userLogin,
+    isActive
     
 }

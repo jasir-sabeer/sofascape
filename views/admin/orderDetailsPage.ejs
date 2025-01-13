@@ -91,8 +91,15 @@
         <main class="main-content">
             <section class="order-summary">
                 <h2>Order Summary</h2>
-                <p><strong>Order ID:</strong> <%= order.id %></p>
-                <p><strong>Date:</strong> <%= order.createdAt %></p>
+                <p><strong>Order ID:</strong> <%= order.orderId %></p>
+                <p><strong>Date:</strong><%= new Date(order.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }) %>
+                  </p>
                 <p><strong>Status:</strong> <%= product.status %></p>
                 <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
             </section>
@@ -137,7 +144,7 @@
                     <%}%>   
                 </div>
             </section>
-            <a href="/orderManagement" style="text-decoration: none;color: #000;"><button>Back</button></a>
+            <a href="/admin/orderManagement" style="text-decoration: none;color: #000;"><button>Back</button></a>
 
         </main>
         <footer class="footer">

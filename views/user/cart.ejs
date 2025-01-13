@@ -259,7 +259,8 @@
                             class="btn-decrease" type="button">-</button>
                     <input type="text" name="qty" id="sst" maxlength="12" m value="<%= product.quantity %>" 
                            title="Quantity:" class="input-text qty" 
-                           data-product-id="<%= product.productId._id %>">
+                           data-product-id="<%= product.productId._id %>"
+                           readonly>
                     <button onclick="updateQuantity('increase', '<%= product.productId._id %>')" 
                             class="btn-increase" type="button">+</button>
                   </div>
@@ -288,7 +289,6 @@
               <tr class="bottom_button">
                 <td>
                   <div class="cupon_text float-right">
-                    <a class="btn_1"  href="#">Close Coupon</a>
                   </div>
                 </td>
                 <td></td>

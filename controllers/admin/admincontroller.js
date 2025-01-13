@@ -66,10 +66,21 @@ const loaduserManagement = async (req, res) => {
         const limit = parseInt(req.query.limit) || 4;
         const skip = (page - 1) * limit;
 
-        const [totalUsers, users] = await Promise.all([
-            User.countDocuments(),
-            User.find({}).skip(skip).sort({ _id: -1 }).limit(limit),
+        const searchQuery = req.query.search || '';
 
+        const searchFilter = searchQuery ? {
+            $or: [
+                { username: { $regex: searchQuery, $options: 'i' } }, 
+                { email: { $regex: searchQuery, $options: 'i' } },   
+            ]
+        } : {};
+
+        const [totalUsers, users] = await Promise.all([
+            User.countDocuments(searchFilter),  
+            User.find(searchFilter)              
+                .skip(skip)
+                .sort({ _id: -1 })
+                .limit(limit),
         ]);
 
         const totalPages = Math.ceil(totalUsers / limit);
@@ -82,11 +93,12 @@ const loaduserManagement = async (req, res) => {
             totalPages,
             previousPage,
             nextPage,
+            searchQuery 
         });
 
     } catch (error) {
-        console.error("Error in product management:", error.message);
-        res.status(500).send("An error occurred while fetching products and categories.");
+        console.error("Error in user management:", error.message);
+        res.status(500).send("An error occurred while fetching users.");
     }
 };
 
@@ -116,7 +128,6 @@ const unblockUser = async (req, res) => {
     }
 }
 
-//category management
 
 const loadCategory = async (req, res) => {
     try {
@@ -124,13 +135,22 @@ const loadCategory = async (req, res) => {
         const limit = parseInt(req.query.limit) || 3;
         const skip = (page - 1) * limit;
 
-        const [totalCategories, categories] = await Promise.all([
-            Category.countDocuments(),
-            Category.find({}).skip(skip).sort({ _id: -1 }).limit(limit),
+        const searchQuery = req.query.search || '';
 
+        const searchFilter = searchQuery ? {
+            $or: [
+                { name: { $regex: searchQuery, $options: 'i' } }, 
+                { variant: { $regex: searchQuery, $options: 'i' } },    
+            ]
+        } : {};
+
+        // Fetch total categories count and categories based on search filter
+        const [totalCategories, categories] = await Promise.all([
+            Category.countDocuments(searchFilter),
+            Category.find(searchFilter).skip(skip).sort({ _id: -1 }).limit(limit),
         ]);
 
-        const totalPages = Math.ceil(totalCategories / limit);
+        const totalPages = totalCategories > 0 ? Math.ceil(totalCategories / limit) : 1; // Prevent division by zero
         const previousPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
 
@@ -140,14 +160,16 @@ const loadCategory = async (req, res) => {
             totalPages,
             previousPage,
             nextPage,
-            err: req.flash('err')
+            err: req.flash('err'),
+            searchQuery
         });
 
     } catch (error) {
-        console.error("Error in product management:", error.message);
-        res.status(500).send("An error occurred while fetching products and categories.");
+        console.error("Error in category management:", error.message);
+        res.status(500).send("An error occurred while fetching categories.");
     }
 };
+;
 
 const addCategory = async (req, res) => {
     try {
@@ -220,9 +242,19 @@ const loadProduct = async (req, res) => {
         const limit = parseInt(req.query.limit) || 3;
         const skip = (page - 1) * limit;
 
+        const searchQuery = req.query.search || '';
+
+        const searchFilter = searchQuery ? {
+            $or: [
+                { productname: { $regex: searchQuery, $options: 'i' } }, 
+                { description: { $regex: searchQuery, $options: 'i' } },    
+            ]
+        } : {};
+
+
         const [totalProducts, products, categories] = await Promise.all([
-            Product.countDocuments(),
-            Product.find({}).populate('category').sort({ _id: -1 }).skip(skip).limit(limit),
+            Product.countDocuments(searchFilter),
+            Product.find(searchFilter).populate('category').sort({ _id: -1 }).skip(skip).limit(limit),
             Category.find({ isListed: true })
         ]);
 
@@ -237,6 +269,7 @@ const loadProduct = async (req, res) => {
             totalPages,
             previousPage,
             nextPage,
+            searchQuery
         });
 
     } catch (error) {
@@ -351,12 +384,15 @@ const toggleProductStatus = async (req, res) => {
         const product = await Product.findById(productId);
         const newStatus = !product.isListed;
         await Product.findByIdAndUpdate(productId, { isListed: newStatus });
-        res.redirect("/admin/productManagement");
+
+        // Return a JSON response instead of redirect
+        res.status(200).json({ success: true, newStatus });
     } catch (error) {
         console.error('Error toggling product status:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
+
 
 
 const logout = async (req, res) => {

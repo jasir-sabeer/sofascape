@@ -185,6 +185,7 @@
           <button class="tp_btn" type="submit">Apply Coupon</button>
 
         </form>
+        
         <button style="margin-top: .5cm;" class="tp_btn" onclick="removeCoupon() ">Cancel Coupon</button>
 
         <div style="display: flex;">
@@ -562,6 +563,9 @@
       }
 
 
+
+
+
       document.addEventListener('DOMContentLoaded', () => {
         const addressLists = document.querySelectorAll('.address-list');
         const radios = document.querySelectorAll('input[name="selectedAddress"]');
@@ -880,25 +884,38 @@
       });
       //cancel coupon 
       function removeCoupon() {
+  // Get the coupon code (assuming it's in an input field with id "couponCode")
+  const couponCode = document.getElementById("coupuncode")?.value;
 
-        document.getElementById("couponRow").style.display = 'none';
-        document.getElementById("couponRow2").style.display = 'none';
+  if (!couponCode) {
+    // Show alert if no coupon code is entered
+    Swal.fire({
+      title: 'No Coupon Found!',
+      text: 'Please apply a coupon code before trying to remove it.',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+    });
+    return; // Exit the function since there's no coupon to remove
+  }
 
+  // Hide coupon rows
+  document.getElementById("couponRow").style.display = 'none';
+  document.getElementById("couponRow2").style.display = 'none';
 
-        const subtotal = parseFloat(document.getElementById("subtotal").textContent.replace("₹", ""));
-        document.getElementById("total").textContent = "₹" + subtotal.toFixed(2); 
+  // Update total
+  const subtotal = parseFloat(document.getElementById("subtotal").textContent.replace("₹", ""));
+  document.getElementById("total").textContent = "₹" + subtotal.toFixed(2);
 
-
-        Swal.fire({
-          title: 'Success!',
-          text: 'Coupon removed. No discount applied.',
-          icon: 'success',
-          confirmButtonText: 'OK'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            location.reload();
-          }
-        });
-      }
-
-    </script>
+  // Show success alert
+  Swal.fire({
+    title: 'Success!',
+    text: 'Coupon removed. No discount applied.',
+    icon: 'success',
+    confirmButtonText: 'OK'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      location.reload();
+    }
+  });
+}
+</script>

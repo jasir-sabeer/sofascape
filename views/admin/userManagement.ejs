@@ -163,9 +163,13 @@
         <p>Manage user statuses: block or unblock users</p>
 
         <!-- Search Bar -->
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search users..." onkeyup="searchUsers()">
-        </div>
+            <div class="search-bar" style="display: flex;">
+                <form action="/admin/userManagement" method="GET">
+                <input type="text" id="searchInput" name="search" placeholder="Search users..." value="<%= searchQuery %>" style="width: 22cm;">
+                <button type="submit" style="block-size: 35px;background-color: #333;color: #fff;border: none;">Search</button>
+            </form>
+            <a href="/admin/userManagement"><button style="block-size: 35px;margin-left: .3cm;background-color: #333;color: #fff;border: none;">See All</button></a> 
+            </div>
 
         <table class="user-table">
             <thead>
@@ -199,29 +203,29 @@
             
         </table>
         <nav id="pagination" aria-label="Page navigation" class="paginationdiv">
-            <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
-              <% if (previousPage) { %>
-                <li class="page-item">
-                  <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous" style="text-decoration: none;"><</a>                   
-                </li>         
+            <ul class="pagination justify-content-center pages custom-pagination" style="list-style: none;">
+                <% if (previousPage) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= previousPage %>&search=<%= searchQuery %>" aria-label="Previous" style="text-decoration: none;">&lt;</a>
+                    </li>
                 <% } %>
         
-                  <% for (let i=1; i <=totalPages; i++) { %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
                     <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                       
-                      <a class="page-link" href="?page=<%= i %>">
-                        <%= i %>
-                      </a>
-                      </li>
-                    <% } %>
+                        <a class="page-link" href="?page=<%= i %>&search=<%= searchQuery %>">
+                            <%= i %>
+                        </a>
+                    </li>
+                <% } %>
         
-                      <% if (nextPage) { %>
-                        <li class="page-item">
-                          <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next" style="text-decoration: none;">></a>
-                        </li>
-                        <% } %>
+                <% if (nextPage) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= nextPage %>&search=<%= searchQuery %>" aria-label="Next" style="text-decoration: none;">&gt;</a>
+                    </li>
+                <% } %>
             </ul>
-          </nav>
+        </nav>
+        
     </div>
 
     <script>
@@ -250,25 +254,55 @@
         }
 
         
-    function confirmAction(userId, actionType) {
-        const actionText = actionType === 'block' ? 'Block' : 'Unblock';
-        
-        Swal.fire({
-            title: `Are you sure you want to ${actionText.toLowerCase()} this user?`,
-            showCancelButton: true,
-            confirmButtonColor: '#000',
-            cancelButtonColor: '#000',
-            confirmButtonText: ` ${actionText}`
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/admin/userManagement/${actionType}User/${userId}`;
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
-    }
+        function confirmAction(userId, actionType) {
+    const actionText = actionType === 'block' ? 'Block' : 'Unblock';
+
+    Swal.fire({
+        title: `Are you sure you want to ${actionText.toLowerCase()} this user?`,
+        showCancelButton: true,
+        confirmButtonColor: '#000',
+        cancelButtonColor: '#000',
+        confirmButtonText: ` ${actionText}`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/userManagement/${actionType}User/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                 
+                },
+                body: JSON.stringify({ userId, actionType }) 
+            })
+            .then((response) => {
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: `${actionText} Successful!`,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: `${actionText} Failed!`,
+                        text: 'Please try again later.',
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'An error occurred!',
+                    text: 'Please try again later.',
+                });
+            });
+        }
+    });
+}
+
 
 
     </script>

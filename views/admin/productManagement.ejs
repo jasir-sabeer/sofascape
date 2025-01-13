@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM97Dk4t3nA4q2Vo9mltpbBRj52R4mGowWbA2xB" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     /* General Styles */
@@ -455,9 +457,13 @@ input[type="file"] {
         <button class="add-btn" >Add Product</button>
       </a>
         <section class="product-table">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search product..." onkeyup="searchProducts()">
-            </div>
+          <div class="search-bar" style="display: flex;">
+            <form action="/admin/productManagement" method="GET">
+            <input type="text" id="searchInput" name="search" placeholder="Search categories ..." value="<%= searchQuery %>" style="width: 20cm;">
+            <button type="submit" style="block-size: 35px;background-color: #333;color: #fff;border: none;width: 1.5cm;">Search</button>
+        </form>
+        <a href="/admin/productManagement"><button style="block-size: 35px;margin-left: .3cm;background-color: #333;color: #fff;border: none;">See All</button></a> 
+        </div> 
           <div class="table-container">
             <table>
               <thead>
@@ -466,7 +472,6 @@ input[type="file"] {
                   <th>Image</th>
                   <th>Price</th>
                   <th>Category</th>
-                  <!-- <th>Description</th> -->
                   <th>Stock</th>
                   <th>Status</th>
                   <th>Edit</th>
@@ -519,12 +524,12 @@ input[type="file"] {
     
                     </td>
                     <td>
-    
-                      <form action="/admin/productManagement/toggle-status/<%= product._id %>" method="POST">
-                        <button type="submit" class="btn <%= product.isListed ? 'btn-danger' : 'btn-warning' %>">
-                          <%= product.isListed ? 'Unlist' : 'List' %>
-                        </button>
-                      </form>
+                      <button 
+                      class="btn <%= product.isListed ? 'btn-danger' : 'btn-warning' %>" 
+                      onclick="toggleProductStatus('<%= product._id %>', '<%= product.isListed %>')">
+                      <%= product.isListed ? 'Unlist' : 'List' %>
+                  </button>
+                  
                     </td>
                   </tr>
                   <% }) %>
@@ -570,7 +575,7 @@ input[type="file"] {
             </select>
     
             <label for="productStock">Stock:</label>
-            <input type="number" id="editProductStock" name="stock" min="0" required />
+            <input type="number" id="editProductStock" name="stock" min="0"  required />
             <input type="text" id="productId" hidden>
             <label for="productImage" class="file-upload-label">Update Images:</label>
             <input type="file" id="editProductImage" name="images" accept="image/*" multiple />
@@ -930,20 +935,68 @@ input[type="file"] {
                 const cells = rows[i].getElementsByTagName('td');
                 let match = false;
 
-                // Check each cell in the row for a match
-                for (let j = 0; j < cells.length - 1; j++) { // Exclude the Action column
+                for (let j = 0; j < cells.length - 1; j++) { 
                     if (cells[j] && cells[j].textContent.toLowerCase().includes(filter)) {
                         match = true;
                         break;
                     }
                 }
 
-                // Show or hide the row based on whether there's a match
                 rows[i].style.display = match ? '' : 'none';
             }
         }
     
-    
-    
+
+
+        function toggleProductStatus(productId, isListed) {
+          const isListedBool = isListed === 'true'; 
+const actionText = isListedBool ? 'Unlist' : 'List';
+
+    Swal.fire({
+        title: `Are you sure you want to ${actionText} this product?`,
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: `${actionText}`,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/productManagement/toggle-status/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isListed }),
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: `Product ${actionText}ed Successfully!`,
+                            showConfirmButton: false,
+                            timer: 1500,
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: `${actionText} Failed!`,
+                            text: 'Please try again later.',
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'An error occurred!',
+                        text: 'Please try again later.',
+                    });
+                });
+        }
+    });
+}
+
+
     
       </script>

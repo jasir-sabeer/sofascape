@@ -27,8 +27,12 @@ const loadAddCoupon = async (req, res) => {
 const addCoupons = async (req, res) => {
     const { code, discountValue, minPurchase, startDate, expiryDate } = req.body;
 
-    console.log(code);
     try {
+        const existingCoupon = await Coupon.findOne({ code });
+
+        if (existingCoupon) {
+            return res.render('addCoupon',{message:'Already Existing this coupon Create new one'}); // Redirect with the message
+        }
 
         const coupons = new Coupon({
             code,
@@ -36,18 +40,17 @@ const addCoupons = async (req, res) => {
             minPurchase,
             startDate,
             expiryDate,
+        });
 
-        })
+        await coupons.save();
 
-        await coupons.save()
-        res.redirect('/admin/couponManagement')
-
-
+        res.redirect('/couponManagement');
     } catch (error) {
-        console.error("Error i", error.message);
-        res.status(500).send("An error in load coupon managemet");
+        console.error("Error in addCoupons:", error.message);
+        res.status(500).send("An error occurred while adding the coupon.");
     }
-}
+};
+
 
 const toggle_status = async (req, res) => {
     const couponId = req.params.id;

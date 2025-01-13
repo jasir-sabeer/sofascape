@@ -15,6 +15,11 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center">Add New Coupon</h1>
+        <% if(locals.message && message.length>0){%>
+          <div style="color: red;margin-left: 10.5cm;" >
+           <%=message%>
+          </div>
+     <%}%>
         <form id="addCouponForm" action="/admin/coupons/add" method="POST" class="mt-4">
             <div class="mb-3">
                 <label for="code" class="form-label">Coupon Code</label>
