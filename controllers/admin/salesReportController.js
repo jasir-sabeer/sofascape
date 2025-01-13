@@ -8,6 +8,7 @@ const loadSalesReportPage = async (req, res) => {
         let query = {};
         const now = new Date();
 
+
         if (specificDay) {
             const startOfDay = new Date(specificDay);
             startOfDay.setHours(0, 0, 0, 0);
@@ -75,10 +76,12 @@ const loadSalesReportPage = async (req, res) => {
             { $sort: { _id: -1 } }
         ]);
 
+
         const overallOrderCount = dailyReport.reduce((sum, report) => sum + report.totalOrders, 0);
         const overallTotalSales = dailyReport.reduce((sum, report) => sum + report.totalAmount, 0);
         const overallTotalDiscount = dailyReport.reduce((sum, report) => sum + report.totalDiscount, 0);
         const overallNetSales = dailyReport.reduce((sum, report) => sum + report.netSales, 0);
+
 
         const formattedReport = dailyReport.map(report => ({
             ...report,
@@ -102,7 +105,6 @@ const loadSalesReportPage = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
-
 
 const downloadPDF = async (req, res) => {
     try {

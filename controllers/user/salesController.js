@@ -217,8 +217,10 @@ const saveOrder = async (req, res) => {
             couponCode: couponCode || null,
             couponDiscountValue: couponDiscountValue || 0,
             finalDiscountAmount: finalDiscountAmount || 0,
+
             couponDiscountPercentage: couponPercentage || 0,
             orderId: generateOrderId(prefix = "ORD")
+
         });
 
         const savedOrder = await newOrder.save();
