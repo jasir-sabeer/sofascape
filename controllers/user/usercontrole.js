@@ -48,7 +48,6 @@ const loadhomepage = async (req, res) => {
     }
 };
 
-
 const loadHomepage= async  (req, res) => {
     // const user = req.session.passport ? req.session.passport.user : null;
     
@@ -82,8 +81,6 @@ const loadHomepage= async  (req, res) => {
 
 };
 
-
-
 const loadproductpage = async (req, res) => {
     try {
         const { category, sort, minPrice, maxPrice, search = '' } = req.query;
@@ -93,79 +90,92 @@ const loadproductpage = async (req, res) => {
         const listedCategories = await Category.find({ isListed: true }).select('_id');
         const listedCategoryIds = listedCategories.map(cat => cat._id);
 
-        filter.category = { $in: listedCategoryIds };
+        if (category) {
+            filter.category = { $in: listedCategoryIds.filter(id => id.equals(category)) };
+        } else {
+            filter.category = { $in: listedCategoryIds };
+        }
 
         if (search) {
-            const searchFilter = {
+            filter.$and = filter.$and || [];
+            filter.$and.push({
                 $or: [
                     { productname: { $regex: search, $options: 'i' } },
                     { description: { $regex: search, $options: 'i' } },
                 ],
-            };
-
-            filter = { $and: [filter, searchFilter] };
-        }
-
-        if (category) {
-            filter.category = category;
-        }
-
-        if (minPrice) {
-            filter.regularprice = { ...filter.regularprice, $gte: Number(minPrice) };
-        }
-        if (maxPrice) {
-            filter.regularprice = { ...filter.regularprice, $lte: Number(maxPrice) };
-        }
-
-        let sortOption = {};
-        if (sort === "priceLowHigh") {
-            sortOption.regularprice = 1;
-        } else if (sort === "priceHighLow") {
-            sortOption.regularprice = -1;
-        } else if (sort === "newArrivals") {
-            sortOption._id = -1;
-        } else if (sort === "nameAsc") {
-            sortOption.productname = 1;
-        } else if (sort === "nameDesc") {
-            sortOption.productname = -1;
-        }
-
-        const cart = await Cart.findOne({ userId: req.session.user });
-
-        let cartCount = 0;
-        if (cart && cart.products) {
-            const validProducts = cart.products.filter(async (item) => {
-                const product = await Product.findById(item.productId._id).populate('category');
-                if (product && product.isListed && product.category.isListed) {
-                    return true;
-                }
-                await Cart.updateOne(
-                    { userId: req.session.user },
-                    { $pull: { products: { productId: item.productId._id } } }
-                );
-                return false;
             });
-            
-            cartCount = validProducts.length;
+        }
+
+        if (minPrice || maxPrice) {
+            filter.$and = filter.$and || [];
+            const priceFilter = {};
+            if (minPrice) priceFilter.$gte = Number(minPrice);
+            if (maxPrice) priceFilter.$lte = Number(maxPrice);
+            filter.$and.push({ regularprice: priceFilter });
         }
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 6;
         const skip = (page - 1) * limit;
 
-        const totalProducts = await Product.countDocuments(filter);
-        const products = await Product.find(filter)
-            .populate('offer')
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limit);
+        let products;
+        let totalProducts;
 
-        const categories = await Category.find({ isListed: true });
-        const offerPrices = products.map(product => product.offer?.discountValue);
+        if (sort === "priceLowHigh" || sort === "priceHighLow") {
+            const sortOrder = sort === "priceLowHigh" ? 1 : -1;
+
+            const pipeline = [
+                {
+                    $addFields: {
+                        effectivePrice: {
+                            $ifNull: ["$discountPrice", "$regularprice"],
+                        },
+                    },
+                },
+                { $match: filter },
+                { $sort: { effectivePrice: sortOrder } },
+                { $skip: skip }, 
+                { $limit: limit },
+            ];
+
+            products = await Product.aggregate(pipeline);
+
+            totalProducts = await Product.aggregate([
+                {
+                    $addFields: {
+                        effectivePrice: {
+                            $ifNull: ["$discountPrice", "$regularprice"],
+                        },
+                    },
+                },
+                { $match: filter },
+                { $count: "total" },
+            ]);
+            totalProducts = totalProducts.length > 0 ? totalProducts[0].total : 0;
+        } else {
+            let sortOption = {};
+            if (sort === "newArrivals") {
+                sortOption = { _id: -1 };
+            } else if (sort === "nameAsc") {
+                sortOption = { productname: 1 };
+            } else if (sort === "nameDesc") {
+                sortOption = { productname: -1 };
+            }
+
+            products = await Product.find(filter)
+                .populate('offer')
+                .sort(sortOption)
+                .skip(skip)
+                .limit(limit);
+
+            totalProducts = await Product.countDocuments(filter);
+        }
 
         const totalPages = Math.ceil(totalProducts / limit);
         const previousPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
+
+        const categories = await Category.find({ isListed: true });
 
         res.render('shop', {
             categories,
@@ -176,20 +186,16 @@ const loadproductpage = async (req, res) => {
             totalPages,
             previousPage,
             nextPage,
-            cartCount,
+            cartCount: 0, 
             searchQuery: search,
             minPrice,
-            maxPrice
+            maxPrice,
         });
-
     } catch (error) {
         console.error("Product page load error:", error);
         res.status(500).send('Server error');
     }
 };
-
-
-
 
 
 
@@ -201,7 +207,6 @@ const loadloginpage = async (req, res) => {
         res.redirect("/pagenotfound");
     }
 };
-
 
 
 const loadsignuppage = async (req, res) => {

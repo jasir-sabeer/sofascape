@@ -255,29 +255,33 @@
                         <div class="col-lg-12">
                             <div class="pageination">
                                 <nav id="pagination" aria-label="Page navigation" class="paginationdiv">
-                                    <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
-                                      <% if (previousPage) { %>
-                                        <li class="page-item">
-                                          <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous" style="text-decoration: none;"><i class="ti-angle-double-left"></i></a>                   
-                                        </li>         
+                                    <ul class="pagination justify-content-center pages custom-pagination" style="list-style: none;">
+                                        <% if (previousPage) { %>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=<%= previousPage %>&sort=<%= sortOption %>&category=<%= selectedCategory %>&search=<%= searchQuery %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>" aria-label="Previous" style="text-decoration: none;">
+                                                    <i class="ti-angle-double-left"></i>
+                                                </a>
+                                            </li>
                                         <% } %>
                                 
-                                          <% for (let i=1; i <=totalPages; i++) { %>
-                                            <li class="page-item  <%= i === currentPage ? 'active' : '' %>" >
-                                               
-                                              <a class="page-link" href="?page=<%= i %>">
-                                                <%= i %>
-                                              </a>
-                                              </li>
-                                            <% } %>
+                                        <% for (let i = 1; i <= totalPages; i++) { %>
+                                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                <a class="page-link" href="?page=<%= i %>&sort=<%= sortOption %>&category=<%= selectedCategory %>&search=<%= searchQuery %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>">
+                                                    <%= i %>
+                                                </a>
+                                            </li>
+                                        <% } %>
                                 
-                                              <% if (nextPage) { %>
-                                                <li class="page-item">
-                                                  <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next" style="text-decoration: none;"><i class="ti-angle-double-right"></i></a>
-                                                </li>
-                                                <% } %>
+                                        <% if (nextPage) { %>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=<%= nextPage %>&sort=<%= sortOption %>&category=<%= selectedCategory %>&search=<%= searchQuery %>&minPrice=<%= minPrice %>&maxPrice %>" aria-label="Next" style="text-decoration: none;">
+                                                    <i class="ti-angle-double-right"></i>
+                                                </a>
+                                            </li>
+                                        <% } %>
                                     </ul>
-                                  </nav>
+                                </nav>
+                                
                                 <!-- <nav aria-label="Page navigation example">
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item">
