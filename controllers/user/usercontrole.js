@@ -86,9 +86,14 @@ const loadHomepage= async  (req, res) => {
 
 const loadproductpage = async (req, res) => {
     try {
-        const { category, sort, minPrice, maxPrice,search = '' } = req.query;
+        const { category, sort, minPrice, maxPrice, search = '' } = req.query;
 
         let filter = { isListed: true };
+
+        const listedCategories = await Category.find({ isListed: true }).select('_id');
+        const listedCategoryIds = listedCategories.map(cat => cat._id);
+
+        filter.category = { $in: listedCategoryIds };
 
         if (search) {
             const searchFilter = {
@@ -97,15 +102,14 @@ const loadproductpage = async (req, res) => {
                     { description: { $regex: search, $options: 'i' } },
                 ],
             };
-        
+
             filter = { $and: [filter, searchFilter] };
         }
-        
-        
 
         if (category) {
             filter.category = category;
         }
+
         if (minPrice) {
             filter.regularprice = { ...filter.regularprice, $gte: Number(minPrice) };
         }
@@ -126,11 +130,23 @@ const loadproductpage = async (req, res) => {
             sortOption.productname = -1;
         }
 
-        const cart = await Cart.findOne({ userId: req.session.user });  
+        const cart = await Cart.findOne({ userId: req.session.user });
 
         let cartCount = 0;
         if (cart && cart.products) {
-            cartCount = cart.products.length; 
+            const validProducts = cart.products.filter(async (item) => {
+                const product = await Product.findById(item.productId._id).populate('category');
+                if (product && product.isListed && product.category.isListed) {
+                    return true;
+                }
+                await Cart.updateOne(
+                    { userId: req.session.user },
+                    { $pull: { products: { productId: item.productId._id } } }
+                );
+                return false;
+            });
+            
+            cartCount = validProducts.length;
         }
 
         const page = parseInt(req.query.page) || 1;
@@ -143,16 +159,13 @@ const loadproductpage = async (req, res) => {
             .sort(sortOption)
             .skip(skip)
             .limit(limit);
+
         const categories = await Category.find({ isListed: true });
         const offerPrices = products.map(product => product.offer?.discountValue);
-        console.log('Offer prices:', offerPrices);
-
-
 
         const totalPages = Math.ceil(totalProducts / limit);
         const previousPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
-        console.log(products);
 
         res.render('shop', {
             categories,
@@ -164,7 +177,7 @@ const loadproductpage = async (req, res) => {
             previousPage,
             nextPage,
             cartCount,
-            searchQuery:search,
+            searchQuery: search,
             minPrice,
             maxPrice
         });
@@ -174,6 +187,7 @@ const loadproductpage = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
 
 
 

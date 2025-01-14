@@ -26,7 +26,7 @@ body {
 
 .sidebar {
   width: 250px;
-  background-color: #333; /* Dark sidebar color */
+  background-color: #000; /* Dark sidebar color */
   color: #fff; /* White text color */
   height: 100vh; /* Full height */
   position: fixed; /* Fixed sidebar */
@@ -51,10 +51,10 @@ body {
 }
 
 .sidebar  a:hover {
-  background-color: #555; /* Darker background on hover */
+  background-color: rgba(39, 39, 43, 0.918); /* Darker background on hover */
 }
 .logoutbtn{
-    background-color: #333;
+    background-color: #000;
     block-size: 40px;
     border: none;color: #fff;
     width: 250px;
@@ -98,6 +98,7 @@ body {
             font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            display: flex;
         }
 .recent-orders,
 .user-table {
@@ -402,7 +403,7 @@ input[type="file"] {
   display: none;
 }
 .special-color{
- background-color:#555 ;
+ background-color:rgba(39, 39, 43, 0.918) ;
  }
  .page-item{
         float: left;
@@ -421,6 +422,21 @@ input[type="file"] {
        .paginationdiv{
         margin-left: 8cm;
        }
+
+       .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .user-table th, .user-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .user-table th {
+            background-color: #333;
+            color: #fff;
+        }
     </style>
 
     
@@ -457,15 +473,15 @@ input[type="file"] {
         <button class="add-btn" >Add Product</button>
       </a>
         <section class="product-table">
-          <div class="search-bar" style="display: flex;">
-            <form action="/admin/productManagement" method="GET">
-            <input type="text" id="searchInput" name="search" placeholder="Search categories ..." value="<%= searchQuery %>" style="width: 20cm;">
-            <button type="submit" style="block-size: 35px;background-color: #333;color: #fff;border: none;width: 1.5cm;">Search</button>
+          <div class="search-bar"  >
+            <form action="/admin/productManagement" method="GET"  >
+            <input type="text" id="searchInput" name="search" placeholder="Search categories ..." value="<%= searchQuery %>" style="width: 25cm;">
+            <button type="submit" style="block-size: 35px;background-color: #333;color: #fff;border: none;width: 3cm;">Search</button>
         </form>
-        <a href="/admin/productManagement"><button style="block-size: 35px;margin-left: .3cm;background-color: #333;color: #fff;border: none;">See All</button></a> 
+        <a href="/admin/productManagement"><button style="block-size: 35px;background-color: #333;color: #fff;border: none;margin-top: .2cm;width: 3c;">See All</button></a> 
         </div> 
-          <div class="table-container">
-            <table>
+          
+            <table class="user-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -537,7 +553,7 @@ input[type="file"] {
     
               </tbody>
             </table>
-          </div>
+          
         </section>
     
       </div>

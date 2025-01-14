@@ -18,7 +18,7 @@
 
         .sidebar {
             width: 250px;
-            background-color: #333;
+            background-color: #000;
             color: #fff;
             height: 100vh;
             position: fixed;
@@ -54,12 +54,12 @@
         }
 
         .sidebar a:hover {
-            background-color: #555;
+            background-color: rgba(39, 39, 43, 0.918);
             /* Darker background on hover */
         }
 
         .logoutbtn {
-            background-color: #333;
+            background-color: #000;
             block-size: 40px;
             border: none;
             color: #fff;
@@ -226,7 +226,7 @@
         }
 
         .special-color {
-            background-color: #555;
+            background-color: rgba(39, 39, 43, 0.918);
         }
 
         .page-item {
@@ -368,33 +368,64 @@
                 </tbody>
                 <%})%>
         </table>
-        <nav id="pagination" aria-label="Page navigation" class="paginationdiv">
-            <ul class="pagination justify-content-center pages custom-pagination" style=" list-style: none;">
+        <nav id="pagination" aria-label="Page navigation" class="paginationdiv" style="text-align: center; margin-top: 20px;">
+            <ul class="pagination custom-pagination" style="display: inline-flex; gap: 5px; padding: 0; list-style: none;">
                 <% if (previousPage) { %>
                     <li class="page-item">
                         <a class="page-link" href="?page=<%= previousPage %>" aria-label="Previous"
-                            style="text-decoration: none;">
-                            << 
+                           style="display: block; padding: 10px 15px; background-color: #f1f1f1; color: #333; text-decoration: none; border-radius: 5px;">
+                            &laquo; Prev
+                        </a>
                     </li>
-                    <% } %>
-
-                        <% for (let i=1; i <=totalPages; i++) { %>
-                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-
-                                <a class="page-link" href="?page=<%= i %>">
-                                    <%= i %>
-                                </a>
-                            </li>
-                            <% } %>
-
-                                <% if (nextPage) { %>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next"
-                                            style="text-decoration: none;">></a>
-                                    </li>
-                                    <% } %>
+                <% } %>
+        
+                <% 
+                // Pagination Logic
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, currentPage + 2);
+                if (startPage > 1) { 
+                %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" 
+                           style="display: block; padding: 10px 15px; background-color: #f1f1f1; color: #333; text-decoration: none; border-radius: 5px;">
+                            1
+                        </a>
+                    </li>
+                    <li class="page-item" style="pointer-events: none; user-select: none; padding: 10px 15px;">...</li>
+                <% } %>
+        
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>" 
+                        style="<%= i === currentPage ? 'background-color: #333; color: #fff; border-radius: 5px;' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>" 
+                           style="display: block; padding: 10px 15px; background-color: <%= i === currentPage ? '#333' : '#f1f1f1' %>; 
+                                  color: <%= i === currentPage ? '#fff' : '#333' %>; text-decoration: none; border-radius: 5px;">
+                            <%= i %>
+                        </a>
+                    </li>
+                <% } %>
+        
+                <% if (endPage < totalPages) { %>
+                    <li class="page-item" style="pointer-events: none; user-select: none; padding: 10px 15px;">...</li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= totalPages %>" 
+                           style="display: block; padding: 10px 15px; background-color: #f1f1f1; color: #333; text-decoration: none; border-radius: 5px;">
+                            <%= totalPages %>
+                        </a>
+                    </li>
+                <% } %>
+        
+                <% if (nextPage) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= nextPage %>" aria-label="Next"
+                           style="display: block; padding: 10px 15px; background-color: #f1f1f1; color: #333; text-decoration: none; border-radius: 5px;">
+                            Next &raquo;
+                        </a>
+                    </li>
+                <% } %>
             </ul>
         </nav>
+        
 
     </div>
 

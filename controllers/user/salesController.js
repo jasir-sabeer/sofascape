@@ -9,6 +9,7 @@ const razorpay = require('razorpay')
 const Wishlist = require('../../models/wishlist')
 const Product = require('../../models/prductschema')
 const Wallet = require('../../models/walletSchema')
+const Category=require('../../models/categoryschema')
 const crypto = require('crypto');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
@@ -36,6 +37,17 @@ const loadCheckout = async (req, res) => {
             const product = await Product.findById(item.productId._id);
 
             if (!product || product.stock < item.quantity) {
+                await Cart.updateOne(
+                    { userId },
+                    { $pull: { products: { productId: item.productId._id } } }
+                );
+                continue;
+            }
+
+            // Check if the product and its category are listed
+            const category = await Category.findById(product.category);
+            if (!product.isListed || !category || !category.isListed) {
+                // Remove the product from the cart if it's unlisted
                 await Cart.updateOne(
                     { userId },
                     { $pull: { products: { productId: item.productId._id } } }
@@ -77,6 +89,7 @@ const loadCheckout = async (req, res) => {
         res.status(500).json({ error: 'Server error, please try again later.' });
     }
 };
+
 
 
 const addAddressCheckout = async (req, res) => {

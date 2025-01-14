@@ -4,6 +4,7 @@ const Cart = require('../../models/cartSchema')
 const User = require('../../models/userschema')
 const Product = require('../../models/prductschema')
 const Coupon = require('../../models/couponSchema')
+const Category=require('../../models/categoryschema')
 
 
 const loadCartPage = async (req, res) => {
@@ -24,30 +25,39 @@ const loadCartPage = async (req, res) => {
             return res.render('cart', { cartProducts: [], subtotal: 0, cartCount: 0 });
         }
 
+        const validProducts = [];
         let subtotal = 0;
-        let productTotal = 0;
-        cart.products.forEach((item) => {
-            if (item.productId.discountPrice && item.productId.discountPrice < item.productId.regularprice) {
-                productTotal = item.quantity * item.productId.discountPrice;
-            } else {
-                productTotal = item.quantity * item.productId.regularprice;
-            }
-            item.subtotal = productTotal;
-            subtotal += productTotal;
-        });
-
         let cartCount = 0;
-        if (cart && cart.products) {
-            cartCount = cart.products.length; 
-        }
-        
 
-        res.render('cart', { cartProducts: cart.products, subtotal, cartCount });
+        for (const item of cart.products) {
+            const product = item.productId;
+            const category = await Category.findById(product.category);
+
+            if (product.isListed && category && category.isListed) {
+                let productTotal = 0;
+
+                if (product.discountPrice && product.discountPrice < product.regularprice) {
+                    productTotal = item.quantity * product.discountPrice;
+                } else {
+                    productTotal = item.quantity * product.regularprice;
+                }
+
+                item.subtotal = productTotal;
+                validProducts.push(item);
+                subtotal += productTotal;
+                cartCount++;
+            }
+        }
+
+        // Render the cart page with valid products only
+        res.render('cart', { cartProducts: validProducts, subtotal, cartCount });
+
     } catch (error) {
         console.error('Error loading cart page:', error);
         res.redirect('/page-404');
     }
 };
+
 
 
 const addCart = async (req, res) => {

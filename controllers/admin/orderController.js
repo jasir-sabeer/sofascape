@@ -11,7 +11,7 @@ const loadOrderManagement = async (req, res) => {
         const limit = parseInt(req.query.limit) || 3;
         const skip = (page - 1) * limit;
 
-        const [totalOders, orders] = await Promise.all([
+        const [totalOrders, orders] = await Promise.all([
             Order.countDocuments(),
             Order.find()
                 .populate("userId")
@@ -21,27 +21,22 @@ const loadOrderManagement = async (req, res) => {
                 .limit(limit),
         ]);
 
-
-        const totalPages = Math.ceil(totalOders / limit);
+        const totalPages = Math.ceil(totalOrders / limit);
         const previousPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
-
-
 
         res.render("orderManagement", {
             orders,
             currentPage: page,
-            totalPages,
+            totalPages: totalPages || 1, // Handle empty orders case
             previousPage,
             nextPage,
         });
-
     } catch (error) {
         console.error("Error in product management:", error.message);
         res.status(500).send("An error occurred while fetching orders");
     }
-
-}
+};
 
 
 const changeStatus = async (req, res) => {
