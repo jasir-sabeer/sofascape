@@ -25,29 +25,38 @@ const loadAddCoupon = async (req, res) => {
 
 
 const addCoupons = async (req, res) => {
-    const { code, discountValue, minPurchase, startDate, expiryDate } = req.body;
-
     try {
-        const existingCoupon = await Coupon.findOne({ code });
-
-        if (existingCoupon) {
-            return res.render('addCoupon',{message:'Already Existing this coupon Create new one'}); // Redirect with the message
+        const { code, discountValue, minPurchase, startDate, expiryDate } = req.body;
+         
+        // Ensure all fields are provided
+        if (!code || !discountValue || !minPurchase || !startDate || !expiryDate) {
+            return res.render('addCoupon', { message: 'All fields are required!' });
         }
 
+        console.log('Received Data:', req.body);
+
+        // Check for existing coupon
+        const existingCoupon = await Coupon.findOne({ code });
+        if (existingCoupon) {
+            return res.render('addCoupon', { message: 'This coupon code already exists. Please use a different code.' });
+        }
+
+        // Create new coupon
         const coupons = new Coupon({
             code,
             discountValue,
             minPurchase,
-            startDate,
-            expiryDate,
+            startDate: new Date(startDate),
+            expiryDate: new Date(expiryDate),
         });
 
         await coupons.save();
 
-        res.redirect('/couponManagement');
+        console.log('Coupon Saved Successfully!');
+        res.redirect('/admin/couponManagement');
     } catch (error) {
-        console.error("Error in addCoupons:", error.message);
-        res.status(500).send("An error occurred while adding the coupon.");
+        console.error('Error in addCoupons:', error.message);
+        res.status(500).render('addCoupon', { message: 'An error occurred. Please try again later.' });
     }
 };
 

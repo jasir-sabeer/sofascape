@@ -43,7 +43,6 @@ const loadhomepage = async (req, res) => {
             cartCount,  
         });
     } catch (error) {
-        console.log("Home page not found.", error);
         res.status(500).send('Server error');
     }
 };
@@ -74,7 +73,6 @@ const loadHomepage= async  (req, res) => {
             cartCount,  
         });
     } catch (error) {
-        console.log("Home page not found.", error);
         res.status(500).send('Server error');
     }
 
@@ -101,7 +99,6 @@ const loadproductpage = async (req, res) => {
             filter.$and.push({
                 $or: [
                     { productname: { $regex: search, $options: 'i' } },
-                    { description: { $regex: search, $options: 'i' } },
                 ],
             });
         }
@@ -192,7 +189,6 @@ const loadproductpage = async (req, res) => {
             maxPrice,
         });
     } catch (error) {
-        console.error("Product page load error:", error);
         res.status(500).send('Server error');
     }
 };
@@ -203,7 +199,6 @@ const loadloginpage = async (req, res) => {
     try {
         res.render('login');
     } catch (error) {
-        console.error("Error loading login page:", error);
         res.redirect("/pagenotfound");
     }
 };
@@ -213,7 +208,6 @@ const loadsignuppage = async (req, res) => {
     try {
         return res.render("signup");
     } catch (error) {
-        console.log("Signup page not found.");
         res.status(500).send('Server error');
     }
 };
@@ -223,7 +217,6 @@ const securePassword = async (password) => {
     try {
         return await bcrypt.hash(password, 10);
     } catch (error) {
-        console.error("Password hashing error:", error);
         throw error;
     }
 };
@@ -298,7 +291,6 @@ const loadotppage = async (req, res) => {
             res.json({ success: false, message: "Invalid OTP, please try again" });
         }
     } catch (error) {
-        console.error("OTP verification error:", error);
         res.status(500).json({ success: false, message: "An error occurred" });
     }
 };
@@ -336,7 +328,6 @@ async function sendVerification(email, otp) {
 
         return info.accepted.length > 0;
     } catch (error) {
-        console.error("Error sending email:", error);
         return false;
     }
 }
@@ -373,9 +364,7 @@ const signup = async (req, res) => {
         req.session.userOtp = otp;
         req.session.userData = { name, phone, email, password, referralCodeInput };
         res.render("otp-verification");
-        console.log("OTP sent:", otp);
     } catch (error) {
-        console.error("Signup error:", error);
         res.redirect("/pagenotfound");
     }
 };
@@ -434,7 +423,6 @@ const login = async (req, res) => {
         res.redirect('/homepage');
 
     } catch (error) {
-        console.error("Login error:", error);
         res.render('login', { message: "Login failed. Please try again later" });
     }
 };
@@ -458,7 +446,6 @@ const loadsingleproductpage = async (req, res) => {
                 }
             }
         ]);
-        console.log(Ratings);
         let avg = 0
         if (Ratings.length > 0) {
             avg = Ratings[0].averageRating.toFixed(2)
@@ -474,14 +461,12 @@ const loadsingleproductpage = async (req, res) => {
 
         res.render("single-product", { product, relatedProducts, productReviews, users, avg, totalReviews,cartCount })
     } catch (error) {
-        console.error("Product page load error:", error);
         res.status(500).send('Server error');
     }
 };
 
 const productReview = async (req, res) => {
     const { name, email, number, comment, rating } = req.body;
-    console.log(req.body);
     const userId = req.session.user;
 
 

@@ -1,36 +1,102 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Coupon</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            background-color: #1f1f1f;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #bb86fc;
+            text-align: center;
+        }
+
+        label {
+            color: #ffffff;
+        }
+
+        .form-control {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .form-control:focus {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border-color: #bb86fc;
+            box-shadow: 0 0 0 0.2rem rgba(187, 134, 252, 0.25);
+        }
+
+        .btn-primary {
+            background-color: #bb86fc;
+            border-color: #bb86fc;
+        }
+
+        .btn-primary:hover {
+            background-color: #9a67ea;
+            border-color: #9a67ea;
+        }
+
+        .btn-back {
+            width: 100%;
+            margin-top: 16px;
+            background-color: #333;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            height: 40px;
+        }
+
+        .btn-back:hover {
+            background-color: #444;
+        }
+
+        .errormessage {
+            color: #cf6679;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .form-label {
+            margin-top: 10px;
+        }
+    </style>
 </head>
-<style>
-    .errormessage{
-        color: red;
-        font-size: 13px;
-    }
-</style>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center">Add New Coupon</h1>
-        <% if(locals.message && message.length>0){%>
-          <div style="color: red;margin-left: 10.5cm;" >
-           <%=message%>
-          </div>
-     <%}%>
-        <form id="addCouponForm" action="/admin/coupons/add" method="POST" class="mt-4">
+        <h1>Add New Coupon</h1>
+        <% if(locals.message && message.length > 0) { %>
+            <div class="errormessage text-center">
+                <%= message %>
+            </div>
+        <% } %>
+        <form id="addCouponForm" action="/admin/coupons/add" method="POST">
             <div class="mb-3">
                 <label for="code" class="form-label">Coupon Code</label>
                 <div id="error1" class="errormessage" aria-live="assertive"></div>
-                <input type="text" id="code" name="code" class="form-control" placeholder="Enter coupon code" >
+                <input type="text" id="code" name="code" class="form-control" placeholder="Enter coupon code">
             </div>
 
             <div class="mb-3">
                 <label for="discountValue" class="form-label">Discount Value</label>
                 <div id="error2" class="errormessage" aria-live="assertive"></div>
-                <input type="number" id="discountValue" name="discountValue" class="form-control" placeholder="Enter discount value" >
+                <input type="number" id="discountValue" name="discountValue" class="form-control" placeholder="Enter discount value">
             </div>
 
             <div class="mb-3">
@@ -40,9 +106,9 @@
             </div>
 
             <div class="mb-3">
-                <label for="stratDate" class="form-label">Start Date</label>
+                <label for="startDate" class="form-label">Start Date</label>
                 <div id="error4" class="errormessage" aria-live="assertive"></div>
-                <input type="date" id="startDate" name="startDate" class="form-control" >
+                <input type="date" id="startDate" name="startDate" class="form-control">
             </div>
 
             <div class="mb-3">
@@ -51,146 +117,135 @@
                 <input type="date" id="expiryDate" name="expiryDate" class="form-control">
             </div>
 
-
             <button type="submit" class="btn btn-primary w-100">Add Coupon</button>
         </form>
-       <a href="/admin/couponManagement"><button style="width: 100%;margin-top: .6cm;background-color: black; color: #fff; border: none; border-radius: 5px;height: 1cm; margin-bottom: 3cm;">Back</button></a>
+
+        <a href="/admin/couponManagement">
+            <button class="btn-back">Back</button>
+        </a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-const addCouponForm = document.getElementById('addCouponForm');
-const error1 = document.getElementById('error1');
-const error2 = document.getElementById('error2');
-const error3 = document.getElementById('error3');
-const error4 = document.getElementById('error4');
-const error5 = document.getElementById('error5');
+        // Validation script remains unchanged from the provided version.
+        const addCouponForm = document.getElementById('addCouponForm');
+        const error1 = document.getElementById('error1');
+        const error2 = document.getElementById('error2');
+        const error3 = document.getElementById('error3');
+        const error4 = document.getElementById('error4');
+        const error5 = document.getElementById('error5');
 
-addCouponForm.addEventListener("submit", (e) => {
-  couponCodeValidateChecking();
-  DiscountValidateChecking();
-  MinPurchaseValidateChecking();
-  startDateValidateChecking();
-  expiryDateValidateChecking();
-  
+        addCouponForm.addEventListener("submit", (e) => {
+            couponCodeValidateChecking();
+            DiscountValidateChecking();
+            MinPurchaseValidateChecking();
+            startDateValidateChecking();
+            expiryDateValidateChecking();
 
-  if (
-    error1.classList.contains("show-error") || 
-    error2.classList.contains("show-error") || 
-    error3.classList.contains("show-error") || 
-    error4.classList.contains("show-error") || 
-    error5.classList.contains("show-error") 
-  ) {
-    e.preventDefault();  
-  }
-});
+            if (
+                error1.classList.contains("show-error") || 
+                error2.classList.contains("show-error") || 
+                error3.classList.contains("show-error") || 
+                error4.classList.contains("show-error") || 
+                error5.classList.contains("show-error") 
+            ) {
+                e.preventDefault();
+            }
+        });
 
+        // Validation functions remain unchanged from the provided version.
+        function couponCodeValidateChecking() {
+            const couponCodeInput = document.getElementById('code').value.trim();
+            const couponPattern = /^[A-Z0-9]{6}$/;
+            if (couponCodeInput === "") {
+                error1.textContent = "Please add a coupon code";
+                error1.classList.add("show-error");
+            } else if (!couponCodeInput.match(couponPattern)) {
+                error1.textContent = "Enter a 6 character numbers and uppercase letters mixed code";
+                error1.classList.add("show-error");
+            } else {
+                error1.textContent = "";
+                error1.classList.remove("show-error");
+            }
+        }
 
-function couponCodeValidateChecking() {
-  const couponCodeInput = document.getElementById('code').value.trim();
-  const couponPattern=/^[A-Z0-9]{6}$/;
-  if (couponCodeInput === "") {
-    error1.textContent = "plese add a coupon code";
-    error1.classList.add("show-error");
-  } else if(!couponCodeInput.match(couponPattern)){
-    error1.textContent = "Enter a 6 character numbers and uppercase letters mixed code";
-    error1.classList.add("show-error");
-  }else{
-    error1.textContent = "";
-    error1.classList.remove("show-error");
-  }
-}
+        function DiscountValidateChecking() {
+            const discountInput = document.getElementById('discountValue').value.trim();
+            const maxValue = 50;
+            if (discountInput === "") {
+                error2.textContent = "Please add a discount value";
+                error2.classList.add("show-error");
+            } else if (discountInput > maxValue) {
+                error2.textContent = "Please enter less than 50%";
+                error2.classList.add("show-error");
+            } else {
+                error2.textContent = "";
+                error2.classList.remove("show-error");
+            }
+        }
 
-function DiscountValidateChecking() {
-  const discountInput = document.getElementById('discountValue').value.trim();
-  const maxValue=50;
-  if (discountInput === "") {
-    error2.textContent = "plese add a discount value";
-    error2.classList.add("show-error");
-  } else if(discountInput>maxValue){
-    error2.textContent = "Please enter lessthan 50% ";
-    error2.classList.add("show-error");
-  }else{
-    error2.textContent = "";
-    error2.classList.remove("show-error");
-  }
-}
+        function MinPurchaseValidateChecking() {
+            const minPurchaseInput = document.getElementById('minPurchase').value.trim();
+            const minPurchaseValue = 10000;
+            if (minPurchaseInput === "") {
+                error3.textContent = "Please add a minimum purchase limit";
+                error3.classList.add("show-error");
+            } else if (minPurchaseInput <= minPurchaseValue) {
+                error3.textContent = "Please enter more than 10000";
+                error3.classList.add("show-error");
+            } else {
+                error3.textContent = "";
+                error3.classList.remove("show-error");
+            }
+        }
 
-function MinPurchaseValidateChecking() {
-  const minPurchaseInput = document.getElementById('minPurchase').value.trim();
-  const minPurchaseValue=10000;
-  if (minPurchaseInput === "") {
-    error3.textContent = "plese add  minimum purchase limit";
-    error3.classList.add("show-error");
-  } else if(minPurchaseInput <= minPurchaseValue){
-    error3.textContent = "please enter morethan 10000 ";
-    error3.classList.add("show-error");
-  }else{
-    error3.textContent = "";
-    error3.classList.remove("show-error");
-  }
-}
+        function startDateValidateChecking() {
+            const startDateInput = document.getElementById('startDate').value.trim();
+            const errorElement = document.getElementById('error4'); 
+            if (startDateInput === "") {
+                errorElement.textContent = "Please add a start date";
+                errorElement.classList.add("show-error");
+                return; 
+            }
 
-function startDateValidateChecking() {
-    const startDateInput = document.getElementById('startDate').value.trim();
-    const errorElement = document.getElementById('error4'); 
-    if (startDateInput === "") {
-        errorElement.textContent = "Please add a start date";
-        errorElement.classList.add("show-error");
-        return; 
-    }
+            const today = new Date();
+            const startDate = new Date(startDateInput);
 
-    const today = new Date();
-    const startDate = new Date(startDateInput);
+            today.setHours(0, 0, 0, 0);
+            startDate.setHours(0, 0, 0, 0);
 
-    
-    today.setHours(0, 0, 0, 0);
-    startDate.setHours(0, 0, 0, 0);
+            if (startDate < today) {
+                errorElement.textContent = "Start date must be today or in the future";
+                errorElement.classList.add("show-error");
+            } else {
+                errorElement.textContent = "";
+                errorElement.classList.remove("show-error");
+            }
+        }
 
-    if (startDate < today) {
-        errorElement.textContent = "Start date must be today or in the future";
-        errorElement.classList.add("show-error");
-    } else {
-        errorElement.textContent = "";
-        errorElement.classList.remove("show-error");
-    }
-}
+        function expiryDateValidateChecking() {
+            const expiryDateInput = document.getElementById('expiryDate').value.trim();
+            const errorElement = document.getElementById('error5'); 
+            if (expiryDateInput === "") {
+                errorElement.textContent = "Please add an expiry date";
+                errorElement.classList.add("show-error");
+                return; 
+            }
 
-function expiryDateValidateChecking() {
+            const today = new Date();
+            const expiryDate = new Date(expiryDateInput);
 
-    const expiryDateInput = document.getElementById('expiryDate').value.trim();
-    const errorElement = document.getElementById('error5'); 
-    if (expiryDateInput === "") {
-        errorElement.textContent = "Please add an expiry date";
-        errorElement.classList.add("show-error");
-        return; 
-    }
+            today.setHours(0, 0, 0);
+            expiryDate.setHours(0, 0, 0);
 
-    const today = new Date();
-    const expiryDate = new Date(expiryDateInput);
-
-
-    today.setHours(0, 0, 0);
-    expiryDate.setHours(0, 0, 0);
-
-    if (expiryDate <= today) {
-        errorElement.textContent = "Expiry date must be in the future";
-        errorElement.classList.add("show-error");
-    } else {
-        errorElement.textContent = "";
-        errorElement.classList.remove("show-error");
-    }
-}
-
-
-
-
-
-
-
-
-
+            if (expiryDate <= today) {
+                errorElement.textContent = "Expiry date must be in the future";
+                errorElement.classList.add("show-error");
+            } else {
+                errorElement.textContent = "";
+                errorElement.classList.remove("show-error");
+            }
+        }
     </script>
 </body>
 </html>
