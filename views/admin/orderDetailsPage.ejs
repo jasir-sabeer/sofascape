@@ -6,81 +6,103 @@
     <title>Order Details</title>
     <style>
         body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f9f9f9;
-    color: #333;
-}
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
 
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
 
-.header {
-    text-align: center;
-    margin-bottom: 20px;
-}
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-.header h1 {
-    margin: 0;
-    color: #444;
-}
+        .header h1 {
+            margin: 0;
+            color: #f0f0f0;
+        }
 
-.main-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-.order-summary,
-.customer-info,
-.items {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #fafafa;
-}
+        .order-summary,
+        .customer-info,
+        .items {
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #292929;
+        }
 
-.items-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
 
-.items-table th,
-.items-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
+        .items-table th,
+        .items-table td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: left;
+        }
 
-.items-table th {
-    background-color: #f4f4f4;
-    color: #555;
-}
+        .items-table th {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+        }
 
-.totals {
-    margin-top: 10px;
-}
+        .totals {
+            margin-top: 10px;
+        }
 
-.totals p {
-    font-weight: bold;
-    margin: 5px 0;
-}
+        .totals p {
+            font-weight: bold;
+            margin: 5px 0;
+        }
 
-.footer {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 0.9em;
-    color: #666;
-}
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .footer p {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -92,22 +114,22 @@
             <section class="order-summary">
                 <h2>Order Summary</h2>
                 <p><strong>Order ID:</strong> <%= order.orderId %></p>
-                <p><strong>Date:</strong><%= new Date(order.createdAt).toLocaleDateString('en-US', {
+                <p><strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit',
                   }) %>
-                  </p>
+                </p>
                 <p><strong>Status:</strong> <%= product.status %></p>
                 <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
             </section>
             <section class="customer-info">
                 <h2>Customer Information</h2>
-                <p><strong>Name:</strong> <%= order.address.firstName %> <%= order.address.lastName %></p>
+                <p><strong>Name:</strong> <%= order.address.customerName %></p>
                 <p><strong>Email:</strong> <%= order.address.email %></p>
-                <p><strong>Phone:</strong> <%= order.address.phoneNumber %></p>
+                <p><strong>Phone:</strong> <%= order.address.phone %></p>
             </section>
             <section class="items">
                 <h2>Items</h2>
@@ -121,38 +143,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                            <tr>
-                                <td><%= product.name %></td>
-                                <td><%= product.quantity %></td>
-                                <td>₹<%= product.price %></td>
-                                <td>₹<%= (product.quantity * product.price) %></td>
-                            </tr>
+                        <tr>
+                            <td><%= product.name %></td>
+                            <td><%= product.quantity %></td>
+                            <td>₹<%=Math.ceil(product.price) %></td>
+                            <td>₹<%=Math.ceil(product.quantity * product.price) %></td>
+                        </tr>
                     </tbody>
                 </table>
                 <div class="totals">
-                    
-                    <% if(order.couponDiscountValue){%>
+                    <% if(order.couponDiscountValue) { %>
                         <p><strong>Subtotal:</strong> ₹<%= order.subtotal %></p>
-                        <p><strong>Shipping Cost:</strong>₹<%= order.shippingCost %></p>
-                        <p><strong>Discount Value:</strong> ₹<%= order.couponDiscountValue %></p>
-                        <p><strong>Total:</strong> ₹<%= order.finalDiscountAmount %></p>
-
-                    <%}else{%> 
-                        <p><strong>Subtotal:</strong> ₹<%= order.subtotal %></p>
-                        <p><strong>Shipping Cost:</strong>₹<%= order.shippingCost %></p>
-                        <p><strong>Total:</strong> ₹<%= order.total %></p>
-                    <%}%>   
+                        <p><strong>Shipping Cost:</strong> ₹<%= order.shippingCost %></p>
+                        <p><strong>Discount Value:</strong> ₹<%=Math.ceil(order.couponDiscountValue) %></p>
+                        <p><strong>Total:</strong> ₹<%=Math.ceil(order.finalDiscountAmount) %></p>
+                    <% } else { %>
+                        <p><strong>Subtotal:</strong> ₹<%= Math.ceil(order.subtotal) %></p>
+                        <p><strong>Shipping Cost:</strong> ₹<%=Math.ceil(order.shippingCost) %></p>
+                        <p><strong>Total:</strong> ₹<%=Math.ceil(order.total) %></p>
+                    <% } %>
                 </div>
             </section>
-
-            <a href="/admin/orderManagement" style="text-decoration: none;color: #000;"><button>Back</button></a>
-<!-- 
-            <a href="/orderManagement" style="text-decoration: none;color: #000;"><button>Back</button></a>
->>>>>>> ba4fe0a2a46f1b1aff3592fe89ac2111a97a053e -->
-
+            <a href="/admin/orderManagement"><button>Back</button></a>
         </main>
         <footer class="footer">
-            <p></p>
+            <p>&copy; 2025 Order Management System</p>
         </footer>
     </div>
 </body>

@@ -137,7 +137,7 @@
         <% if (!wallet || wallet.balance <= 0) { %>
             <h1 style="margin-left:4cm;color: #ff3368;font-size:34px;font-weight: bold;">₹000</h1>
         <% } else { %>
-            <h1 style="margin-left:4cm;color: #ff3368;font-size:34px;font-weight: bold;">₹ <%= wallet.balance %></h1>
+            <h1 style="margin-left:4cm;color: #ff3368;font-size:34px;font-weight: bold;">₹ <%= Math.ceil(wallet.balance) %></h1>
         <% } %>
         <p style="font-size: 12px;margin-top: 2cm;">"Secure your future, one transaction at a time—set up your wallet and take control of your digital journey."</p>
     </div>
@@ -159,7 +159,7 @@
                         <div class="table-row">
                             <div class="serial"><%= index + 1 %></div>
                             <div class="country"><%= transaction.type %></div>
-                            <div class="visit">₹ <%= transaction.amount %></div>
+                            <div class="visit">₹ <%= Math.ceil(transaction.amount) %></div>
                             <div class="percentage">
                                 <p><%= transaction.description %></p>
                             </div>
@@ -168,16 +168,30 @@
                 <% } %>
             </div>
         </div>
-        <nav aria-label="Page navigation" class="d-flex justify-content-center mt-3">
-            <ul class="pagination">
-                <% for (let i = 1; i <= totalPages; i++) { %>
-                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                    </li>
-                <% } %>
-            </ul>
-        </nav>
-        
+        <% const startPage = Math.max(1, currentPage - 2); %>
+<% const endPage = Math.min(totalPages, currentPage + 2); %>
+<nav aria-label="Page navigation" class="d-flex justify-content-center mt-3">
+    <ul class="pagination">
+        <% if (startPage > 1) { %>
+            <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+            <% if (startPage > 2) { %>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            <% } %>
+        <% } %>
+        <% for (let i = startPage; i <= endPage; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+        <% } %>
+        <% if (endPage < totalPages) { %>
+            <% if (endPage < totalPages - 1) { %>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            <% } %>
+            <li class="page-item"><a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a></li>
+        <% } %>
+    </ul>
+</nav>
+
         
     </div>
     <%- include("../../views/partials/user/footer") %>

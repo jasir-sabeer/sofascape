@@ -104,7 +104,7 @@
                 <%})%>
                 <tr>
                   <th colspan="3">Subtotal</th>
-                  <th> <span></span>₹<%= orders.subtotal%></th>
+                  <th> <span></span>₹<%= Math.ceil(orders.subtotal)%></th>
                 </tr>
                 <tr>
                   <th colspan="3">shipping</th>
@@ -118,7 +118,7 @@
                   <%if(orders.couponDiscountValue){%>
                   <tr>
                   <th colspan="3">Coupon Discount</th>
-                  <th><span>-₹<%= orders.couponDiscountValue%></span></th>
+                  <th><span>-₹<%=Math.ceil(orders.couponDiscountValue)%></span></th>
                 </tr>
                 <%}%>
               </tbody>
@@ -127,12 +127,12 @@
                 <%if(orders.finalDiscountAmount){%>
                 <tr>
                   <th scope="00col" colspan="3">Total</th>
-                  <th scope="col">₹<%= orders.finalDiscountAmount%></th>
+                  <th scope="col">₹<%= Math.ceil(orders.finalDiscountAmount)%></th>
                 </tr>
                 <%}else{%>
                   <tr>
                     <th scope="00col" colspan="3">Total</th>
-                    <th scope="col">₹<%= orders.total%></th>
+                    <th scope="col">₹<%=Math.ceil( orders.total)%></th>
                   </tr>
                   <%}%>
                   <tr>

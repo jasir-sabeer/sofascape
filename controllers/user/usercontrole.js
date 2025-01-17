@@ -48,9 +48,7 @@ const loadhomepage = async (req, res) => {
 };
 
 const loadHomepage= async  (req, res) => {
-    // const user = req.session.passport ? req.session.passport.user : null;
     
-    // res.render('home', { user });
 
     try {
         if (req.session.passport && req.session.passport.user) {
@@ -173,6 +171,11 @@ const loadproductpage = async (req, res) => {
         const nextPage = page < totalPages ? page + 1 : null;
 
         const categories = await Category.find({ isListed: true });
+        const cart = await Cart.findOne({ userId: req.session.user });  
+        let cartCount = 0;
+        if (cart && cart.products) {
+            cartCount = cart.products.length; 
+        }
 
         res.render('shop', {
             categories,
@@ -183,7 +186,7 @@ const loadproductpage = async (req, res) => {
             totalPages,
             previousPage,
             nextPage,
-            cartCount: 0, 
+            cartCount, 
             searchQuery: search,
             minPrice,
             maxPrice,

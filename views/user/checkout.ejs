@@ -183,7 +183,6 @@
         <form id="couponForm">
           <input type="text" placeholder="Enter coupon code" id="coupuncode" name="coupuncode" />
           <button class="tp_btn" type="submit">Apply Coupon</button>
-
         </form>
         
         <button style="margin-top: .5cm;" class="tp_btn" onclick="removeCoupon() ">Cancel Coupon</button>
@@ -191,10 +190,11 @@
         <div style="display: flex;">
           <%coupons.forEach(coupon=>{%>
             <div
-              style="width: 5cm;height: 4cm;background-color: #ecfdff;margin-top: 1cm;margin-left: 1cm;padding-top: .5cm;">
+              style="width: 5cm;height: 4.5cm;background-color: #ecfdff;margin-top: 1cm;margin-left: 1cm;padding-top: .5cm;">
               <h4 style="margin-left: 1.3cm;"><strong id="couponPercentage">
                   <%= coupon.discountValue %>% offer
                 </strong></h4>
+                <h5 style="font-size: 10px;margin-left: .8cm;">Minimum Purchase :<%=coupon.minPurchase%></h5>
               <div style="width: 100%;height: 1cm;background-color: #f44a40;">
                 <p style="margin-left: 1.5cm;margin-top: .4cm;font-size: 18px;color: #fff;">
                   <%= coupon.code %>
@@ -212,76 +212,49 @@
         <div class="row">
           <div class="col-lg-8">
             <div class="col-md-12 form-group">
-              <% addresses.forEach((address, index)=> { %>
+              <% addresses.forEach((address, index) => { %>
                 <div>
-                <label class="address-list" for="default-radio-<%= index %>" id="addressList<%= index %>">
-                  <input type="radio" name="selectedAddress" id="default-radio-<%= index %>" value="<%= address._id %>"
-                    style="display: none;"> 
-                  <div class="address-item">
-                    <p><strong>Name:</strong>
-                      <%= address.firstName %>
-                        <%= address.lastName %>
-                    </p>
-                    <p><strong>Mobile:</strong>
-                      <%= address.phoneNumber %>
-                    </p>
-                    <p><strong>Street:</strong>
-                      <%= address.street %>
-                    </p>
-                    <p><strong>City:</strong>
-                      <%= address.city %>
-                    </p>
-                    <p><strong>State:</strong>
-                      <%= address.state %>
-                    </p>
-                    <div class="address-actions">
-                      <a href='/editAddressPage?id=<%= address._id %>'>
-                        <button class="genric-btn info radius">Edit</button>
-                      </a>
+                  <label class="address-list" for="default-radio-<%= index %>" id="addressList<%= index %>">
+                    <input type="radio" name="selectedAddress" value='<%= JSON.stringify(address) %>' onchange="fillBillingDetails(this.value)">
+                    <div class="address-item">
+                      <p><strong>Name:</strong> <%= address.firstName %> <%= address.lastName %></p>
+                      <p><strong>Mobile:</strong> <%= address.phoneNumber %></p>
+                      <p><strong>Street:</strong> <%= address.street %></p>
+                      <p><strong>City:</strong> <%= address.city %></p>
+                      <p><strong>State:</strong> <%= address.state %></p>
                     </div>
-                  </div>
-                </label>
-               </div>
-                <% }); %>
-
-
+                  </label>
+                </div>
+              <% }); %>
+              
             </div>
+            
             <h3>Billing Details</h3>
-            <form id="addAddressForm" action="/add_address_checkout" method="post">
-
-              <input type="text" id="firstName" class="form-control" name="firstName" placeholder="First Name">
+            <form id="addAddressForm" >
+              <input type="text" id="firstName" class="form-control" name="firstName" placeholder="Full Name">
               <div id="error1" class="errormessage" aria-live="assertive"></div>
-              <input type="text" id="lastName" class="form-control" name="lastName" placeholder="Last Name">
-              <div id="error2" class="errormessage" aria-live="assertive"></div>
-
+            
               <input type="text" id="email" class="form-control" name="email" placeholder="Email">
               <div id="error3" class="errormessage" aria-live="assertive"></div>
-
+            
               <input type="text" id="phoneNumber" class="form-control" name="phoneNumber" placeholder="Phone Number">
               <div id="error4" class="errormessage" aria-live="assertive"></div>
-
+            
               <input type="text" id="address" class="form-control" name="address" placeholder="Address">
               <div id="error5" class="errormessage" aria-live="assertive"></div>
-
+            
               <input type="text" id="street" class="form-control" name="street" placeholder="Street">
               <div id="error6" class="errormessage" aria-live="assertive"></div>
-
+            
               <input type="text" id="city" class="form-control" name="city" placeholder="City">
               <div id="error7" class="errormessage" aria-live="assertive"></div>
-
+            
               <input type="text" id="state" class="form-control" name="state" placeholder="State">
               <div id="error8" class="errormessage" aria-live="assertive"></div>
-
+            
               <input type="text" id="pincode" class="form-control" name="pincode" placeholder="Pincode">
               <div id="error9" class="errormessage" aria-live="assertive"></div>
-
-
-
-              <div class="form-actions">
-                <button id="savebtn" type="submit" value="submit" class="genric-btn success radius">Save</button>
-              </div>
-            </form>
-
+            
             <!-- <div class="col-md-12 form-group">
                 <div class="creat_account">
                   <input type="checkbox" id="f-option2" name="selector" />
@@ -380,10 +353,13 @@
                 </div>
               </div>
              
-              <a class="btn_3" onclick="submitOrder()">Place Order</a>
+              <button type="button"  class="btn_3"   onclick="submitOrder()">Place Order</button>
+              
             </div>
 
           </div>
+        </form>
+
         </div>
       </div>
     </div>
@@ -394,259 +370,218 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
+ document.addEventListener("DOMContentLoaded", () => {
+  const addressLists = document.querySelectorAll(".address-list");
+  const radios = document.querySelectorAll('input[name="selectedAddress"]');
 
-      function cancelAddAddress() {
-        window.location.href = '/checkout';
-      }
-      const addAddressForm = document.getElementById('addAddressForm');
-      const error1 = document.getElementById('error1');
-      const error2 = document.getElementById('error2');
-      const error3 = document.getElementById('error3');
-      const error4 = document.getElementById('error4');
-      const error5 = document.getElementById('error5');
-      const error6 = document.getElementById('error6');
-      const error7 = document.getElementById('error7');
-      const error8 = document.getElementById('error8');
-      const error9 = document.getElementById('error9');
+  addressLists.forEach((addressList, index) => {
+    addressList.addEventListener("click", () => {
+      // Remove 'selected' class from all address lists
+      addressLists.forEach(list => list.classList.remove("selected"));
+      
+      // Add 'selected' class to the clicked address list
+      addressList.classList.add("selected");
+      
+      // Check the radio button when the div is clicked
+      radios[index].checked = true;
 
-      addAddressForm.addEventListener("submit", (e) => {
-        firstNameValidateChecking();
-        lastNameValidateChecking();
-        emailValidateChecking();
-        phoneNumberValidateChecking();
-        addressValidateChecking();
-        streetValidateChecking();
-        cityValidateChecking();
-        stateValidateChecking();
-        pincodeValidateChecking();
-
-        if (
-          error1.classList.contains("show-error") ||
-          error2.classList.contains("show-error") ||
-          error3.classList.contains("show-error") ||
-          error4.classList.contains("show-error") ||
-          error5.classList.contains("show-error") ||
-          error6.classList.contains("show-error") ||
-          error7.classList.contains("show-error") ||
-          error8.classList.contains("show-error") ||
-          error9.classList.contains("show-error")
-        ) {
-          e.preventDefault();
-        }
-      });
-
-      function firstNameValidateChecking() {
-        const nameInput = document.getElementById('firstName').value.trim();
-        const usernamePattern = /^[a-zA-Z\s]{3,}$/;
-        if (nameInput === "") {
-          error1.textContent = "first is required";
-          error1.classList.add("show-error");
-
-        } else if (!nameInput.match(usernamePattern)) {
-          error1.textContent = "plese enter a valid name";
-          error1.classList.add("show-error");
-        } else {
-          error1.textContent = "";
-          error1.classList.remove("show-error");
-        }
-      }
-      function lastNameValidateChecking() {
-        const nameInput = document.getElementById('lastName').value.trim();
-        const usernamePattern = /^[a-zA-Z\s]{3,}$/;
-        if (nameInput === "") {
-          error2.textContent = "last name is required";
-          error2.classList.add("show-error");
-
-        } else if (!nameInput.match(usernamePattern)) {
-          error2.textContent = "plese enter a valid name";
-          error2.classList.add("show-error");
-        } else {
-          error2.textContent = "";
-          error2.classList.remove("show-error");
-        }
-      }
-
-
-      function emailValidateChecking() {
-        const emailInput = document.getElementById('email').value.trim();
-        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
-        if (emailInput === "") {
-          error3.textContent = "email is required";
-          error3.classList.add("show-error");
-        } else if (!emailInput.match(emailPattern)) {
-          error3.textContent = "Please enter a valid email";
-          error3.classList.add("show-error");
-        } else {
-          error3.textContent = "";
-          error3.classList.remove("show-error");
-        }
-      }
-
-
-      function phoneNumberValidateChecking() {
-        const phoneInput = document.getElementById('phoneNumber').value.trim();
-        const phonePattern = /^[0-9]{10}$/;
-        if (phoneInput === "") {
-          error4.textContent = "Phone number is required";
-          error4.classList.add("show-error");
-
-        } else if (!phoneInput.match(phonePattern)) {
-          error4.textContent = "Phone number must be 10 digits";
-          error4.classList.add("show-error");
-        } else {
-          error4.textContent = "";
-          error4.classList.remove("show-error");
-        }
-      }
-
-      function addressValidateChecking() {
-        const nameInput = document.getElementById('address').value.trim();
-        if (nameInput === "") {
-          error5.textContent = "Address is required";
-          error5.classList.add("show-error");
-        } else {
-          error5.textContent = "";
-          error5.classList.remove("show-error");
-        }
-      }
-      function streetValidateChecking() {
-        const nameInput = document.getElementById('street').value.trim();
-        if (nameInput === "") {
-          error6.textContent = "street  is required";
-          error6.classList.add("show-error");
-        } else {
-          error6.textContent = "";
-          error6.classList.remove("show-error");
-        }
-      }
-      function cityValidateChecking() {
-        const cityInput = document.getElementById('city').value.trim();
-        if (cityInput === "") {
-          error7.textContent = "city is required";
-          error7.classList.add("show-error");
-        } else {
-          error7.textContent = "";
-          error7.classList.remove("show-error");
-        }
-      }
-
-      function stateValidateChecking() {
-        const stateInput = document.getElementById('state').value.trim();
-        const statePattern = /^[a-zA-Z\s]{3,}$/;
-        if (stateInput === "") {
-          error8.textContent = "state is required";
-          error8.classList.add("show-error");
-
-        } else if (!stateInput.match(statePattern)) {
-          error8.textContent = "plese enter your currect state";
-          error8.classList.add("show-error");
-        } else {
-          error8.textContent = "";
-          error8.classList.remove("show-error");
-        }
-      }
-
-      function pincodeValidateChecking() {
-        const pincodeInput = document.getElementById('pincode').value.trim();
-        const pincodePattern = /^[0-9]{6}$/;
-        if (pincodeInput === "") {
-          error9.textContent = "Pincode is required";
-          error9.classList.add("show-error");
-
-        } else if (!pincodeInput.match(pincodePattern)) {
-          error9.textContent = "Pincode must be 6 digits";
-          error9.classList.add("show-error");
-        } else {
-          error9.textContent = "";
-          error9.classList.remove("show-error");
-        }
-      }
-
-
-
-
-
-      document.addEventListener('DOMContentLoaded', () => {
-        const addressLists = document.querySelectorAll('.address-list');
-        const radios = document.querySelectorAll('input[name="selectedAddress"]');
-
-        addressLists.forEach((addressList, index) => {
-          addressList.addEventListener('click', () => {
-            radios[index].checked = true;
-
-            addressLists.forEach(list => list.classList.remove('selected'));
-            addressList.classList.add('selected');
-          });
-        });
-      });
-
-      function submitOrder() {
-    const selectedAddressElement = document.querySelector('input[name="selectedAddress"]:checked');
-    const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
-
-    if (!selectedAddressElement) {
-        Swal.fire({
-            title: 'Error!',
-            text: 'Please select an address.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        return;
-    }
-
-    if (!paymentMethodElement) {
-        Swal.fire({
-            title: 'Error!',
-            text: 'Please select a payment method.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        return;
-    }
-
-    const selectedAddress = selectedAddressElement.value;
-    const paymentMethod = paymentMethodElement.value;
-    const couponCodeElement = document.getElementById("coupuncode"); 
-    const couponCode = couponCodeElement ? couponCodeElement.value : null; 
-    const couponDiscountElement = document.getElementById("discountValue");
-    const couponDiscountValue = couponDiscountElement ? couponDiscountElement.innerText : "0";
-    const finalDiscountElement = document.getElementById("totalAfterDiscount");
-    const finalDiscountAmount = finalDiscountElement ? finalDiscountElement.innerText : "0";
-    const couponPercentageElement = document.getElementById("couponPercentage");
-    const couponPercentage = couponPercentageElement ? couponPercentageElement.innerText : "0";
-
-    const cartItems = [];
-    '<% cartProduct.forEach(function(product) { %>';
-    cartItems.push({
-        productId: "<%= product.productId._id %>",
-        quantity: '<%= product.quantity %>',
-        price: Number('<%= product.productId.discountPrice || product.productId.regularprice %>'),
-        name: "<%= product.productId.productname %>",
-        image: '<%= product.productId.images[0] %>',
-        status: "Pending",
+      // Call the function to fill the billing details
+      fillBillingDetails(radios[index].value);
     });
-    '<% }); %>';
+  });
+});
 
-    const orderData = {
-        addressId: selectedAddress,
-        cartItems: cartItems,
-        subtotal: '<%= subtotal %>',
-        shippingCost: 50,
-        total: '<%= total %>',
-        paymentMethod: paymentMethod,
-        couponCode: couponCode, 
-        couponDiscountValue: Number(couponDiscountValue.replace(/[^0-9.-]+/g, "")),
-        finalDiscountAmount: Number(finalDiscountAmount.replace(/[^0-9.-]+/g, "")),
-        couponPercentage: Number(couponPercentage.replace(/[^0-9.-]+/g, ""))
+function fillBillingDetails(selectedAddress) {
+  try {
+    const addressObj = JSON.parse(selectedAddress);
+    document.getElementById("firstName").value = `${addressObj.firstName || ""} ${addressObj.lastName || ""}`;
+    document.getElementById("email").value = addressObj.email || "";
+    document.getElementById("phoneNumber").value = addressObj.phoneNumber || "";
+    document.getElementById("address").value = addressObj.address || "";
+    document.getElementById("street").value = addressObj.street || "";
+    document.getElementById("city").value = addressObj.city || "";
+    document.getElementById("state").value = addressObj.state || "";
+    document.getElementById("pincode").value = addressObj.pincode || "";
+  } catch (error) {
+    console.error("Error parsing address object:", error);
+  }
+}
 
-    };
 
-    if (paymentMethod === "razorpay") {
-        createRazorpayOrder(orderData);
-    } else if (paymentMethod === "CashOnDelivery") {
-        submitOrderToBackend(orderData);
-    }else if (paymentMethod === "wallet") {
-      createWalletOrder(orderData);
+function validateField(value, pattern, errorElement, errorMessage) {
+  if (!value.trim()) {
+    errorElement.textContent = `${errorMessage} is required`;
+    errorElement.classList.add("show-error");
+    return false;
+  } else if (!pattern.test(value.trim())) {
+    errorElement.textContent = `Please enter a valid ${errorMessage}`;
+    errorElement.classList.add("show-error");
+    return false;
+  } else {
+    errorElement.textContent = "";
+    errorElement.classList.remove("show-error");
+    return true;
+  }
+}
+
+function firstNameValidateChecking() {
+  const nameInput = document.getElementById("firstName").value;
+  const usernamePattern = /^[a-zA-Z\s]{3,}$/;
+  return validateField(nameInput, usernamePattern, document.getElementById("error1"), "First name");
+}
+
+function emailValidateChecking() {
+  const emailInput = document.getElementById("email").value;
+  const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+  return validateField(emailInput, emailPattern, document.getElementById("error3"), "Email");
+}
+
+function phoneNumberValidateChecking() {
+  const phoneInput = document.getElementById("phoneNumber").value;
+  const phonePattern = /^[0-9]{10}$/;
+  return validateField(phoneInput, phonePattern, document.getElementById("error4"), "Phone number");
+}
+
+function addressValidateChecking() {
+  const addressInput = document.getElementById("address").value;
+  return validateField(addressInput, /.+/, document.getElementById("error5"), "Address");
+}
+
+function streetValidateChecking() {
+  const streetInput = document.getElementById("street").value;
+  return validateField(streetInput, /.+/, document.getElementById("error6"), "Street");
+}
+
+function cityValidateChecking() {
+  const cityInput = document.getElementById("city").value;
+  return validateField(cityInput, /.+/, document.getElementById("error7"), "City");
+}
+
+function stateValidateChecking() {
+  const stateInput = document.getElementById("state").value;
+  const statePattern = /^[a-zA-Z\s]{3,}$/;
+  return validateField(stateInput, statePattern, document.getElementById("error8"), "State");
+}
+
+function pincodeValidateChecking() {
+  const pincodeInput = document.getElementById("pincode").value;
+  const pincodePattern = /^[0-9]{6}$/;
+  return validateField(pincodeInput, pincodePattern, document.getElementById("error9"), "Pincode");
+}
+
+function runValidation() {
+  const validations = [
+    firstNameValidateChecking(),
+    emailValidateChecking(),
+    phoneNumberValidateChecking(),
+    addressValidateChecking(),
+    streetValidateChecking(),
+    cityValidateChecking(),
+    stateValidateChecking(),
+    pincodeValidateChecking()
+  ];
+
+  return validations.every(validation => validation);
+}
+
+function submitOrder() {
+  if (!runValidation()) {
+    Swal.fire({
+      title: "Error!",
+      text: "Please fix the validation errors before placing the order.",
+      icon: "error",
+      confirmButtonText: "OK"
+    });
+    return false;
+  }
+
+  const selectedAddressElement = document.querySelector('input[name="selectedAddress"]:checked');
+  const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
+
+  if (!selectedAddressElement) {
+    Swal.fire({
+      title: "Error!",
+      text: "Please select an address.",
+      icon: "error",
+      confirmButtonText: "OK"
+    });
+    return false;
+  }
+
+  if (!paymentMethodElement) {
+    Swal.fire({
+      title: "Error!",
+      text: "Please select a payment method.",
+      icon: "error",
+      confirmButtonText: "OK"
+    });
+    return false;
+  }
+  const selectedAddress = selectedAddressElement.value;
+  const paymentMethod = paymentMethodElement.value;
+  const couponCodeElement = document.getElementById("coupuncode"); 
+  const couponCode = couponCodeElement ? couponCodeElement.value : null; 
+  const couponDiscountElement = document.getElementById("discountValue");
+  const couponDiscountValue = couponDiscountElement ? couponDiscountElement.innerText : "0";
+  const finalDiscountElement = document.getElementById("totalAfterDiscount");
+  const finalDiscountAmount = finalDiscountElement ? finalDiscountElement.innerText : "0";
+  const couponPercentageElement = document.getElementById("couponPercentage");
+  const couponPercentage = couponPercentageElement ? couponPercentageElement.innerText : "0";
+  const fullName=document.getElementById('firstName').value;
+  const email=document.getElementById('email').value;
+  const phoneNumber=document.getElementById('phoneNumber').value;
+  const address=document.getElementById('address').value;
+  const street=document.getElementById('street').value;
+  const city=document.getElementById('city').value;
+  const state=document.getElementById('state').value;
+  const pincode=document.getElementById('pincode').value;
+
+
+  const addressItems={
+      customerName:fullName,
+      email:email,
+      phone:phoneNumber,
+      address:address ,
+      street:street,
+      city:city,
+      state:state ,
+      pincode:pincode
+
+  }
+
+
+  const cartItems = [];
+  '<% cartProduct.forEach(function(product) { %>';
+  cartItems.push({
+      productId: "<%= product.productId._id %>",
+      quantity: '<%= product.quantity %>',
+      price: Number('<%= product.productId.discountPrice || product.productId.regularprice %>'),
+      name: "<%= product.productId.productname %>",
+      image: '<%= product.productId.images[0] %>',
+      status: "Pending",
+  });
+  '<% }); %>';
+
+  const orderData = {
+    addressItems: addressItems,
+      cartItems: cartItems,
+      subtotal: '<%= subtotal %>',
+      shippingCost: 50,
+      total: '<%= total %>',
+      paymentMethod: paymentMethod,
+      couponCode: couponCode, 
+      couponDiscountValue: Number(couponDiscountValue.replace(/[^0-9.-]+/g, "")),
+      finalDiscountAmount: Number(finalDiscountAmount.replace(/[^0-9.-]+/g, "")),
+      couponPercentage: Number(couponPercentage.replace(/[^0-9.-]+/g, ""))
+
+  };
+
+  if (paymentMethod === "razorpay") {
+      createRazorpayOrder(orderData);
+  } else if (paymentMethod === "CashOnDelivery") {
+      submitOrderToBackend(orderData);
+  }else if (paymentMethod === "wallet") {
+    createWalletOrder(orderData);
 
     }
 }
@@ -816,7 +751,6 @@
             } else {
                 console.error('Order placement error:', data.message);
 
-                // Show error using Swal
                 Swal.fire({
                     title: 'Error!',
                     text: data.message || 'Failed to place order. Please try again.',
@@ -841,6 +775,7 @@
       document.getElementById('couponForm').addEventListener('submit', async (event) => {
         event.preventDefault();
         const coupuncode = document.getElementById('coupuncode').value;
+        
 
         try {
           const response = await fetch('/discount', {
@@ -851,7 +786,6 @@
 
           if (response.ok) {
             const data = await response.json();
-            console.log(data);
 
             document.getElementById("couponRow").style.display = "block";
             discountValue.innerText = `₹${data.discountAmount}`;
@@ -882,40 +816,35 @@
           });
         }
       });
-      //cancel coupon 
-      function removeCoupon() {
-  // Get the coupon code (assuming it's in an input field with id "couponCode")
+
+//remove coupon
+  function removeCoupon() {
   const couponCode = document.getElementById("coupuncode")?.value;
 
   if (!couponCode) {
-    // Show alert if no coupon code is entered
     Swal.fire({
       title: 'No Coupon Found!',
       text: 'Please apply a coupon code before trying to remove it.',
       icon: 'warning',
       confirmButtonText: 'OK'
     });
-    return; // Exit the function since there's no coupon to remove
+    return;
   }
 
-  // Hide coupon rows
   document.getElementById("couponRow").style.display = 'none';
   document.getElementById("couponRow2").style.display = 'none';
+  document.getElementById("coupuncode").value = '';
 
-  // Update total
   const subtotal = parseFloat(document.getElementById("subtotal").textContent.replace("₹", ""));
+  
   document.getElementById("total").textContent = "₹" + subtotal.toFixed(2);
 
-  // Show success alert
   Swal.fire({
     title: 'Success!',
     text: 'Coupon removed. No discount applied.',
     icon: 'success',
     confirmButtonText: 'OK'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      location.reload();
-    }
   });
 }
+
 </script>

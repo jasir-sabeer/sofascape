@@ -10,7 +10,6 @@ const loadprofile = async (req, res) => {
     const id = req.session.user
     try {
         const users = await User.findOne({ _id: id, isblocked: false });
-        console.log(users)
 
         if (!users) {
             res.status(404).render('login')
@@ -64,7 +63,6 @@ const changepassword = async (req, res) => {
     const userId = req.session.user;
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
-        console.log(currentPassword)
 
         const user = await User.findById(userId);
 
@@ -123,7 +121,6 @@ const loadAddressPage = async (req, res) => {
 const addAddress = async (req, res) => {
 
     const { firstName, lastName, email, phoneNumber, address, street, city, state, pincode } = req.body;
-    console.log(req.body)
     const userId = req.session.user;
     try {
         const addresses = new Address({

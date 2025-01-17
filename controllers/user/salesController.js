@@ -44,10 +44,8 @@ const loadCheckout = async (req, res) => {
                 continue;
             }
 
-            // Check if the product and its category are listed
             const category = await Category.findById(product.category);
             if (!product.isListed || !category || !category.isListed) {
-                // Remove the product from the cart if it's unlisted
                 await Cart.updateOne(
                     { userId },
                     { $pull: { products: { productId: item.productId._id } } }
@@ -158,7 +156,7 @@ function generateOrderId(prefix = "ORD") {
 const saveOrder = async (req, res) => {
     const userId = req.session.user;
     const {
-        addressId,
+        addressItems,
         cartItems,
         subtotal,
         shippingCost,
@@ -170,6 +168,7 @@ const saveOrder = async (req, res) => {
         paymentStatus,
         couponPercentage
     } = req.body;
+
 
     if (isNaN(total) || total <= 0) {
         return res.status(400).json({ message: 'Invalid total amount.' });
@@ -185,6 +184,21 @@ const saveOrder = async (req, res) => {
                 return res.status(400).json({ message: 'Insufficient wallet balance.' });
             }
         }
+
+        const orderAddress={
+            
+                customerName: addressItems.customerName,
+                email: addressItems.email,
+                phone: addressItems.phone,
+                localaddress: addressItems.address, 
+                street: addressItems.street,
+                city: addressItems.city,
+                state: addressItems.state,
+                pincode: addressItems.pincode,
+            
+        }
+
+          
 
         const orderProducts = cartItems.map(item => ({
             productId: item.productId,
@@ -216,28 +230,26 @@ const saveOrder = async (req, res) => {
             });
             await wallet.save();
         }
+    console.log('address',addressItems)
+    const newOrder = new Order({
+    userId,
+    products: orderProducts,
+    total,
+    subtotal,
+    shippingCost,
+    paymentMethod,
+    createdAt: new Date(),
+    paymentStatus: paymentMethod === "wallet" ? "Completed" : paymentStatus,
+    couponCode: couponCode || null,
+    couponDiscountValue: couponDiscountValue || 0,
+    finalDiscountAmount: finalDiscountAmount || 0,
+    address:orderAddress,
+    couponDiscountPercentage: couponPercentage || 0,
+    orderId: generateOrderId(prefix = "ORD"),
+});
 
-        const newOrder = new Order({
-            userId,
-            products: orderProducts,
-            address: addressId,
-            total,
-            subtotal,
-            shippingCost,
-            paymentMethod,
-            createdAt: new Date(),
-            paymentStatus: paymentMethod === "wallet" ? "Completed" : paymentStatus,
-            couponCode: couponCode || null,
-            couponDiscountValue: couponDiscountValue || 0,
-            finalDiscountAmount: finalDiscountAmount || 0,
-
-            couponDiscountPercentage: couponPercentage || 0,
-            orderId: generateOrderId(prefix = "ORD")
-
-        });
 
         const savedOrder = await newOrder.save();
-
         const cartClearResult = await Cart.findOneAndUpdate(
             { userId },
             { products: [] },
@@ -245,7 +257,6 @@ const saveOrder = async (req, res) => {
         );
 
         if (!cartClearResult) {
-            console.warn('Cart not found or already empty.');
             return res.status(404).json({ message: 'Cart not found or already empty.' });
         }
 
@@ -373,7 +384,6 @@ const cancelProduct = async (req, res) => {
         let canceledDiscount = 0;
 
         if (coupon) {
-            console.log('Coupon found:', coupon.code);
 
             const discountPercentage = coupon.discountValue / 100;
 
@@ -382,10 +392,8 @@ const cancelProduct = async (req, res) => {
             couponDiscount = newSubtotal * discountPercentage;
             order.couponDiscountValue = couponDiscount;
 
-            console.log(`Canceled Product Discount: ${canceledDiscount}`);
-            console.log(`Updated Coupon Discount: ${couponDiscount}`);
+           
         } else {
-            console.log('No valid coupon found or applicable.');
             order.couponDiscountValue = 0;
         }
 
@@ -471,13 +479,11 @@ const loadWishList = async (req, res) => {
         }
 
         const cart = await Cart.findOne({ userId });
-        console.log('Cart:', cart); 
 
         let cartCount = 0;
         if (cart && Array.isArray(cart.products)) {
             cartCount = cart.products.length;
         }
-        console.log('Cart Count:', cartCount); 
 
         res.render('wishlist', { wishlistProducts: wishlist.products, cartCount });
     } catch (error) {
@@ -489,7 +495,6 @@ const loadWishList = async (req, res) => {
 
 const discountCoupon = async (req, res) => {
     const { coupuncode } = req.body;
-    console.log('Received coupon code:', coupuncode);
     const userId = req.session.user;
 
     try {
@@ -501,7 +506,6 @@ const discountCoupon = async (req, res) => {
         });
 
         if (!discountCode) {
-            console.log('No matching coupon found.');
             return res.status(404).json({ message: 'Please Enter a Valied code' });
         }
 
@@ -509,7 +513,6 @@ const discountCoupon = async (req, res) => {
 
         const currentDate = new Date();
         if (discountCode.expiryDate < currentDate) {
-            console.log('Coupon has expired.');
 
             await Coupon.updateOne(
                 { _id: discountCode._id },
@@ -533,22 +536,18 @@ const discountCoupon = async (req, res) => {
             subtotal += productTotal;
         });
 
-        console.log('Subtotal:', subtotal);
 
         if (subtotal < discountCode.minPurchase) {
-            console.log('Subtotal is less than the minimum purchase requirement.');
             return res.status(400).json({
                 message: `This coupon requires a minimum purchase of ${discountCode.minPurchase}.`
             });
         }
 
         const discountValue = discountCode.discountValue;
-        console.log('couponnnnn',discountValue);
         
         const discountAmount = (subtotal * discountValue) / 100;
         const afterCoupon = subtotal - discountAmount;
 
-        console.log('Total after applying coupon:', afterCoupon);
 
         return res.json({ discountCode, afterCoupon, discountAmount });
     } catch (error) {
@@ -559,7 +558,6 @@ const discountCoupon = async (req, res) => {
 
 const addWishlist = async (req, res) => {
     const productId = req.params.id;
-    console.log('Check product:', productId);
 
     const userId = req.session.user;
 
@@ -721,35 +719,22 @@ const paymentFailer = async (req, res) => {
 }
 
 const loadWalletPage = async (req, res) => {
-    const userId = req.session.user;
-    const page = parseInt(req.query.page) || 1;
-    const pageSize = 5;
+    const userId = req.session.user; 
+    const page = parseInt(req.query.page) || 1; 
+    const pageSize = 5; 
 
     try {
-        
         if (!userId) {
-            return res.status(401).redirect('/login'); 
+            return res.status(401).redirect('/login');
         }
 
         const cart = await Cart.findOne({ userId });
-        console.log('Cart:', cart); 
-
         let cartCount = 0;
         if (cart && Array.isArray(cart.products)) {
             cartCount = cart.products.length;
         }
-        console.log('Cart Count:', cartCount); 
 
-        const wallet = await Wallet.findOne({ userId })
-            .populate({
-                path: 'transactions',
-                options: {
-                    sort: { date: -1 },
-                    skip: (page - 1) * pageSize,
-                    limit: pageSize,
-                },
-            });
-
+        const wallet = await Wallet.findOne({ userId }).populate('transactions');
         if (!wallet) {
             return res.render('wallet', {
                 wallet: { balance: 0, transactions: [] },
@@ -766,10 +751,14 @@ const loadWalletPage = async (req, res) => {
             return res.status(400).send('Invalid page number.');
         }
 
+        const paginatedTransactions = wallet.transactions
+            .sort((a, b) => new Date(b.date) - new Date(a.date)) 
+            .slice((page - 1) * pageSize, page * pageSize); 
+
         res.render('wallet', {
             wallet: {
                 balance: wallet.balance,
-                transactions: wallet.transactions,
+                transactions: paginatedTransactions,
             },
             totalPages,
             currentPage: page,
@@ -780,6 +769,7 @@ const loadWalletPage = async (req, res) => {
         res.status(500).send('An error occurred while loading the wallet page.');
     }
 };
+
 
 
 const downloadInvoice = async (req, res) => {

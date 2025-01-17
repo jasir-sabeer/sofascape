@@ -211,7 +211,7 @@
                                 </div>
                                 <% }); %>
                                     <%if(order.finalDiscountAmount){%>
-                                        <p class="last">Total Amount:<%= order.finalDiscountAmount %>
+                                        <p class="last">Total Amount:<%= Math.ceil( order.finalDiscountAmount) %>
                                         </p>
                                         <%}else{%>
                                             <p class="last">Total Amount:<%= order.total %>

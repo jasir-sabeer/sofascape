@@ -45,9 +45,38 @@ const orderSchema = new mongoose.Schema({
     }
     ],
     address: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Address',
-        required: true
+        customerName: {
+            type: String,
+            required: true,
+        },
+        email: {
+            type: String,
+            required: true,
+        },
+        phone: {
+            type: Number,
+            required: true,
+        },
+        localaddress: {
+            type: String,
+            required: true,
+        },
+        street: {
+            type: String,
+            required: true,
+        },
+        city: {
+            type: String,
+            required: true,
+        },
+        state: {
+            type: String,
+            required: true,
+        },
+        pincode: {
+            type: Number,
+            required: true,
+        },
     },
     total: {
         type: Number,

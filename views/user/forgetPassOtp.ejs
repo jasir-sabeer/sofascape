@@ -107,7 +107,7 @@
                     <button type="submit">Verify OTP</button>
                 </form>
                 
-                <a class="resend-otp" onclick="resendOTP()">Resend OTP</a>
+                <a class="resend-otp" id="resend" onclick="resendOTP()"></a>
                 <div class="countdown" id="countdown">00:00</div>
             </div>
         </div>
@@ -129,6 +129,8 @@ function startTimer() {
             clearInterval(countdownInterval);
             document.getElementById("countdown").textContent = "Expired";
             document.getElementById("otp").disabled = true;
+            document.getElementById("resend").textContent = "Resend OTP";;
+
             
         }
     }, 1000);
@@ -143,6 +145,8 @@ function resendOTP() {
     timer = 60;
     document.getElementById("otp").disabled = false;
     document.getElementById("countdown").classList.remove("expired");
+    document.getElementById("resend").textContent = "";;
+
     startTimer();
 
     $.ajax({

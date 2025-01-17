@@ -15,7 +15,6 @@ const pageerror = async (req, res) => {
 
 const loadadminLogin = (req, res) => {
 
-    console.log("admin check", req.session.adminlogin)
     if (req.session.adminlogin) {
         return res.redirect('/admin/dashboard');
     }
@@ -29,12 +28,10 @@ const loadadminLogin = (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(req.body);
 
         const existAdmin = await Admin.findOne({ email: email });
 
         if (!existAdmin) {
-            console.log("Admin not found");
             return res.render("adminLogin", { message: "admin not found" });
         }
 
@@ -144,13 +141,12 @@ const loadCategory = async (req, res) => {
             ]
         } : {};
 
-        // Fetch total categories count and categories based on search filter
         const [totalCategories, categories] = await Promise.all([
             Category.countDocuments(searchFilter),
             Category.find(searchFilter).skip(skip).sort({ _id: -1 }).limit(limit),
         ]);
 
-        const totalPages = totalCategories > 0 ? Math.ceil(totalCategories / limit) : 1; // Prevent division by zero
+        const totalPages = totalCategories > 0 ? Math.ceil(totalCategories / limit) : 1; 
         const previousPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
 
@@ -208,7 +204,6 @@ const editCategory = async (req, res) => {
         });
 
         if (existingCategory) {
-            console.log('Category already exists');
             return res.status(400).json({ error: 'This category name already exists' });
         }
         await Category.findByIdAndUpdate(id, { name, variant });
@@ -342,7 +337,6 @@ const editProduct = async (req, res) => {
         const { id } = req.params;
         const { productname, description, regularprice, category, stock } = req.body;
         const images = req.files;
-        console.log('images ', images)
 
         if (!productname || !description || !regularprice || !category || !stock) {
             return res.status(400).send("All fields are required");
@@ -385,7 +379,6 @@ const toggleProductStatus = async (req, res) => {
         const newStatus = !product.isListed;
         await Product.findByIdAndUpdate(productId, { isListed: newStatus });
 
-        // Return a JSON response instead of redirect
         res.status(200).json({ success: true, newStatus });
     } catch (error) {
         console.error('Error toggling product status:', error);

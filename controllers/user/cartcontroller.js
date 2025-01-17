@@ -19,7 +19,6 @@ const loadCartPage = async (req, res) => {
 
         const userId = req.session.user;
         const cart = await Cart.findOne({ userId }).populate('products.productId').exec();
-        console.log('Cart:', cart);
 
         if (!cart) {
             return res.render('cart', { cartProducts: [], subtotal: 0, cartCount: 0 });
@@ -49,7 +48,6 @@ const loadCartPage = async (req, res) => {
             }
         }
 
-        // Render the cart page with valid products only
         res.render('cart', { cartProducts: validProducts, subtotal, cartCount });
 
     } catch (error) {

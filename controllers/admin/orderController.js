@@ -28,7 +28,7 @@ const loadOrderManagement = async (req, res) => {
         res.render("orderManagement", {
             orders,
             currentPage: page,
-            totalPages: totalPages || 1, // Handle empty orders case
+            totalPages: totalPages || 1, 
             previousPage,
             nextPage,
         });
