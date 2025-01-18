@@ -90,60 +90,6 @@ const loadCheckout = async (req, res) => {
 
 
 
-const addAddressCheckout = async (req, res) => {
-    const { firstName, lastName, email, phoneNumber, address, street, city, state, pincode } = req.body;
-    console.log(req.body)
-    const userId = req.session.user;
-    try {
-        const addresses = new Address({
-            user: userId,
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            address,
-            street,
-            city,
-            state,
-            pincode
-        })
-        await addresses.save()
-        res.redirect('/checkout?success=address added successfully.');
-
-
-    } catch (error) {
-        console.log(error);
-
-        res.status(500).json({ message: 'Error adding adress', error });
-    }
-}
-
-const editAddressCheckout = async (req, res) => {
-    const addressId = req.params.id;
-    const updatedData = {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        phoneNumber: req.body.phoneNumber,
-        address: req.body.address,
-        street: req.body.street,
-        city: req.body.city,
-        state: req.body.state,
-        pincode: req.body.pincode,
-    };
-
-    try {
-        const address = await Address.findByIdAndUpdate(addressId, updatedData, { new: true });
-        if (!address) {
-            return res.status(404).send('Address not found');
-        }
-
-
-        res.redirect('/checkout');
-    } catch (error) {
-        console.error('Error updating address:', error);
-    }
-}
 
 function generateOrderId(prefix = "ORD") {
     const timestamp = Date.now().toString(36); 
@@ -1012,8 +958,6 @@ const rturnProduct = async (req, res) => {
 
 module.exports = {
     loadCheckout,
-    addAddressCheckout,
-    editAddressCheckout,
     saveOrder,
     loadThankyou,
     loadOrderTable,

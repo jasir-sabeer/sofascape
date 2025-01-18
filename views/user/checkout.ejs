@@ -215,7 +215,7 @@
               <% addresses.forEach((address, index) => { %>
                 <div>
                   <label class="address-list" for="default-radio-<%= index %>" id="addressList<%= index %>">
-                    <input type="radio" name="selectedAddress" value='<%= JSON.stringify(address) %>' onchange="fillBillingDetails(this.value)">
+                    <input type="radio" name="selectedAddress" value='<%= JSON.stringify(address) %>' onchange="fillBillingDetails(this.value)" style="display: none;">
                     <div class="address-item">
                       <p><strong>Name:</strong> <%= address.firstName %> <%= address.lastName %></p>
                       <p><strong>Mobile:</strong> <%= address.phoneNumber %></p>
