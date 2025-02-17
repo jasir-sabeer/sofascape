@@ -56,18 +56,26 @@ const addCoupons = async (req, res) => {
 };
 
 
-const toggle_status = async (req, res) => {
+const toggleCouponStatus = async (req, res) => {
     const couponId = req.params.id;
     try {
-        const coupon = await Coupon.findById(couponId);
-        const newStatus = !coupon.isListed;
-        await Coupon.findByIdAndUpdate(couponId, { isListed: newStatus });
-        res.redirect("/admin/couponManagement");
+       const coupon = await Coupon.findById(couponId);
+       if (!coupon) {
+           return res.status(404).json({ success: false, message: "Coupon not found" });
+       }
+       const newStatus = !coupon.isListed;
+       const updatedCoupon = await Coupon.findByIdAndUpdate(
+           couponId,
+           { isListed: newStatus },
+           { new: true } 
+       );
+
+       res.json({ success: true, newStatus: updatedCoupon.isListed });
     } catch (error) {
-        console.error('Error toggling product status:', error);
-        res.status(500).send('Internal Server Error');
+        console.error('Error toggling coupon status:', error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
-}
+};
 
 const removeCoupon = async (req, res) => {
     try {
@@ -90,7 +98,7 @@ module.exports = {
     loadCouponManagement,
     loadAddCoupon,
     addCoupons,
-    toggle_status,
+    toggleCouponStatus,
     removeCoupon
 }
 

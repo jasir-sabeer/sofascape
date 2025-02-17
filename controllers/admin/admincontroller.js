@@ -102,24 +102,24 @@ const loaduserManagement = async (req, res) => {
 const blockUser = async (req, res) => {
     const userId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.redirect('/pageerror');
+        return res.status(400).json({ success: false, message: "Invalid user ID" });
     }
     try {
         await User.findByIdAndUpdate(userId, { isblocked: true });
-        res.redirect("/admin/userManagement");
+        res.json({ success: true, isBlocked: true }); 
     } catch (error) {
-        res.redirect('/pageerror');
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-}
+};
 
 const unblockUser = async (req, res) => {
     const userId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.redirect('/pageerror');
+        return res.status(400).json({ success: false, message: "Invalid user ID" });
     }
     try {
         await User.findByIdAndUpdate(userId, { isblocked: false });
-        res.redirect("/admin/userManagement");
+        res.json({ success: true, isBlocked: false }); 
     } catch (error) {
         res.redirect('/pageerror');
     }
@@ -222,7 +222,7 @@ const toggleCategoryStatus = async (req, res) => {
         const category = await Category.findById(categoryId);
         const newStatus = !category.isListed;
         await Category.findByIdAndUpdate(categoryId, { isListed: newStatus });
-        res.redirect("/admin/categoryManagement");
+        res.json({ success: true, newStatus }); 
     } catch (error) {
         console.error('Error toggling category status:', error);
         res.status(500).send('Internal Server Error');

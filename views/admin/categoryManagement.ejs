@@ -292,18 +292,19 @@
                     <tr>
                         <td><%= category.name %></td>
                         <td><%= category.variant %></td>
-                        <td><%= category.isListed ? 'Listed' : 'Unlisted' %></td>
+                        <td class="category-status"><%= category.isListed ? 'Listed' : 'Unlisted' %></td>
                         <td><button class="edit-button" onclick="openEditModal('<%= category._id %>', '<%= category.name %>', '<%= category.variant %>')">Edit</button></td>
                         <td>
-                            <!-- Dynamically generate the buttons based on `isListed` -->
-<button 
-onclick="toggleCategoryStatus('<%= category._id %>', '<%= category.isListed %>')"
-class="<%= category.isListed ? 'unlist-button' : 'list-button' %>"
->
-<%= category.isListed ? 'Unlist' : 'List' %>
-</button>
-
+                            <button 
+                                onclick="toggleCategoryStatus(this)"
+                                class="<%= category.isListed ? 'unlist-button' : 'list-button' %>"
+                                data-category-id="<%= category._id %>"
+                                data-is-listed="<%= category.isListed %>"
+                            >
+                                <%= category.isListed ? 'Unlist' : 'List' %>
+                            </button>
                         </td>
+                        
                     </tr>
                 <% }) %>
             </tbody>
@@ -378,7 +379,7 @@ class="<%= category.isListed ? 'unlist-button' : 'list-button' %>"
         </div>
     </div>
     
- 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function openModal(modalId) {
             document.getElementById(modalId).style.display = "block";
@@ -515,55 +516,61 @@ async function submitEditCategoryForm(event) {
 
 
 
-function toggleCategoryStatus(categoryId, isListed) {
-    const isListedBool = isListed === 'true'; 
-    const actionText = isListedBool ? 'Unlist' : 'List';
-    
+function toggleCategoryStatus(button) {
+    const categoryId = button.getAttribute("data-category-id");
+    const isListed = button.getAttribute("data-is-listed") === "true";
+    const actionText = isListed ? "Unlist" : "List";
+
     Swal.fire({
-        title: `Are you sure you want to ${actionText.toLowerCase()} this category?`,
+        title: `Are you sure you want to ${actionText.toLowerCase()} this product?`,
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
         confirmButtonText: `${actionText}`,
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/admin/categoryManagement/toggle-status/${categoryId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            $.ajax({
+                url: `/admin/categoryManagement/toggle-status/${categoryId}`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ isListed: !isListed }),
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: `${actionText} Successful!`,
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+
+                        button.textContent = isListed ? "List" : "Unlist";
+                        button.classList.toggle("list-button", isListed);
+                        button.classList.toggle("unlist-button", !isListed);
+                        button.setAttribute("data-is-listed", !isListed);
+                        const statusTd = button.closest("tr").querySelector(".category-status");
+                        if (statusTd) {
+                            statusTd.textContent = isListed ? "Unlisted" : "Listed";
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: `${actionText} Failed!`,
+                            text: response.message || "Please try again later.",
+                        });
+                    }
                 },
-                body: JSON.stringify({ isListed: !isListed }) 
-            })
-            .then((response) => {
-                if (response.ok) {
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
                     Swal.fire({
-                        icon: 'success',
-                        title: `${actionText} Successful!`,
-                        showConfirmButton: false,
-                        timer: 1500,
-                    }).then(() => {
-                        location.reload(); 
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
+                        icon: "error",
                         title: `${actionText} Failed!`,
-                        text: 'Please try again later.',
+                        text: "Please try again later.",
                     });
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'An error occurred!',
-                    text: 'Please try again later.',
-                });
+                },
             });
         }
     });
 }
-
 
     </script>
 </body>

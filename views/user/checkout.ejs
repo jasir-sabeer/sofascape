@@ -294,26 +294,26 @@
               </ul>
               <ul class="list list_2">
                 <li>
-                  <a href="#">Subtotal
+                  <a >Subtotal
                     <span id="subtotal">₹<%=subtotal%></span>
                   </a>
                 </li>
                 <li>
-                  <a href="#">Shipping
+                  <a >Shipping
                     <span>₹50</span>
                   </a>
                 </li>
                 <li>
-                  <a href="#">Total
+                  <a >Total
                     <span id="total">₹<%=subtotal + 50%></span>
                   </a>
                 </li>
                 <li id="couponRow" style="display: none;">
-                  <a href="#">Discount
+                  <a >Discount
                     <span id="discountValue"></span>
                   </a>
                 <li id="couponRow2" style="display: none;">
-                  <a href="#">Total After Discount
+                  <a >Total After Discount
                     <span id="totalAfterDiscount"></span>
                   </a>
               </ul>
@@ -376,16 +376,12 @@
 
   addressLists.forEach((addressList, index) => {
     addressList.addEventListener("click", () => {
-      // Remove 'selected' class from all address lists
       addressLists.forEach(list => list.classList.remove("selected"));
       
-      // Add 'selected' class to the clicked address list
       addressList.classList.add("selected");
       
-      // Check the radio button when the div is clicked
       radios[index].checked = true;
 
-      // Call the function to fill the billing details
       fillBillingDetails(radios[index].value);
     });
   });
@@ -495,18 +491,8 @@ function submitOrder() {
     return false;
   }
 
-  const selectedAddressElement = document.querySelector('input[name="selectedAddress"]:checked');
   const paymentMethodElement = document.querySelector('input[name="paymentMethod"]:checked');
 
-  if (!selectedAddressElement) {
-    Swal.fire({
-      title: "Error!",
-      text: "Please select an address.",
-      icon: "error",
-      confirmButtonText: "OK"
-    });
-    return false;
-  }
 
   if (!paymentMethodElement) {
     Swal.fire({
@@ -517,7 +503,6 @@ function submitOrder() {
     });
     return false;
   }
-  const selectedAddress = selectedAddressElement.value;
   const paymentMethod = paymentMethodElement.value;
   const couponCodeElement = document.getElementById("coupuncode"); 
   const couponCode = couponCodeElement ? couponCodeElement.value : null; 
@@ -528,6 +513,8 @@ function submitOrder() {
   const couponPercentageElement = document.getElementById("couponPercentage");
   const couponPercentage = couponPercentageElement ? couponPercentageElement.innerText : "0";
   const fullName=document.getElementById('firstName').value;
+  console.log('lllllllllllllo',fullName);
+  
   const email=document.getElementById('email').value;
   const phoneNumber=document.getElementById('phoneNumber').value;
   const address=document.getElementById('address').value;
@@ -535,7 +522,6 @@ function submitOrder() {
   const city=document.getElementById('city').value;
   const state=document.getElementById('state').value;
   const pincode=document.getElementById('pincode').value;
-
 
   const addressItems={
       customerName:fullName,
@@ -550,6 +536,7 @@ function submitOrder() {
   }
 
 
+
   const cartItems = [];
   '<% cartProduct.forEach(function(product) { %>';
   cartItems.push({
@@ -561,7 +548,8 @@ function submitOrder() {
       status: "Pending",
   });
   '<% }); %>';
-
+  console.log(addressItems);
+  
   const orderData = {
     addressItems: addressItems,
       cartItems: cartItems,

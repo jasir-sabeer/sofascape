@@ -519,9 +519,10 @@ input[type="file"] {
                     <td>
                       <%= product.stock %>
                     </td>
-                    <td>
+                    <td class="product-status" id="status-<%= product._id %>">
                       <%= product.isListed ? 'Listed' : 'Unlisted' %>
-                    </td>
+                  </td>
+                 
                     <td>
     
                       <button class="btn btn-primary action-btn"
@@ -541,12 +542,15 @@ input[type="file"] {
                     </td>
                     <td>
                       <button 
-                      class="btn <%= product.isListed ? 'btn-danger' : 'btn-warning' %>" 
-                      onclick="toggleProductStatus('<%= product._id %>', '<%= product.isListed %>')">
-                      <%= product.isListed ? 'Unlist' : 'List' %>
-                  </button>
+                          class="btn <%= product.isListed ? 'btn-danger' : 'btn-warning' %>" 
+                          onclick="toggleProductStatus(this, '<%= product._id %>')"
+                          data-product-id="<%= product._id %>"
+                          data-is-listed="<%= product.isListed %>"
+                      >
+                          <%= product.isListed ? 'Unlist' : 'List' %>
+                      </button>
+                  </td>
                   
-                    </td>
                   </tr>
                   <% }) %>
     
@@ -558,13 +562,11 @@ input[type="file"] {
     
       </div>
     
-    <!--add product modal-->>
     
     
    
  
-    
-
+  
     <!--edit modal-->
     
     <div class="modal" id="editProductModal" style="display:none;">
@@ -963,56 +965,60 @@ input[type="file"] {
         }
     
 
-
-        function toggleProductStatus(productId, isListed) {
-          const isListedBool = isListed === 'true'; 
-const actionText = isListedBool ? 'Unlist' : 'List';
+    function toggleProductStatus(button, productId) {
+    const isListed = button.getAttribute("data-is-listed") === "true"; 
+    const actionText = isListed ? "Unlist" : "List";
 
     Swal.fire({
-        title: `Are you sure you want to ${actionText} this product?`,
+        title: `Are you sure you want to ${actionText.toLowerCase()} this product?`,
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
         confirmButtonText: `${actionText}`,
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`/admin/productManagement/toggle-status/${productId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ isListed }),
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isListed: !isListed }),
             })
-                .then((response) => {
-                    if (response.ok) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: `Product ${actionText}ed Successfully!`,
-                            showConfirmButton: false,
-                            timer: 1500,
-                        }).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: `${actionText} Failed!`,
-                            text: 'Please try again later.',
-                        });
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'An error occurred!',
-                        text: 'Please try again later.',
+                        icon: "success",
+                        title: `Product ${actionText}ed Successfully!`,
+                        showConfirmButton: false,
+                        timer: 1500,
                     });
+
+                    button.textContent = isListed ? "List" : "Unlist";
+                    button.classList.toggle("btn-danger", !isListed);
+                    button.classList.toggle("btn-warning", isListed);
+                    button.setAttribute("data-is-listed", !isListed);
+
+                    const statusTd = document.getElementById(`status-${productId}`);
+                    if (statusTd) {
+                        statusTd.textContent = isListed ? "Unlisted" : "Listed";
+                    }
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: `${actionText} Failed!`,
+                        text: "Please try again later.",
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "An error occurred!",
+                    text: "Please try again later.",
                 });
+            });
         }
     });
 }
-
-
     
       </script>

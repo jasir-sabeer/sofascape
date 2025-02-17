@@ -132,6 +132,20 @@
        .paginationdiv{
         margin-left: 8cm;
        }
+       .unblock-button{
+        color: #fff;
+        border: none;
+        block-size: 25px;
+        background-color: #000;
+        border-radius: 5px;
+       }
+       .block-button{
+        color: #fff;
+        border: none;
+        block-size: 25px;
+        background-color: #000;
+        border-radius: 5px;
+       }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -187,15 +201,19 @@
                     <td><%= user._id %></td>
                     <td><%= user.name %></td>
                     <td><%= user.email %></td>
-                    <td id="status-<%= user._id %>"><%= user.isblocked ? 'Blocked' : 'Active' %></td>
-                    <!-- Default to 'Active' if status is missing -->
+                    <td class="user-status"><%= user.isblocked ? 'Blocked' : 'Active' %></td>
+
                     <td>
-                        <% if (user.isblocked) { %>
-                            <button type="button" class="unblock-btn" onclick="confirmAction('<%= user._id %>', 'unblock')">Unblock</button>
-                        <% } else { %>
-                            <button type="button" class="block-btn" onclick="confirmAction('<%= user._id %>', 'block')">Block</button>
-                        <% } %>           
-                   </td>
+                        <button 
+                            onclick="confirmAction(this, '<%= user._id %>', '<%= user.isblocked ? `unblock` : `block` %>')"
+                            class="<%= user.isblocked ? 'unblock-button' : 'block-button' %>"
+                        >
+                            <%= user.isblocked ? 'Unblock' : 'Block' %>
+                        </button>
+                    </td>
+                    
+                    
+                   
                 </tr>
                 <% }) %>
             </tbody>
@@ -227,7 +245,7 @@
         </nav>
         
     </div>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
         
@@ -253,8 +271,7 @@
             }
         }
 
-        
-        function confirmAction(userId, actionType) {
+function confirmAction(button, userId, actionType) {
     const actionText = actionType === 'block' ? 'Block' : 'Unblock';
 
     Swal.fire({
@@ -262,48 +279,50 @@
         showCancelButton: true,
         confirmButtonColor: '#000',
         cancelButtonColor: '#000',
-        confirmButtonText: ` ${actionText}`
+        confirmButtonText: `${actionText}`
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/admin/userManagement/${actionType}User/${userId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                 
+            $.ajax({
+                url: `/admin/userManagement/${actionType}User/${userId}`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ userId }),
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: `${actionText} Successful!`,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+
+                        button.textContent = actionType === 'block' ? 'Unblock' : 'Block';
+                        button.setAttribute("onclick", `confirmAction(this, '${userId}', '${actionType === 'block' ? 'unblock' : 'block'}')`);
+
+                        const statusTd = button.closest("tr").querySelector(".user-status");
+                        if (statusTd) {
+                            statusTd.textContent = actionType === 'block' ? "Blocked" : "Active";
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: `${actionText} Failed!`,
+                            text: response.message || "Please try again later.",
+                        });
+                    }
                 },
-                body: JSON.stringify({ userId, actionType }) 
-            })
-            .then((response) => {
-                if (response.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: `${actionText} Successful!`,
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
                     Swal.fire({
                         icon: 'error',
                         title: `${actionText} Failed!`,
                         text: 'Please try again later.',
                     });
                 }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'An error occurred!',
-                    text: 'Please try again later.',
-                });
             });
         }
     });
 }
-
-
 
     </script>
 </body>

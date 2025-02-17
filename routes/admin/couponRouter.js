@@ -8,7 +8,7 @@ const adminAuth=require('../../middlewares/adminAuth');
 router.get('/couponManagement',adminAuth.adminlogin,couponController.loadCouponManagement)
 router.get('/addCoupon',adminAuth.adminlogin,couponController.loadAddCoupon)
 router.post('/coupons/add',couponController.addCoupons)
-router.post('/couponManagement/toggle-status/:id',couponController.toggle_status)
+router.post('/couponManagement/toggle-status/:id',couponController.toggleCouponStatus)
 router.delete('/coupon/remove/:id',couponController.removeCoupon)
 
 
