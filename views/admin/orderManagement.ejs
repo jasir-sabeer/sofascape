@@ -259,7 +259,7 @@
 
 <body>
     <aside class="sidebar">
-        <h2 style="margin-left: .5cm;"><b>SOFA</b>SCAPE</h2>
+        <h2 style="margin-left: .5cm; "><b style="color: #f02d71;">SOFA</b>SCAPE</h2>
         <nav>
             <ul>
                 <li><a href="/admin/dashboard">Home</a></li>
@@ -396,7 +396,7 @@
         
                 <% for (let i = startPage; i <= endPage; i++) { %>
                     <li class="page-item <%= i === currentPage ? 'active' : '' %>" 
-                        style="<%= i === currentPage ? 'background-color: #333; color: #fff; border-radius: 5px;' : '' %>">
+                        style="<%= i === currentPage ? 'background-color: #333; color: #fff; border-radius: 5px;' : '' %>`">
                         <a class="page-link" href="?page=<%= i %>" 
                            style="display: block; padding: 10px 15px; background-color: <%= i === currentPage ? '#333' : '#f1f1f1' %>; 
                                   color: <%= i === currentPage ? '#fff' : '#333' %>; text-decoration: none; border-radius: 5px;">

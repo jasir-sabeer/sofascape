@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #f0f0f0;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .order-summary,
+        .customer-info,
+        .items {
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #292929;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .items-table th,
+        .items-table td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .items-table th {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        .totals {
+            margin-top: 10px;
+        }
+
+        .totals p {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Offer Details</h1>
+        </header>
+        <main class="main-content">
+            <section class="order-summary">
+                <h2>offer Summary</h2>
+                <p><strong>Offer ID:</strong> <%= offer._id%></p>
+                <p><strong>Offer Name:</strong> <%= offer.offerName%></p>
+                <p><strong>Discount Value:</strong> <%= offer.discountValue%></p>
+                <p><strong>Start Date:</strong>   <%= new Date(offer.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }) %></p>
+                <p><strong>Expaire Date:</strong>  <%= new Date(offer.expiryDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }) %></p>
+                <p><strong>Applicable To:</strong>  <%= offer.applicableTo%></p>
+            </section>
+            <section class="items">
+                <h2>Items</h2>
+                <table class="items-table">
+                    <% if( offer.applicableTo=='Category'){%>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>categories</th>
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                             
+                            <% productList.forEach(item => { %>
+    
+                                <tr>
+                                <td>1</td>
+                                <td><%= item.name %> <%= item.variant %></td>
+                               
+                            </tr>
+    
+                            <% }) %>
+                        </tbody>
+                        <%}else{%> 
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Item</th>
+                            <th>Regular Price</th>
+                            <th>Offer Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         
+                        <% productList.forEach(item => { %>
+
+                            <tr>
+                            <td>1</td>
+                            <td><%= item.productname %></td>
+                            <td>₹<%= item.regularprice %></td>
+                            <td>₹<%= item.discountPrice %></td>
+                        </tr>
+
+                        <% }) %>
+                    </tbody>
+                    <%}%>
+                </table>
+                
+            </section>
+            <a href="/admin/offerManagement"><button>Back</button></a>
+        </main>
+        <footer class="footer">
+            <p>&copy; 2025 Order Management System</p>
+        </footer>
+    </div>
+</body>
+</html>

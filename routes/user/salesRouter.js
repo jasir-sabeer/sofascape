@@ -17,7 +17,7 @@ router.delete('/wishlist/cancel/:productId', salesController.cancelProductWshlis
 router.post('/create-order',salesController.createOrder)
 router.post("/checkout",salesController.paymentFailer)
 router.get('/wallet',userAuth.userLogin,salesController.loadWalletPage)
-router.get('/downloadInvoice/:orderId',salesController.downloadInvoice)
+router.get('/downloadInvoice/:Id',salesController.downloadInvoice)
 router.post('/razorpay/retry/:id',salesController.retryPayment)
 router.post('/payment-sucsess',salesController.paymentSuccess)
 router.post('/rturnProduct/:orderId/:productId', salesController.rturnProduct);

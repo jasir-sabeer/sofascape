@@ -494,7 +494,7 @@
 
 
     <aside class="sidebar">
-        <h2 style="margin-left: .5cm;"><b>SOFA</b>SCAPE</h2>
+        <h2 style="margin-left: .5cm; "><b style="color: #f02d71;">SOFA</b>SCAPE</h2>
         <nav>
             <ul>
                 <li><a href="/admin/dashboard">Home</a></li>
@@ -531,9 +531,9 @@
                 <div id="toDateError" style="color: red; display: none;"></div>
                 <br><br>
                 <select name="quickRange" id="quickRange" style="width: 5cm;">
-                    <option value="">Select</option>
-                    <option value="1week">Last Week</option>
-                    <option value="1month">Last Month</option>
+                    <option value="">all</option>
+                    <option value="1week">Last 7 days</option>
+                    <option value="1month">Last 30 days</option>
                     <option value="1day">Latest</option>
                 </select>
             </div>
@@ -553,8 +553,9 @@
                         <th>Date</th>
                         <th>Order Count</th>
                         <th>Total Sales</th>
-                        <th>Total Discount</th>
+                        <th>Refund Amount</th>
                         <th>Net Sales</th>
+                        <th>View More</th>
                       </tr>
                     </thead>
                     <tbody id="salesReportBody">
@@ -565,6 +566,7 @@
                           <td><%= report.totalAmount %></td>
                           <td><%= report.totalDiscount %></td>
                           <td><%= report.netSales %></td>
+                          <td><a href="/admin/salesReport/detail/<%= report.date %>"><button style="background-color: #e0af1d;border: none;color: #f4f4f4;block-size: 40px;border-radius: 10px;">View More</button></a></td>
                         </tr>
                       <% }); %>
                     </tbody>
@@ -574,40 +576,34 @@
                     <div class="sales-summary">
                         <div class="summary-item">
                             <strong>Overall Order Count:</strong>
-                            <span>
-                                <%=overallOrderCount%>
-                            </span>
+                            <span id="overallOrderCount"><%= overallOrderCount %></span>
                         </div>
                         <div class="summary-item">
                             <strong>Overall Sales Amount (₹):</strong>
-                            <span>
-                                <%= formatNumber(overallTotalSales) %>
-                                
-                            </span>
+                            <span id="overallTotalSales"><%= formatNumber(overallTotalSales) %></span>
                         </div>
                         <div class="summary-item">
                             <strong>Overall Discount (₹):</strong>
-                            <span>
-                            <%= formatNumber(overallTotalDiscount) %>
-                                
-                            </span>
+                            <span id="overallTotalDiscount"><%= formatNumber(overallTotalDiscount) %></span>
                         </div>
                         <div class="summary-item">
                             <strong>Overall Net Sales (₹):</strong>
-                            <span>
-                                <%= formatNumber(overallNetSales) %>
-
-                            </span>
+                            <span id="overallNetSales"><%= formatNumber(overallNetSales) %></span>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </section>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+     document.addEventListener('DOMContentLoaded', () => {
     const salesReportBody = document.getElementById('salesReportBody');
+    const overallOrderCountElement = document.getElementById('overallOrderCount');
+    const overallTotalSalesElement = document.getElementById('overallTotalSales');
+    const overallTotalDiscountElement = document.getElementById('overallTotalDiscount');
+    const overallNetSalesElement = document.getElementById('overallNetSales');
 
     const updateSalesReport = (filter) => {
         fetch('/admin/salesReport/filter', {
@@ -621,6 +617,7 @@
             })
             .then((data) => {
                 salesReportBody.innerHTML = '';
+
                 if (data.dailyReport && data.dailyReport.length > 0) {
                     data.dailyReport.forEach((report) => {
                         const row = `
@@ -634,12 +631,27 @@
                                 <td>${formatNumber(report.totalAmount)}</td>
                                 <td>${formatNumber(report.totalDiscount)}</td>
                                 <td>${formatNumber(report.netSales)}</td>
+                                <td>
+            <a href="/admin/salesReport/detail/${encodeURIComponent(report.date)}">
+                <button class="view-more-btn"  style="background-color: #e0af1d;border: none;color: #f4f4f4;block-size: 40px;border-radius: 10px;">View More</button>
+            </a>
+                      </td>
                             </tr>
                         `;
                         salesReportBody.insertAdjacentHTML('beforeend', row);
                     });
+
+                    overallOrderCountElement.textContent = data.overallOrderCount || 0;
+                    overallTotalSalesElement.textContent = formatNumber(data.overallTotalSales || 0);
+                    overallTotalDiscountElement.textContent = formatNumber(data.overallTotalDiscount || 0);
+                    overallNetSalesElement.textContent = formatNumber(data.overallNetSales || 0);
                 } else {
                     salesReportBody.innerHTML = '<tr><td colspan="5">No data available for the selected range.</td></tr>';
+
+                    overallOrderCountElement.textContent = 0;
+                    overallTotalSalesElement.textContent = formatNumber(0);
+                    overallTotalDiscountElement.textContent = formatNumber(0);
+                    overallNetSalesElement.textContent = formatNumber(0);
                 }
             })
             .catch((error) => console.error('Error:', error));
@@ -686,7 +698,6 @@
         }
     };
 
-    
     if (salesReportBody) {
         addEventListeners();
     } else {
@@ -696,75 +707,91 @@
 
     </script>
 <script>
-    // downloadPDF
 
 document.getElementById('downloadPDFBtn').addEventListener('click', function () {
+    const tableData = captureTableData(); 
+    const overallData = captureOverallData(); 
+
+    fetch('/admin/sales-report/download/pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            salesData: tableData,
+            overallData: overallData  
+        })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'sales_report.pdf';
+        link.click();
+    })
+    .catch(error => {
+        console.error('Error generating PDF:', error);
+    });
+});
+document.getElementById('downloadExcelBtn').addEventListener('click', function () {
     const tableData = captureTableData();
-         fetch('/admin/sales-report/download/pdf', {
-            method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ salesData: tableData })
-                  })
+    const overallData = captureOverallData();
 
-                .then(response => response.blob())
-                .then(blob => {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'sales_report.pdf';
-                    link.click();
-                })
-                .catch(error => {
-                    console.error('Error generating PDF:', error);
-                });
-        });
+    fetch('/admin/sales-report/download/excel', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+            salesData: tableData,
+            overallData: overallData
+        })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'sales_report.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    })
+    .catch(error => {
+        console.error('Error generating Excel:', error);
+    });
+});
 
-//  download exel file       
-        document.getElementById('downloadExcelBtn').addEventListener('click', function () {
-            const tableData = captureTableData();
-
-            fetch('/admin/sales-report/download/excel', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ salesData: tableData })
-            })
-                .then(response => response.blob())
-                .then(blob => {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'sales_report.xlsx';
-                    link.click();
-                })
-                .catch(error => {
-                    console.error('Error generating Excel:', error);
-                });
-        });
-
-// capture data
 function captureTableData() {
     const rows = document.querySelectorAll('#salesReportBody tr'); 
     const data = [];
+
     rows.forEach(row => {
         const columns = row.querySelectorAll('td');
-        if (columns.length === 5) { 
+        if (columns.length >= 5) {  
             const rowData = {
                 date: columns[0].textContent.trim(),
-                orderCount: columns[1].textContent.trim(),
-                totalSales: columns[2].textContent.trim(),
-                discount: columns[3].textContent.trim(),
-                netSales: columns[4].textContent.trim(),
+                orderCount: parseInt(columns[1].textContent.trim()) || 0,
+                totalSales: parseFloat(columns[2].textContent.trim().replace(/[₹,]/g, '')) || 0,
+                discount: parseFloat(columns[3].textContent.trim().replace(/[₹,]/g, '')) || 0,
+                netSales: parseFloat(columns[4].textContent.trim().replace(/[₹,]/g, '')) || 0,
             };
             data.push(rowData);
         }
     });
+
     return data;
 }
+function captureOverallData() {
+    return {
+        overallOrderCount: parseInt(document.getElementById("overallOrderCount")?.innerText) || 0,
+        overallTotalSales: parseFloat(document.getElementById("overallTotalSales")?.innerText.replace("₹", "").replace(",", "")) || 0,
+        overallTotalDiscount: parseFloat(document.getElementById("overallTotalDiscount")?.innerText.replace("₹", "").replace(",", "")) || 0,
+        overallNetSales: parseFloat(document.getElementById("overallNetSales")?.innerText.replace("₹", "").replace(",", "")) || 0
+    };
+}
+
 
 </script>
-  <!--validate end and start date -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const fromDateInput = document.getElementById("fromDate");

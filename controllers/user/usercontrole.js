@@ -27,6 +27,7 @@ const loadhomepage = async (req, res) => {
             req.session.user = req.session.passport.user;
         }
 
+        
         const topSellingData = await getBestSellingProducts();
         const productId = topSellingData.map(data => data._id);  
         const topSellingProducts = await Product.find({ _id: { $in: productId } }).limit(8);
@@ -82,7 +83,6 @@ const loadproductpage = async (req, res) => {
         const { category, sort, minPrice, maxPrice, search = '' } = req.query;
 
         let filter = { isListed: true };
-
         const listedCategories = await Category.find({ isListed: true }).select('_id');
         const listedCategoryIds = listedCategories.map(cat => cat._id);
 
@@ -100,7 +100,6 @@ const loadproductpage = async (req, res) => {
                 ],
             });
         }
-
         if (minPrice || maxPrice) {
             filter.$and = filter.$and || [];
             const priceFilter = {};
@@ -195,8 +194,6 @@ const loadproductpage = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
-
-
 
 const loadloginpage = async (req, res) => {
     try {

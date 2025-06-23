@@ -442,7 +442,7 @@ input[type="file"] {
     
     
      <aside class="sidebar">
-      <h2 style="margin-left: .5cm;"><b>SOFA</b>SCAPE</h2>
+      <h2 style="margin-left: .5cm; "><b style="color: #f02d71;">SOFA</b>SCAPE</h2>
       <nav>
         <ul>
           <li><a href="/admin/dashboard">Home</a></li>
@@ -587,7 +587,7 @@ input[type="file"] {
             <select id="editProductCategory" name="category" required>
               <% categories.forEach(category=> { %>
                 <option value="<%=category._id%>">
-                  <%=category.name%>
+                  <%=category.name%> <%= category.variant %>
                 </option>
                 <%})%>
             </select>

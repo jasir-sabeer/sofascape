@@ -124,10 +124,6 @@ tbody tr:nth-child(even) {
   background-color: #f4f4f9; 
 }
 
-
-
-
-
 .user-profile {
   display: flex; 
   align-items: center;
@@ -143,7 +139,6 @@ table th, table td {
   padding: 10px;
   text-align: left; 
 }
-
 
 table th:last-child, table td:last-child {
   text-align: center;
@@ -167,8 +162,6 @@ table, th, td {
  justify-content: center;
  gap:10px;
 }
-
-
 
 .close:hover {
   color: #000;
@@ -363,7 +356,7 @@ input[type="file"] {
     
     
      <aside class="sidebar">
-      <h2 style="margin-left: .5cm;"><b>SOFA</b>SCAPE</h2>
+      <h2 style="margin-left: .5cm; "><b style="color: #f02d71;">SOFA</b>SCAPE</h2>
       <nav>
         <ul>
           <li><a href="/admin/dashboard">Home</a></li>
@@ -398,13 +391,16 @@ input[type="file"] {
             </div>
           <div class="table-container">
             <table>
+              <%if(offers.length>0){ %>
               <thead>
                 <tr>
                   <th>Offer name</th>
                   <th>Discount </th>
                   <th>Expiry Date</th>
                   <th>Applicaple </th>
-                  <th>Remove</th>
+                  <th>Edit </th>
+                  <th>Remove </th>
+                  <th>View More</th>
              
                 </tr>
     
@@ -425,12 +421,19 @@ input[type="file"] {
                    <td>
                     <%=offer.applicableTo %>
                    </td>
+                   <td>
+                    <a href="/admin/editOfferPage/<%= offer._id %> %>"><button class="btn" > Edit </button></a>
+                   </td>
                       <td>
                         <form action="/admin/offer/remove/<%= offer._id %>?_method=DELETE" method="POST"
                             onsubmit="return confirmAndRemoveOffer('<%= offer._id %>')">
-                          <button class="btn">Remove</button>
+                          <button class="btn" style="margin-top: .4cm;">Remove</button>
                       </form>
                       </td>
+                      <td><a href="/admin/viewMore/<%= offer._id %> %>"><button style="background-color: rgb(210, 181, 17);block-size: 40px;border: none;color: #fff;">
+                      View More
+                    </button></a>
+                    </td>
                     
                   </tr>
                   <%})%>
@@ -439,6 +442,9 @@ input[type="file"] {
     
     
               </tbody>
+              <%}else{%>
+                <p style="margin-left: 4cm;font-weight: 600;font-size: 30px;">Now offers not available please add a offer ....</p>
+                <%}%>
             </table>
           </div>
         </section>
@@ -507,6 +513,7 @@ input[type="file"] {
         }
     
     
+
     
     
       </script>

@@ -719,10 +719,9 @@ const loadWalletPage = async (req, res) => {
 
 
 const downloadInvoice = async (req, res) => {
-    const { orderId } = req.params;
+    const { Id } = req.params;
 
-    const order = await Order.findById(orderId).populate('userId').populate('address');
-
+    const order = await Order.findById(Id).populate('userId').populate('address');
     if (!order) {
         return res.status(404).send('Order not found');
     }
@@ -730,20 +729,20 @@ const downloadInvoice = async (req, res) => {
     const doc = new PDFDocument();
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderId}.pdf`);
 
     doc.pipe(res);
 
     doc.fontSize(20).font('Helvetica-Bold').text('SOFASCAPE', { align: 'center' });
     doc.moveDown();
 
-    doc.fontSize(14).font('Helvetica').text(`Order ID: ${orderId}`);
+    doc.fontSize(14).font('Helvetica').text(`Order ID: ${order.orderId}`);
     doc.text(`Date: ${order.createdAt.toLocaleDateString('en-US')}`);
     doc.moveDown();
 
-    doc.fontSize(11).text(`Customer Name: ${order.address.firstName}  ${order.address.lastName} `);
-    doc.text(`Phone: ${order.address.phoneNumber}`);
-    doc.text(`Address: ${order.address.address}`);
+    doc.fontSize(11).text(`Customer Name: ${order.address.customerName}`);
+    doc.text(`Phone: ${order.address.phone}`);
+    doc.text(`Address: ${order.address.localaddress}`);
     doc.text(`${order.address.street},${order.address.city}, ${order.address.state}  `);
     doc.text(`pincode:${order.address.pincode}`);
 
@@ -773,6 +772,8 @@ const downloadInvoice = async (req, res) => {
 
     doc.moveDown()
     doc.text(`Thank You For Business`, { align: 'center' });
+    doc.moveDown()
+     doc.fontSize(10).font('Helvetica-Bold').text(`Thank you for purchasing our product! We truly appreciate your trust in our brand and are delighted to have you as a valued customer. Your support means a lot to us, and we are committed to providing you with high-quality products and excellent service. We hope you enjoy your purchase and that it meets all your expectations. If you have any questions, feedback, or need assistance, please don’t hesitate to reach out to our support team. Your satisfaction is our top priority, and we look forward to serving you again in the future. Thank you once again for choosing us!`, { align: 'center' });
 
 
 

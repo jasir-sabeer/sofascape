@@ -11,20 +11,18 @@ const offerSchema = new mongoose.Schema({
         enum: ['Product', 'Category'],
         required: true
     },
-   
-    applicableToId: {
-        type: [String],
+    applicableToId: [{
+        type: mongoose.Schema.Types.ObjectId, 
         required: true,
-        validate: [array => array.length > 0, 'At least one ID must be selected']
-    }
-    ,
+        refPath: 'applicableTo'  
+    }],
     products: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
     categories: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category'
+        ref: 'category'
     }],
     discountValue: {
         type: Number,
@@ -34,7 +32,7 @@ const offerSchema = new mongoose.Schema({
     expiryDate: {
         type: Date,
         required: true,
-    },
+    }
   
 }, { timestamps: true });
 
