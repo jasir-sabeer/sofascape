@@ -2,7 +2,6 @@ let express=require('express')
 let app=express()
 const path=require('path')
 const session =require('express-session')
-
 require("dotenv").config();
 const passport=require("./config/passport")
 const db=require("./config/db");
