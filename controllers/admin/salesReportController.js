@@ -1,6 +1,6 @@
 const orderModel = require("../../models/orderSchema")
 const PDFDocument = require('pdfkit');
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 
 const loadSalesReportPage = async (req, res) => {
     try {
@@ -162,59 +162,56 @@ const downloadPDF = async (req, res) => {
 const downloadExcel = async (req, res) => {
     try {
         const { salesData, overallData } = req.body;
-        console.log('Received Overall Data:', overallData); 
+        console.log('Received Overall Data:', overallData);
 
         if (!Array.isArray(salesData) || salesData.length === 0) {
             return res.status(400).send('No sales data available');
         }
 
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet([]);
-        ws['!cols'] = [
-            { wch: 15 }, // Column A - Date / Overall
-            { wch: 15 }, // Column B - Order Count
-            { wch: 20 }, // Column C - Total Sales
-            { wch: 15 }, // Column D - Discount
-            { wch: 20 }, // Column E - Net Sales
-          ];
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sales Report');
 
-        XLSX.utils.sheet_add_aoa(ws, [['Sofascapes']], { origin: 'C1' });
+        worksheet.columns = [
+            { header: 'Date', key: 'date', width: 15 },
+            { header: 'Order Count', key: 'orderCount', width: 15 },
+            { header: 'Total Sales', key: 'totalSales', width: 20 },
+            { header: 'Discount', key: 'discount', width: 15 },
+            { header: 'Net Sales', key: 'netSales', width: 20 }
+        ];
 
-        const headers = [['Date', 'Order Count', 'Total Sales', 'Discount', 'Net Sales']];
-        XLSX.utils.sheet_add_aoa(ws, headers, { origin: 'A3' });
+        worksheet.getCell('C1').value = 'Sofascapes';
+        worksheet.getCell('C1').font = { bold: true, size: 14 };
 
-        XLSX.utils.sheet_add_json(ws, salesData, {
-            skipHeader: true,
-            origin: 'A4'
+        let rowStartIndex = 4;
+        salesData.forEach((item, index) => {
+            worksheet.addRow({
+                date: item.Date || item.date,
+                orderCount: item['Order Count'] || item.orderCount,
+                totalSales: item['Total Sales'] || item.totalSales,
+                discount: item['Discount'] || item.discount,
+                netSales: item['Net Sales'] || item.netSales,
+            });
         });
 
-        let lastRowIndex = salesData.length + 4; 
-
-        XLSX.utils.sheet_add_aoa(ws, [[]], { origin: `A${lastRowIndex}` });
-        lastRowIndex++;
+        worksheet.addRow([]);
 
         if (overallData && overallData.overallOrderCount !== undefined) {
             console.log('Final Overall Data:', overallData);
-            XLSX.utils.sheet_add_json(ws, [{
-                Date: 'Overall',
-                'Order Count': overallData.overallOrderCount,
-                'Total Sales': overallData.overallTotalSales,
-                'Discount': overallData.overallTotalDiscount,
-                'Net Sales': overallData.overallNetSales
-              }], { skipHeader: true, origin: `A${lastRowIndex}` });
-              
+            worksheet.addRow({
+                date: 'Overall',
+                orderCount: overallData.overallOrderCount,
+                totalSales: overallData.overallTotalSales,
+                discount: overallData.overallTotalDiscount,
+                netSales: overallData.overallNetSales
+            });
         } else {
             console.error('Overall data is missing or invalid');
         }
 
-        XLSX.utils.book_append_sheet(wb, ws, 'Sales Report');
-
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
 
-        const excelFile = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
-
-        res.send(excelFile);
+        await workbook.xlsx.write(res);
         res.end();
 
     } catch (error) {
