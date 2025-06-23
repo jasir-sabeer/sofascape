@@ -1,10 +1,10 @@
-
+require("dotenv").config();
 const passport = require('passport');
 console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userschema'); 
 const isProd = process.env.NODE_ENV === 'production';
-require("dotenv").config();
+
 
 passport.use(
   new GoogleStrategy(
