@@ -1,5 +1,6 @@
 
 const passport = require('passport');
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userschema'); 
 const isProd = process.env.NODE_ENV === 'production';
@@ -10,9 +11,9 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,  
-      callbackURL: process.env.NODE_ENV === 'production'
-       ? 'https://sofasacpe.3utilities.com/auth/google/callback'
-        : 'http://localhost:3000/auth/google/callback'
+      callbackURL: isProd
+      ? 'https://sofasacpe.3utilities.com/auth/google/callback'
+      : 'http://localhost:3000/auth/google/callback'
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
