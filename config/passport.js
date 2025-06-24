@@ -4,6 +4,8 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userschema');
 
 const isProd = process.env.NODE_ENV === 'production';
+console.log(isProd);
+
 const callbackURL = process.env.GOOGLE_CALLBACK_URL || (
   isProd ? 'https://sofascape.webhop.me/auth/google/callback'
          : 'http://localhost:3000/auth/google/callback'
