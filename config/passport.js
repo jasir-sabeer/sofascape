@@ -8,8 +8,8 @@ const isProd = process.env.NODE_ENV === 'production';
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,  
+      clientID: '1053174164070-mjll75tp2trnobppkjq86ad8kje5lf6g.apps.googleusercontent.com',
+      clientSecret: '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',  
       callbackURL: isProd
       ? 'https://sofascape.webhop.me/auth/google/callback'
       : 'http://localhost:3000/auth/google/callback'
