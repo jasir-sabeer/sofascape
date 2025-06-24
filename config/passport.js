@@ -9,7 +9,7 @@ console.log('Environment Variables:', {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
   NODE_ENV: process.env.NODE_ENV,
-  callbackURL: isProd ? 'http://sofascape.webhop.me/auth/google/callback' :'http://localhost:3000/auth/google/callback'
+  callbackURL: isProd ? 'https://sofascape.webhop.me/auth/google/callback' :'http://localhost:3000/auth/google/callback'
 });
 
 passport.use(
@@ -18,7 +18,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: isProd
-        ? process.env.GOOGLE_CALLBACK_URL
+        ? 'https://sofascape.webhop.me/auth/google/callback'
         : 'http://localhost:3000/auth/google/callback'
     },
     async (accessToken, refreshToken, profile, done) => {
