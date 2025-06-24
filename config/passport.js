@@ -9,7 +9,7 @@ console.log('Environment Variables:', {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
   NODE_ENV: process.env.NODE_ENV,
-  callbackURL: isProd ? process.env.GOOGLE_CALLBACK_URL :'http://localhost:3000/auth/google/callback'
+  callbackURL: isProd ? 'http://sofascape.webhop.me/auth/google/callback' :'http://localhost:3000/auth/google/callback'
 });
 
 passport.use(
