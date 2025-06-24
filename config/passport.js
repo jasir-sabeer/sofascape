@@ -11,7 +11,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,  
       callbackURL: isProd
-      ? 'https://sofasacpe.3utilities.com/auth/google/callback'
+      ? 'https://sofascape.webhop.me/auth/google/callback'
       : 'http://localhost:3000/auth/google/callback'
     },
     async (accessToken, refreshToken, profile, done) => {
