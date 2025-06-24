@@ -1,4 +1,4 @@
-require("dotenv").config({ path: require('path').resolve(__dirname, '../.env') });
+require("dotenv").config();
 const passport = require('passport');
 console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
