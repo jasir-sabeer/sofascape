@@ -1,41 +1,11 @@
 const orderModel = require("../../models/orderSchema")
 const PDFDocument = require('pdfkit');
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 
 const loadSalesReportPage = async (req, res) => {
-    const { specificDay, quickRange, fromDate, toDate } = req.body;
     try {
-        let query = {};
+        let query = {}; 
         const now = new Date();
-
-
-        if (specificDay) {
-            const startOfDay = new Date(specificDay);
-            startOfDay.setHours(0, 0, 0, 0);
-            const endOfDay = new Date(specificDay);
-            endOfDay.setHours(23, 59, 59, 999);
-            query.createdAt = { $gte: startOfDay, $lte: endOfDay };
-        }
-
-        if (quickRange === '1day') {
-            const yesterday = new Date(now);
-            yesterday.setDate(now.getDate() - 1);
-            query.createdAt = { $gte: yesterday, $lte: now };
-        } else if (quickRange === '1week') {
-            const lastWeek = new Date(now);
-            lastWeek.setDate(now.getDate() - 7);
-            query.createdAt = { $gte: lastWeek, $lte: now };
-        } else if (quickRange === '1month') {
-            const lastMonth = new Date(now);
-            lastMonth.setMonth(now.getMonth() - 1);
-            query.createdAt = { $gte: lastMonth, $lte: now };
-        }
-
-        if (fromDate && toDate) {
-            const startDate = new Date(fromDate);
-            const endDate = new Date(toDate);
-            query.createdAt = { $gte: startDate, $lte: endDate };
-        }
 
         const dailyReport = await orderModel.aggregate([
             { $match: query },
@@ -76,12 +46,10 @@ const loadSalesReportPage = async (req, res) => {
             { $sort: { _id: -1 } }
         ]);
 
-
         const overallOrderCount = dailyReport.reduce((sum, report) => sum + report.totalOrders, 0);
         const overallTotalSales = dailyReport.reduce((sum, report) => sum + report.totalAmount, 0);
         const overallTotalDiscount = dailyReport.reduce((sum, report) => sum + report.totalDiscount, 0);
         const overallNetSales = dailyReport.reduce((sum, report) => sum + report.netSales, 0);
-
 
         const formattedReport = dailyReport.map(report => ({
             ...report,
@@ -100,115 +68,161 @@ const loadSalesReportPage = async (req, res) => {
             overallNetSales,
             formatNumber: (number) => number.toLocaleString()
         });
+
     } catch (error) {
         console.error("Error fetching sales report:", error);
         res.status(500).send("Internal Server Error");
     }
 };
 
+
 const downloadPDF = async (req, res) => {
     try {
-        const { salesData } = req.body;
+        const { salesData, overallData } = req.body;
+
+
+        if (!salesData || salesData.length === 0) {
+            return res.status(400).send("No sales data available.");
+        }
 
         const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
 
+        doc.pipe(res);
+
+        doc.fontSize(20).text('SOFASCAPE', { align: 'center', underline: true });
+        doc.moveDown(1);
         doc.fontSize(16).text('Sales Report', { align: 'center' });
+        doc.moveDown(2);
+
+        const tableHeaders = ['Date', 'Order Count', 'Total Sales (₹)', 'Discount (₹)', 'Net Sales (₹)'];
+        const tableWidths = [100, 80, 100, 100, 100];
+        let startX = 50;
+        let startY = doc.y;
+
+        doc.font('Helvetica-Bold').fontSize(12);
+        let x = startX;
+        tableHeaders.forEach((header, index) => {
+            doc.text(header, x, startY, { width: tableWidths[index], align: 'center' });
+            x += tableWidths[index];
+        });
+
+        doc.moveTo(startX, startY + 15).lineTo(550, startY + 15).stroke();
         doc.moveDown(1);
 
-        const tableHeaders = ['Date', 'Order Count', 'Total Sales', 'Discount', 'Net Sales'];
-        const tableWidths = [100, 80, 100, 100, 100];
+        doc.font('Helvetica').fontSize(10);
+        salesData.forEach((item, index) => {
+            startY = doc.y + 5;
+            x = startX;
 
-        let x = 50;
-        let y = doc.y;
-
-        y = 100;
-
-        doc.fontSize(12).font('Helvetica-Bold');
-        tableHeaders.forEach((header, index) => {
-            doc.text(header, x, y, { width: tableWidths[index], align: 'center' });
-            x += tableWidths[index];
-        });
-
-        x = 50;
-        tableHeaders.forEach((_, index) => {
-            doc.rect(x, y - 10, tableWidths[index], 20).stroke();
-            x += tableWidths[index];
-        });
-
-        doc.moveDown(0.2);
-        y = doc.y;
-
-        doc.fontSize(10).font('Helvetica');
-        salesData.forEach(item => {
-            x = 50;
-            const rowY = y;
-
-            doc.text(item.date, x, rowY, { width: tableWidths[0], align: 'center' });
+            doc.text(item.date || '-', x, startY, { width: tableWidths[0], align: 'center' });
             x += tableWidths[0];
 
-            doc.text(item.orderCount, x, rowY, { width: tableWidths[1], align: 'center' });
+            doc.text(item.orderCount?.toString() || '0', x, startY, { width: tableWidths[1], align: 'center' });
             x += tableWidths[1];
 
-            doc.text(item.totalSales, x, rowY, { width: tableWidths[2], align: 'center' });
+            doc.text(`₹${parseFloat(item.totalSales || 0).toLocaleString()}`, x, startY, { width: tableWidths[2], align: 'center' });
             x += tableWidths[2];
 
-            doc.text(item.discount, x, rowY, { width: tableWidths[3], align: 'center' });
+            doc.text(`₹${parseFloat(item.discount || 0).toLocaleString()}`, x, startY, { width: tableWidths[3], align: 'center' });
             x += tableWidths[3];
 
-            doc.text(item.netSales, x, rowY, { width: tableWidths[4], align: 'center' });
+            doc.text(`₹${parseFloat(item.netSales || 0).toLocaleString()}`, x, startY, { width: tableWidths[4], align: 'center' });
             x += tableWidths[4];
 
-            x = 50;
-            tableHeaders.forEach((_, index) => {
-                doc.rect(x, rowY - 5, tableWidths[index], 20).stroke();
-                x += tableWidths[index];
-            });
+            doc.moveTo(startX, startY + 15).lineTo(550, startY + 15).stroke();
+            doc.moveDown(1);
 
-            y = rowY + 20;
+            if (doc.y > 700) {
+                doc.addPage();
+                startY = 50;
+            }
         });
 
+        doc.moveDown(2);
+        doc.fontSize(14).font('Helvetica-Bold').text('Overall Summary', { underline: true });
+        doc.moveDown(1);
+
+        doc.fontSize(12).font('Helvetica');
+        doc.text(`Total Orders: ${overallData.overallOrderCount}`);
+        doc.text(`Total Sales: ₹${parseFloat(overallData.overallTotalSales).toLocaleString()}`);
+        doc.text(`Total Discount: ₹${parseFloat(overallData.overallTotalDiscount).toLocaleString()}`);
+        doc.text(`Net Sales: ₹${parseFloat(overallData.overallNetSales).toLocaleString()}`);
+
         doc.end();
-        doc.pipe(res);
     } catch (error) {
         console.error('Error generating PDF:', error);
         res.status(500).send('Error generating PDF.');
     }
+};
 
-}
 
-const downloadExel = async (req, res) => {
+const downloadExcel = async (req, res) => {
     try {
-        const { salesData } = req.body;
+        const { salesData, overallData } = req.body;
+        console.log('Received Overall Data:', overallData);
 
         if (!Array.isArray(salesData) || salesData.length === 0) {
             return res.status(400).send('No sales data available');
         }
 
-        const wb = XLSX.utils.book_new();
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sales Report');
 
-        const ws = XLSX.utils.json_to_sheet(salesData, {
-            header: ['date', 'orderCount', 'totalSales', 'discount', 'netSales'],
+        worksheet.columns = [
+            { header: 'Date', key: 'date', width: 15 },
+            { header: 'Order Count', key: 'orderCount', width: 15 },
+            { header: 'Total Sales', key: 'totalSales', width: 20 },
+            { header: 'Discount', key: 'discount', width: 15 },
+            { header: 'Net Sales', key: 'netSales', width: 20 }
+        ];
+
+        worksheet.getCell('C1').value = 'Sofascapes';
+        worksheet.getCell('C1').font = { bold: true, size: 14 };
+
+        let rowStartIndex = 4;
+        salesData.forEach((item, index) => {
+            worksheet.addRow({
+                date: item.Date || item.date,
+                orderCount: item['Order Count'] || item.orderCount,
+                totalSales: item['Total Sales'] || item.totalSales,
+                discount: item['Discount'] || item.discount,
+                netSales: item['Net Sales'] || item.netSales,
+            });
         });
 
-        XLSX.utils.book_append_sheet(wb, ws, 'Sales Report');
+        worksheet.addRow([]);
+
+        if (overallData && overallData.overallOrderCount !== undefined) {
+            console.log('Final Overall Data:', overallData);
+            worksheet.addRow({
+                date: 'Overall',
+                orderCount: overallData.overallOrderCount,
+                totalSales: overallData.overallTotalSales,
+                discount: overallData.overallTotalDiscount,
+                netSales: overallData.overallNetSales
+            });
+        } else {
+            console.error('Overall data is missing or invalid');
+        }
 
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
 
-        const excelFile = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
-
-        res.send(excelFile);
+        await workbook.xlsx.write(res);
         res.end();
 
     } catch (error) {
         console.error('Error generating Excel:', error);
         res.status(500).send('Error generating Excel.');
     }
+};
 
-}
+
+
+
 
 const filter = async (req, res) => {
     const { specificDay, quickRange, fromDate, toDate } = req.body;
@@ -283,6 +297,12 @@ const filter = async (req, res) => {
             { $sort: { _id: -1 } }
         ]);
 
+        // Calculate overall totals
+        const overallOrderCount = dailyReport.reduce((sum, report) => sum + report.totalOrders, 0);
+        const overallTotalSales = dailyReport.reduce((sum, report) => sum + report.totalAmount, 0);
+        const overallTotalDiscount = dailyReport.reduce((sum, report) => sum + report.totalDiscount, 0);
+        const overallNetSales = dailyReport.reduce((sum, report) => sum + report.netSales, 0);
+
         const formattedReport = dailyReport.map(report => ({
             ...report,
             date: new Date(report._id).toLocaleDateString("en-US", {
@@ -292,13 +312,19 @@ const filter = async (req, res) => {
             })
         }));
 
-        res.json({ dailyReport: formattedReport });
+        res.json({
+            dailyReport: formattedReport,
+            overallOrderCount,
+            overallTotalSales,
+            overallTotalDiscount,
+            overallNetSales
+        });
     } catch (error) {
         console.error("Error fetching sales report:", error);
         res.status(500).json({ error: "Server error" });
     }
+};
 
-}
 
 
 
@@ -581,14 +607,40 @@ const bestSellingCategoriesPipeline = [
 ];
 
 
+const loadSalesDetails = async (req, res) => {
+    const { date } = req.params;
+    try {
+        const startDate = new Date(date);
+        const endDate = new Date(date);
+        endDate.setHours(23, 59, 59, 999); 
+
+        let orders = await orderModel.find({
+            createdAt: { $gte: startDate, $lte: endDate }
+        }).lean(); 
+
+        const productIds = orders.flatMap(order =>
+            order.products.map(product => product.productId)
+        );
+        let totalOrder=orders.length;
+        const netSales = orders.reduce((sum, order) => sum + order.total, 0); 
+
+        console.log("order IDs:", netSales);
+        console.log("Product IDs:", productIds);
+
+        res.render('salesDetails', { orders, productIds ,totalOrder,netSales,date}); 
+    } catch (error) {
+        console.error("Error fetching sales details:", error);
+        res.status(500).send("Server Error");
+    }
+};
+
 
 module.exports = {
     loadSalesReportPage,
     downloadPDF,
-    downloadExel,
+    downloadExcel,
     filter,
     loadDashboard,
-    getSalesData
-   
-
+    getSalesData,
+    loadSalesDetails   
 }

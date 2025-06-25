@@ -337,17 +337,17 @@ select:focus {
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
+  width: 80%; 
   position: relative; /* Allows absolute positioning of child elements */
 }
 
 .close {
-  position: absolute; /* Position the close button absolutely */
-  top: 10px; /* Adjust this value to position it at the top of the modal */
-  right: 20px; /* Adjust this value for horizontal positioning */
-  font-size: 24px; /* Adjust font size as needed */
-  color: #000; /* Change color if desired */
-  cursor: pointer; /* Change cursor to pointer */
+  position: absolute;
+  top: 10px; 
+  right: 20px; 
+  font-size: 24px; 
+  color: #000; 
+  cursor: pointer; 
 }
 
 
@@ -364,12 +364,10 @@ select:focus {
 
 }
 
-/* Container for file input */
 input[type="file"] {
-  display: none; /* Hide the default file input */
+  display: none; 
 }
 
-/* Style for custom file upload button */
 .file-upload-label {
   display: inline-block;
   padding: 10px 20px;
@@ -423,7 +421,7 @@ input[type="file"] {
     
     
      <aside class="sidebar">
-      <h2 style="margin-left: .5cm;"><b>SOFA</b>SCAPE</h2>
+      <h2 style="margin-left: .5cm; "><b style="color: #f02d71;">SOFA</b>SCAPE</h2>
       <nav>
         <ul>
           <li><a href="/admin/dashboard">Home</a></li>
@@ -460,6 +458,7 @@ input[type="file"] {
             </div>
           <div class="table-container">
             <table>
+              <%if(coupons.length>0){%>
               <thead>
                 <tr>
                   <th>Coupon Code</th>
@@ -514,6 +513,10 @@ input[type="file"] {
     
     
               </tbody>
+              <%}else{%>
+                <p style="margin-left: 4cm;font-weight: 600;font-size: 30px;">Now coupons not available please add a Coupon ....</p>
+
+              <%}%>
             </table>
           </div>
         </section>

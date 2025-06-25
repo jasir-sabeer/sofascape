@@ -4,7 +4,8 @@ const Coupon = require('../../models/couponSchema')
 
 const loadCouponManagement = async (req, res) => {
     try {
-        const coupons = await Coupon.find({ isExpired: false })
+        const currentDate=Date()
+        const coupons = await Coupon.find({expiryDate:{$gte:currentDate}})
 
         res.render('couponManagement', { coupons })
     } catch (error) {

@@ -7,6 +7,9 @@ router.get('/offerManagement',adminAuth.adminlogin,offerController.loadOfferMana
 router.get('/addOffer',adminAuth.adminlogin,offerController.loadAddOffer)
 router.post('/offers/add',offerController.addOffer)
 router.delete('/offer/remove/:id',offerController.removeOffer)
+router.get('/viewMore/:offerId',adminAuth.adminlogin,offerController.offerDetails)
+router.get('/editOfferPage/:offerId',adminAuth.adminlogin,offerController.loadEditOffer)
+router.post('/offers/edit/:offerId',offerController.editOffer)
 
 
 

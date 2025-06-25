@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Offer</title>
+    <title>Edit Offer</title>
     <!-- Include Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -42,94 +42,103 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center mb-4" style="color: #bb86fc;">Add Offer</h1>
-        <form id="addOfferForm" action="/admin/offers/add" method="POST" class="row g-3">
+        <h1 class="text-center mb-4" style="color: #bb86fc;">Edit Offer</h1>
+        <form id="addOfferForm" action="/admin/offers/edit/<%= offer._id%>" method="POST" class="row g-3">
             <!-- Offer Name -->
             <div class="col-md-6">
                 <label for="offerName" class="form-label">Offer Name</label>
                 <div id="error1" class="errormessage" aria-live="assertive"></div>
-                <input type="text" id="offerName" name="offerName" class="form-control" placeholder="Offer name">
+                <input type="text" id="offerName" name="offerName" class="form-control" placeholder="Offer name" value="<%= offer.offerName%>">
             </div>
 
             <!-- Applicable To -->
             <div class="col-md-6">
-                <label for="applicableTo" class="form-label">Applicable To</label>
+                <label for="applicableTo" class="form-label">Applicable To</label >
                 <div id="error2" class="errormessage" aria-live="assertive"></div>
-                <select id="applicableTo" name="applicableTo" class="form-select">
-                    <option value="Product">Product</option>
-                    <option value="Category">Category</option>
+                <select id="applicableTo" name="applicableTo" class="form-select" >
+                    <option value="Product" <%= offer.applicableTo === "Product" ? "selected" : "" %>>Product</option>
+                    <option value="Category" <%= offer.applicableTo === "Category" ? "selected" : "" %>>Category</option>
                 </select>
             </div>
 
-            <!-- Products Checkbox Group -->
+            <!-- Products Group -->
             <div class="col-md-6" id="productCheckboxGroup">
                 <label for="productCheckboxes" class="form-label">Select Products</label>
                 <div id="error3" class="errormessage" aria-live="assertive"></div>
                 <div id="productCheckboxes" class="form-check">
                     <% products.forEach(product => { %>
                         <div>
-                            <input type="checkbox" name="products[]" value="<%= product._id%>" id="product<%= product._id%>">
-                            <label for="product_<%= product._id%>"><%=product.productname%></label>
+                            <input type="checkbox" name="products[]" value="<%= product._id %>" id="product<%= product._id %>"
+                                <%= offer.products.includes(product._id.toString()) ? "checked" : "" %>>
+                            <label for="product<%= product._id %>"><%= product.productname %></label>
                         </div>
                     <% }) %>
                 </div>
             </div>
-
+            
             <!-- Categories Checkbox Group -->
-            <div class="col-md-6" id="categoryCheckboxGroup" style="display: none;">
-                <label for="categoryCheckboxes" class="form-label">Select Categories</label>
-                <div id="error4" class="errormessage" aria-live="assertive"></div>
-                <div id="categoryCheckboxes" class="form-check">
-                    <% categories.forEach(category => { %>
-                        <div>
-                            <input type="checkbox" name="categories[]" value="<%= category._id%>"
-                                id="category_<%= category._id%>">
-                            <label for="category_<%= category._id%>"><%= category.name%> <%= category.variant%> </label>
-                        </div>
-                    <% }) %>
+           <div class="col-md-6" id="categoryCheckboxGroup" style="display: none;">
+    <label for="categoryCheckboxes" class="form-label">Select Categories</label>
+    <div id="error4" class="errormessage" aria-live="assertive"></div>
+    <div id="categoryCheckboxes" class="form-check">
+            <% categories.forEach(category => { %>
+                <div>
+                    <input type="checkbox" name="categories[]" value="<%= category._id %>" 
+                        id="category_<%= category._id %>" 
+                        <%= (offer.categories || []).map(c => c.toString()).includes(category._id.toString()) ? "checked" : "" %>>
+                    <label for="category_<%= category._id %>"><%= category.name %></label>
                 </div>
-            </div>
+            <% }) %>
+       
+    </div>
+</div>
+
 
             <!-- Discount Value -->
             <div class="col-md-6">
                 <label for="discountValue" class="form-label">Discount Value</label>
                 <div id="error5" class="errormessage" aria-live="assertive"></div>
-                <input type="number" id="discountValue" name="discountValue" class="form-control" min="0" placeholder="Discount Value">
+                <input type="number" id="discountValue" name="discountValue" class="form-control" min="0" placeholder="Discount Value" value="<%= offer.discountValue%>">
             </div>
 
             <!-- Expiry Date -->
             <div class="col-md-6">
                 <label for="expiryDate" class="form-label">Expiry Date</label>
                 <div id="error6" class="errormessage" aria-live="assertive"></div>
-                <input type="date" id="expiryDate" name="expiryDate" class="form-control">
+                <input type="date" id="expiryDate" name="expiryDate" class="form-control" 
+                    value="<%= offer.expiryDate.toISOString().split('T')[0] %>">
             </div>
+            
 
-            <!-- Submit Button -->
             <div class="col-12">
-                <button type="submit" class="btn btn-primary w-100">Add Offer</button>
+                <button type="submit" class="btn btn-primary w-100">Update Offer</button>
             </div>
         </form>
         <a href="/admin/offerManagement"><button class="btn btn-secondary w-100">Back</button></a>
     </div>
-    <!-- Include Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom Script -->
     <script>
-        const applicableToSelect = document.getElementById('applicableTo');
-        const productCheckboxGroup = document.getElementById('productCheckboxGroup');
-        const categoryCheckboxGroup = document.getElementById('categoryCheckboxGroup');
+     document.addEventListener("DOMContentLoaded", () => {
+    const applicableToSelect = document.getElementById('applicableTo');
+    const productCheckboxGroup = document.getElementById('productCheckboxGroup');
+    const categoryCheckboxGroup = document.getElementById('categoryCheckboxGroup');
 
-        applicableToSelect.addEventListener('change', () => {
-            const selectedValue = applicableToSelect.value;
+    function toggleCheckboxGroups() {
+        const selectedValue = applicableToSelect.value;
+        
+        if (selectedValue === 'Product') {
+            productCheckboxGroup.style.display = 'block';
+            categoryCheckboxGroup.style.display = 'none';
+        } else if (selectedValue === 'Category') {
+            productCheckboxGroup.style.display = 'none';
+            categoryCheckboxGroup.style.display = 'block';
+        }
+    }
 
-            if (selectedValue === 'Product') {
-                productCheckboxGroup.style.display = 'block';
-                categoryCheckboxGroup.style.display = 'none';
-            } else if (selectedValue === 'Category') {
-                productCheckboxGroup.style.display = 'none';
-                categoryCheckboxGroup.style.display = 'block';
-            }
-        });
+    toggleCheckboxGroups();
+
+    applicableToSelect.addEventListener('change', toggleCheckboxGroups);
+});
 
         const addOfferForm = document.getElementById('addOfferForm');
         const error1 = document.getElementById('error1');
