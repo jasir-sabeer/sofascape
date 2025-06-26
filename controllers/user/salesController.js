@@ -68,9 +68,11 @@ const loadCheckout = async (req, res) => {
         }
 
         const usedCouponIds = user.usedCoupons.map(used => used.couponId._id.toString());
+        let currentDate=Date()
         const coupons = await Coupon.find({
             isListed: true,
-            isExpired: false,
+            expiryDate:{$gte:currentDate},
+            startDate:{$lte:currentDate},
             _id: { $nin: usedCouponIds }
         });
 
